@@ -99,7 +99,7 @@ void DQMOfflineHLTEventInfoClient::initialize() {
   counterEvt_ = 0;
 
   // get back-end interface
-  dbe_ = Service<DQMStore>().operator->();
+  dbe_ = std::make_unique<DQMStore>();
 
   // base folder for the contents of this job
   verbose_ = parameters_.getUntrackedParameter<bool>("verbose", false);
@@ -119,8 +119,6 @@ void DQMOfflineHLTEventInfoClient::initialize() {
 void DQMOfflineHLTEventInfoClient::beginJob() {
   if (verbose_)
     cout << "[TriggerDQM]: Begin Job" << endl;
-  // get backendinterface
-  dbe_ = Service<DQMStore>().operator->();
 
   dbe_->setCurrentFolder("HLT/EventInfo");
 

@@ -29,8 +29,7 @@
 #include "DataFormats/BeamSpot/interface/BeamSpot.h"
 #include <string>
 
-TrackSplittingMonitor::TrackSplittingMonitor(const edm::ParameterSet& iConfig)
-    : dqmStore_(edm::Service<DQMStore>().operator->()), conf_(iConfig) {
+TrackSplittingMonitor::TrackSplittingMonitor(const edm::ParameterSet& iConfig) : conf_(iConfig) {
   splitTracks_ = conf_.getParameter<edm::InputTag>("splitTrackCollection");
   splitMuons_ = conf_.getParameter<edm::InputTag>("splitMuonCollection");
   splitTracksToken_ = consumes<std::vector<reco::Track> >(splitTracks_);

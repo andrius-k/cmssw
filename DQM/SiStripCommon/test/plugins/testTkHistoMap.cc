@@ -77,7 +77,9 @@ void testTkHistoMap::create(const TkDetMap* tkDetMap) {
 
 /*Check that is possible to load in tkhistomaps histograms already stored in a DQM root file (if the folder and name are known)*/
 void testTkHistoMap::read(const TkDetMap* tkDetMap) {
-  edm::Service<DQMStore>().operator->()->open("test.root");
+  // TODO: need to use parent instance
+  auto dqmstore = std::make_unique<DQMStore>();
+  dqmstore->open("test.root");
 
   tkhisto = std::make_unique<TkHistoMap>(tkDetMap);
   tkhistoBis = std::make_unique<TkHistoMap>(tkDetMap);
@@ -133,8 +135,11 @@ void testTkHistoMap::endJob(void) {
   }
   ps.Close();
 
-  if (!readFromFile)
-    edm::Service<DQMStore>().operator->()->save("test.root");
+  if (!readFromFile) {
+    // TODO: need to use parent instance
+    auto dqmstore = std::make_unique<DQMStore>();
+    dqmstore->save("test.root");
+  }
 
   tkhisto->saveAsCanvas("test.canvas.root", "LEGO", "RECREATE");
   tkhistoBis->saveAsCanvas("test.canvas.root", "LEGO", "RECREATE");
