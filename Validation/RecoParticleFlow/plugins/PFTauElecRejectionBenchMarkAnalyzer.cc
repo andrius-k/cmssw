@@ -97,7 +97,7 @@ PFTauElecRejectionBenchmarkAnalyzer::PFTauElecRejectionBenchmarkAnalyzer(const e
                                      maxMCAbsEta,
                                      sGenMatchObjectLabel,
                                      applyEcalCrackCut,
-                                     db);
+                                     &*db);
 }
 
 PFTauElecRejectionBenchmarkAnalyzer::~PFTauElecRejectionBenchmarkAnalyzer() {

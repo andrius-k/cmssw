@@ -103,8 +103,15 @@ PFJetBenchmarkAnalyzer::PFJetBenchmarkAnalyzer(const edm::ParameterSet &iConfig)
 
   dbe_ = std::make_unique<DQMStore>();
 
-  PFJetBenchmark_.setup(
-      outjetfilename, pfjBenchmarkDebug, plotAgainstReco, onlyTwoJets, deltaRMax, benchmarkLabel_, recPt, maxEta, dbe_);
+  PFJetBenchmark_.setup(outjetfilename,
+                        pfjBenchmarkDebug,
+                        plotAgainstReco,
+                        onlyTwoJets,
+                        deltaRMax,
+                        benchmarkLabel_,
+                        recPt,
+                        maxEta,
+                        &*dbe_);
 }
 
 PFJetBenchmarkAnalyzer::~PFJetBenchmarkAnalyzer() {

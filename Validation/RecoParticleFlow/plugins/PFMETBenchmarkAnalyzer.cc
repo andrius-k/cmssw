@@ -100,7 +100,7 @@ PFMETBenchmarkAnalyzer::PFMETBenchmarkAnalyzer(const edm::ParameterSet &iConfig)
   xbenchmarkLabel_ = iConfig.getParameter<string>("BenchmarkLabel");
   xdbe_ = std::make_unique<DQMStore>();
 
-  PFMETBenchmark_.setup(OutputFileName, pfmBenchmarkDebug, xplotAgainstReco, xbenchmarkLabel_, xdbe_);
+  PFMETBenchmark_.setup(OutputFileName, pfmBenchmarkDebug, xplotAgainstReco, xbenchmarkLabel_, &*xdbe_);
 }
 
 PFMETBenchmarkAnalyzer::~PFMETBenchmarkAnalyzer() {

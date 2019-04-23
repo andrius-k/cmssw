@@ -73,15 +73,9 @@ lat::Regexp* DQMHistNormalizer::buildRegex(const string& expr) {
 void DQMHistNormalizer::endRun(const edm::Run& r, const edm::EventSetup& c) {
   //std::cout << "<DQMHistNormalizer::endJob>:" << std::endl;
 
-  //--- check that DQMStore service is available
-  if (!edm::Service<DQMStore>().isAvailable()) {
-    edm::LogError("endJob") << " Failed to access dqmStore --> histograms will NOT be plotted !!";
-    return;
-  }
+  auto dqmStore = std::make_unique<DQMStore>();
 
-  DQMStore& dqmStore = (*edm::Service<DQMStore>());
-
-  vector<MonitorElement*> allOurMEs = dqmStore.getAllContents("RecoTauV/");
+  vector<MonitorElement*> allOurMEs = dqmStore->getAllContents("RecoTauV/");
   lat::Regexp* refregex = buildRegex("*RecoTauV/*/" + reference_);
   vector<lat::Regexp*> toNormRegex;
   for (std::vector<string>::const_iterator toNorm = plotNamesToNormalize_.begin();

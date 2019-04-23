@@ -77,7 +77,7 @@ void GenericBenchmarkAnalyzer::beginJob() {
     else
       path += "Gen";
     dbe_->setCurrentFolder(path);
-    setup(dbe_, plotAgainstRecoQuantities_, minDeltaEt_, maxDeltaEt_, minDeltaPhi_, maxDeltaPhi_, doMetPlots_);
+    setup(&*dbe_, plotAgainstRecoQuantities_, minDeltaEt_, maxDeltaEt_, minDeltaPhi_, maxDeltaPhi_, doMetPlots_);
   }
 }
 
