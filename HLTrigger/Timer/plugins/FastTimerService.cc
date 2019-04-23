@@ -872,8 +872,7 @@ void FastTimerService::preGlobalBeginRun(edm::GlobalContext const& gc) {
       };
 
       // book MonitorElements for this stream
-      edm::Service<dqm::legacy::DQMStore>()->bookConcurrentTransaction(bookTransactionCallback,
-                                                                       gc.luminosityBlockID().run());
+      dqmstore_->bookConcurrentTransaction(bookTransactionCallback, gc.luminosityBlockID().run());
     }
   }
 }
@@ -950,13 +949,6 @@ void FastTimerService::postBeginJob() {
   streams_.resize(concurrent_streams_, temp);
   run_summary_.resize(concurrent_runs_, temp);
   job_summary_ = temp;
-
-  // check that the DQMStore service is available
-  if (enable_dqm_ and not edm::Service<dqm::legacy::DQMStore>().isAvailable()) {
-    // the DQMStore is not available, disable all DQM plots
-    enable_dqm_ = false;
-    // FIXME issue a LogWarning ?
-  }
 
   // allocate the structures to hold pointers to the DQM plots
   if (enable_dqm_) {

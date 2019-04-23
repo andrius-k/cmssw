@@ -467,6 +467,7 @@ private:
 
   // dqm configuration
   bool enable_dqm_;  // non const, depends on the availability of the DQMStore
+  std::unique_ptr<dqm::reco::DQMStore> dqmstore_;
   const bool enable_dqm_bymodule_;
   const bool enable_dqm_bypath_;
   const bool enable_dqm_byls_;
