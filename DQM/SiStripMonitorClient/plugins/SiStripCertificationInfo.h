@@ -75,5 +75,7 @@ private:
   edm::ESHandle<SiStripDetCabling> detCabling_{};
 
   int nFEDConnected_{};
+
+  std::unique_ptr<DQMStore> dqm_store;
 };
 #endif
