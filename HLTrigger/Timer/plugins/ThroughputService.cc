@@ -29,7 +29,8 @@ ThroughputService::ThroughputService(const edm::ParameterSet& config, edm::Activ
       m_time_range(config.getUntrackedParameter<double>("timeRange")),
       m_time_resolution(config.getUntrackedParameter<double>("timeResolution")),
       m_dqm_path(config.getUntrackedParameter<std::string>("dqmPath")),
-      m_dqm_bynproc(config.getUntrackedParameter<bool>("dqmPathByProcesses")) {
+      m_dqm_bynproc(config.getUntrackedParameter<bool>("dqmPathByProcesses")),
+      m_dqmstore(std::make_unique<DQMStore>()) {
   registry.watchPreGlobalBeginRun(this, &ThroughputService::preGlobalBeginRun);
   registry.watchPreSourceEvent(this, &ThroughputService::preSourceEvent);
   registry.watchPostEvent(this, &ThroughputService::postEvent);
@@ -48,29 +49,23 @@ void ThroughputService::preallocate(edm::service::SystemBounds const& bounds) {
 }
 
 void ThroughputService::preGlobalBeginRun(edm::GlobalContext const& gc) {
-  // if the DQMStore is available, book the DQM histograms
-  if (edm::Service<DQMStore>().isAvailable()) {
-    std::string y_axis_title = (boost::format("events / %g s") % m_time_resolution).str();
-    unsigned int bins = std::round(m_time_range / m_time_resolution);
-    double range = bins * m_time_resolution;
+  std::string y_axis_title = (boost::format("events / %g s") % m_time_resolution).str();
+  unsigned int bins = std::round(m_time_range / m_time_resolution);
+  double range = bins * m_time_resolution;
 
-    // define a callback that can book the histograms
-    auto bookTransactionCallback = [&, this](DQMStore::ConcurrentBooker& booker) {
-      booker.setCurrentFolder(m_dqm_path);
-      m_sourced_events = booker.book1D("throughput_sourced", "Throughput (sourced events)", bins, 0., range);
-      m_sourced_events.setXTitle("time [s]");
-      m_sourced_events.setYTitle(y_axis_title.c_str());
-      m_retired_events = booker.book1D("throughput_retired", "Throughput (retired events)", bins, 0., range);
-      m_retired_events.setXTitle("time [s]");
-      m_retired_events.setYTitle(y_axis_title.c_str());
-    };
+  // define a callback that can book the histograms
+  auto bookTransactionCallback = [&, this](DQMStore::ConcurrentBooker& booker) {
+    booker.setCurrentFolder(m_dqm_path);
+    m_sourced_events = booker.book1D("throughput_sourced", "Throughput (sourced events)", bins, 0., range);
+    m_sourced_events.setXTitle("time [s]");
+    m_sourced_events.setYTitle(y_axis_title.c_str());
+    m_retired_events = booker.book1D("throughput_retired", "Throughput (retired events)", bins, 0., range);
+    m_retired_events.setXTitle("time [s]");
+    m_retired_events.setYTitle(y_axis_title.c_str());
+  };
 
-    // book MonitorElement's for this run
-    edm::Service<DQMStore>()->bookConcurrentTransaction(bookTransactionCallback, gc.luminosityBlockID().run());
-  } else {
-    std::cerr << "No DQMStore service, aborting." << std::endl;
-    abort();
-  }
+  // book MonitorElement's for this run
+  m_dqmstore->bookConcurrentTransaction(bookTransactionCallback, gc.luminosityBlockID().run());
 }
 
 void ThroughputService::preSourceEvent(edm::StreamID sid) {

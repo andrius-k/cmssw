@@ -56,6 +56,7 @@ private:
   // DQM service-related data members
   std::string m_dqm_path;
   const bool m_dqm_bynproc;
+  std::unique_ptr<DQMStore> m_dqmstore;
 };
 
 #endif  // ! ThroughputService_h
