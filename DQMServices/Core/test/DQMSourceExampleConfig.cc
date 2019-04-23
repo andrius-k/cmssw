@@ -119,7 +119,7 @@ DQMSourceExampleConfig::DQMSourceExampleConfig(const edm::ParameterSet& iConfig)
                  histograms_number / directories_number,
                  histograms_number,
                  iConfig.getUntrackedParameter<int>("lDepth", 2),
-                 dbe,
+                 &*dbe,
                  directories_number);
   dbe->showDirStructure();
 }

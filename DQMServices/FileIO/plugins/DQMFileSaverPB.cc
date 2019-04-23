@@ -50,7 +50,7 @@ void DQMFileSaverPB::saveLumi(const FileParameters& fp) const {
   std::string histoFilePathName;
 
   evf::FastMonitoringService* fms = nullptr;
-  edm::Service<DQMStore> store;
+  auto store = std::make_unique<DQMStore>();
 
   // create the files names
   if (fakeFilterUnitMode_) {

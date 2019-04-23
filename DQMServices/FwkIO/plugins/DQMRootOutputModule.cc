@@ -294,11 +294,7 @@ DQMRootOutputModule::DQMRootOutputModule(edm::ParameterSet const& pset)
 //    // do actual copying here;
 // }
 
-void DQMRootOutputModule::beginJob() {
-  // Determine if we are running multithreading asking to the DQMStore. Not to be moved in the ctor
-  edm::Service<DQMStore> dstore;
-  m_enableMultiThread = dstore->enableMultiThread_;
-}
+void DQMRootOutputModule::beginJob() {}
 
 DQMRootOutputModule::~DQMRootOutputModule() {}
 
@@ -379,7 +375,7 @@ void DQMRootOutputModule::write(edm::EventForOutput const&) {}
 
 void DQMRootOutputModule::writeLuminosityBlock(edm::LuminosityBlockForOutput const& iLumi) {
   //std::cout << "DQMRootOutputModule::writeLuminosityBlock"<< std::endl;
-  edm::Service<DQMStore> dstore;
+  auto dstore = std::make_unique<DQMStore>();
   m_run = iLumi.id().run();
   m_lumi = iLumi.id().value();
   m_beginTime = iLumi.beginTime().value();
@@ -437,7 +433,7 @@ void DQMRootOutputModule::writeLuminosityBlock(edm::LuminosityBlockForOutput con
 
 void DQMRootOutputModule::writeRun(edm::RunForOutput const& iRun) {
   //std::cout << "DQMRootOutputModule::writeRun"<< std::endl;
-  edm::Service<DQMStore> dstore;
+  auto dstore = std::make_unique<DQMStore>();
   m_run = iRun.id().run();
   m_lumi = 0;
   m_beginTime = iRun.beginTime().value();

@@ -72,12 +72,6 @@ std::shared_ptr<edm::RunAuxiliary> DQMProtobufReader::readRunAuxiliary_() {
 void DQMProtobufReader::readRun_(edm::RunPrincipal& rpCache) {
   // fiterator_.logFileAction("readRun_");
   rpCache.fillRunPrincipal(processHistoryRegistryForUpdate());
-
-  edm::Service<DQMStore> store;
-  std::vector<MonitorElement*> allMEs = store->getAllContents("");
-  for (auto const& ME : allMEs) {
-    ME->Reset();
-  }
 }
 
 std::shared_ptr<edm::LuminosityBlockAuxiliary> DQMProtobufReader::readLuminosityBlockAuxiliary_() {
@@ -99,7 +93,7 @@ void DQMProtobufReader::readLuminosityBlock_(edm::LuminosityBlockPrincipal& lbCa
 }
 
 void DQMProtobufReader::beginLuminosityBlock(edm::LuminosityBlock& lb) {
-  edm::Service<DQMStore> store;
+  auto store = std::make_unique<DQMStore>();
 
   // clear the old lumi histograms
   std::vector<MonitorElement*> allMEs = store->getAllContents("");

@@ -28,17 +28,14 @@ DQMFEDIntegrityClient::DQMFEDIntegrityClient(const edm::ParameterSet& ps) {
 
 DQMFEDIntegrityClient::~DQMFEDIntegrityClient() = default;
 
-void DQMFEDIntegrityClient::initialize() {
-  // get back-end interface
-  dbe_ = edm::Service<DQMStore>().operator->();
-}
+void DQMFEDIntegrityClient::initialize() {}
 
 void DQMFEDIntegrityClient::beginJob() {
   NBINS = 850;
   XMIN = 0.;
   XMAX = 850.;
 
-  dbe_ = edm::Service<DQMStore>().operator->();
+  dbe_ = std::make_unique<DQMStore>();
 
   // ----------------------------------------------------------------------------------
   std::string currentFolder = moduleName + "/" + fedFolderName;

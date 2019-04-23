@@ -294,7 +294,7 @@ EDMtoMEConverter::~EDMtoMEConverter() = default;
 
 void EDMtoMEConverter::endRunProduce(edm::Run &iRun, edm::EventSetup const &iSetup) {
   if (convertOnEndRun) {
-    std::unique_ptr<DQMStore> store = edm::Service<DQMStore>().operator->();
+    std::unique_ptr<DQMStore> store = std::make_unique<DQMStore>();
     store->meBookerGetter([&](DQMStore::IBooker &b, DQMStore::IGetter &g) { getData(b, g, iRun); });
   }
 
@@ -303,7 +303,7 @@ void EDMtoMEConverter::endRunProduce(edm::Run &iRun, edm::EventSetup const &iSet
 
 void EDMtoMEConverter::endLuminosityBlockProduce(edm::LuminosityBlock &iLumi, edm::EventSetup const &iSetup) {
   if (convertOnEndLumi) {
-    std::unique_ptr<DQMStore> store = edm::Service<DQMStore>().operator->();
+    std::unique_ptr<DQMStore> store = std::make_unique<DQMStore>();
     store->meBookerGetter([&](DQMStore::IBooker &b, DQMStore::IGetter &g) { getData(b, g, iLumi); });
   }
 
