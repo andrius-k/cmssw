@@ -43,6 +43,7 @@ public:
 protected:
   edm::EDPutTokenT<DQMToken> lumiToken_;
   edm::EDPutTokenT<DQMToken> runToken_;
+  std::unique_ptr<DQMStore> dqmstore_;
 };
 
 #endif  // CORE_DQMED_HARVESTER_H
