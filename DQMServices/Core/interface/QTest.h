@@ -12,6 +12,7 @@
 
 #include "DQMServices/Core/interface/DQMStore.h"
 
+using dqm::legacy::MonitorElement;
 class Comp2RefChi2;
 using Comp2RefChi2ROOT = Comp2RefChi2;
 class Comp2Ref2DChi2;
@@ -69,6 +70,7 @@ using CheckVarianceROOT = CheckVariance;
 
 class QCriterion {
   /// (class should be created by DQMStore class)
+  friend class QReport;
 
 public:
   /// get test status (see Core/interface/DQMDefinitions.h)
@@ -147,11 +149,6 @@ private:
   /// default "probability" values for setting warnings & errors when running tests
   static const float WARNING_PROB_THRESHOLD;
   static const float ERROR_PROB_THRESHOLD;
-
-  /// for creating and deleting class instances
-  friend class DQMStore;
-  /// for running the test
-  friend class MonitorElement;
 };
 
 //////////////////////////////////////////////////////////////////////

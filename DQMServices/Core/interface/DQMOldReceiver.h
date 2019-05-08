@@ -11,6 +11,8 @@
 
 class DQMOldReceiver {
 public:
+  typedef dqm::legacy::DQMStore DQMStore;
+
   /** Connect with monitoring server (DQM Collector) at <hostname> and <port_no>
      using <client_name>; if flag=true, client will accept downstream connections
      DQMOldReceiver(std::string hostname,int port_no,std::string client_name,
