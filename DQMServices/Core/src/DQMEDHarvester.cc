@@ -12,16 +12,10 @@ DQMEDHarvester::DQMEDHarvester() {
   runToken_ = produces<DQMToken, edm::Transition::EndRun>("endRun");
 }
 
-void DQMEDHarvester::endJob() {
-  DQMStore* store = edm::Service<DQMStore>().operator->();
-  store->meBookerGetter([this](DQMStore::IBooker& b, DQMStore::IGetter& g) { this->dqmEndJob(b, g); });
-}
+void DQMEDHarvester::endJob() { this->dqmEndJob(*dqmstore_, *dqmstore_); }
 
 void DQMEDHarvester::endLuminosityBlock(edm::LuminosityBlock const& iLumi, edm::EventSetup const& iSetup) {
-  DQMStore* store = edm::Service<DQMStore>().operator->();
-  store->meBookerGetter([this, &iLumi, &iSetup](DQMStore::IBooker& b, DQMStore::IGetter& g) {
-    this->dqmEndLuminosityBlock(b, g, iLumi, iSetup);
-  });
+  this->dqmEndLuminosityBlock(*dqmstore_, *dqmstore_, iLumi, iSetup);
 }
 
 void DQMEDHarvester::endLuminosityBlockProduce(edm::LuminosityBlock& iLumi, edm::EventSetup const&) {

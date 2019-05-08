@@ -7,7 +7,8 @@
 
 #include <string>
 
-class DQMStore;
+#include <DQMServices/Core/interface/DQMStore.h>
+
 class DQMOldReceiver {
 public:
   /** Connect with monitoring server (DQM Collector) at <hostname> and <port_no>
@@ -40,10 +41,6 @@ public:
 
   ~DQMOldReceiver() DQM_DEPRECATED;
 
-  /// get pointer to back-end interface
-  DQMStore *getStore() DQM_DEPRECATED { return store_; }
-  DQMStore *getBEInterface() DQM_DEPRECATED { return store_; }
-
   /** this is the "main" loop where we receive monitoring or
       send subscription requests;
       if client acts as server, method runQTests is also sending monitoring & 
@@ -55,7 +52,7 @@ public:
 
 private:
   /// use to get hold of structure with monitoring elements that class owns
-  DQMStore *store_;
+  std::unique_ptr<DQMStore> store_;
 } DQM_DEPRECATED;
 
 #endif  // DQMSERVICES_CORE_DQM_CONNECTOR_H

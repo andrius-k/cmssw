@@ -8,7 +8,10 @@
 #include <cassert>
 #include <cstdio>
 #include <cstdlib>
+#include <cstdint>
 #include <iosfwd>
+#include <sstream>
+#include <iomanip>
 #include <list>
 #include <map>
 #include <memory>
@@ -17,851 +20,987 @@
 #include <string>
 #include <thread>
 #include <vector>
+#include <memory>
 #include <cxxabi.h>
 #include <execinfo.h>
+#include <sys/time.h>
 
 #include <classlib/utils/Regexp.h>
 
-#include "DQMServices/Core/interface/DQMDefinitions.h"
-#include "DQMServices/Core/interface/ConcurrentMonitorElement.h"
+#include "TF1.h"
+#include "TH1F.h"
+#include "TH1S.h"
+#include "TH1D.h"
+#include "TH2F.h"
+#include "TH2S.h"
+#include "TH2D.h"
+#include "TH3F.h"
+#include "TProfile.h"
+#include "TProfile2D.h"
+#include "TObjString.h"
+#include "TAxis.h"
 
-namespace edm {
-  class DQMHttpSource;
-  class ParameterSet;
-  class ActivityRegistry;
-  class GlobalContext;
-}  // namespace edm
-namespace lat {
-  class Regexp;
-}
+#include <tbb/spin_mutex.h>
+
+#include "DataFormats/Histograms/interface/MonitorElementCollection.h"
+#include <tuple>
+
+class TFile;
+class TBufferFile;
+
+class QCriterion;
 namespace dqmstorepb {
   class ROOTFilePB;
   class ROOTFilePB_Histo;
 }  // namespace dqmstorepb
 
-class QCriterion;
-class TFile;
-class TBufferFile;
-class TObject;
-class TH1;
-class TObjString;
-class TH1F;
-class TH1S;
-class TH1D;
-class TH2F;
-class TH2S;
-class TH2D;
-class TH3F;
-class TProfile;
-class TProfile2D;
-class TNamed;
+struct DQMChannel {
+  int binx;       //< bin # in x-axis (or bin # for 1D histogram)
+  int biny;       //< bin # in y-axis (for 2D or 3D histograms)
+  float content;  //< bin content
 
-// forward-declare all our friends
-class DQMService;
-class DQMNet;
-class DQMArchiver;
-class DQMStoreExample;  // for get{All,Matching}Contents -- sole user of this method!
-class DQMRootOutputModule;
-class DQMRootSource;
-class DQMFileSaver;
-class MEtoEDMConverter;
+  int getBin() { return getBinX(); }
+  int getBinX() { return binx; }
+  int getBinY() { return biny; }
+  float getContents() { return content; }
 
-namespace dqm::impl {
+  DQMChannel(int bx, int by, float data, float /* rms */) {
+    // rms is not stored for now, but might be useful in the future.
+    binx = bx;
+    biny = by;
+    content = data;
+  }
 
-  class MonitorElement;
+  DQMChannel() {
+    binx = 0;
+    biny = 0;
+    content = 0;
+  }
+};
 
-  /** Implements RegEx patterns which occur often in a high-performant
-    mattern. For all other expressions, the full RegEx engine is used.
-    Note: this class can only be used for lat::Regexp::Wildcard-like
-    patterns.  */
-  class fastmatch {
-    enum MatchingHeuristicEnum { UseFull, OneStarStart, OneStarEnd, TwoStar };
+namespace dqm {
+  namespace me_util {
+    using Channel = DQMChannel;
+  }
+}  // namespace dqm
 
-  public:
-    fastmatch(std::string fastString);
+/** Currently used (only?) for Online. We might decide to drop DQMNet entirely
+ * and use files for the online mode, to get rid of a lot of complexity. */
+#include "DQMServices/Core/interface/DQMNet.h"
 
-    bool match(std::string const& s) const;
+/** Class for reporting results of quality tests for Monitoring Elements */
+class QReport {
+  friend class QCriterion;
 
-  private:
-    // checks if two strings are equal, starting at the back of the strings
-    bool compare_strings_reverse(std::string const& pattern, std::string const& input) const;
-    // checks if two strings are equal, starting at the front of the strings
-    bool compare_strings(std::string const& pattern, std::string const& input) const;
+public:
+  /// get test status (see Core/interface/QTestStatus.h)
+  int getStatus() const { return qvalue_->code; }
 
-    std::unique_ptr<lat::Regexp> regexp_{nullptr};
-    std::string fastString_;
-    MatchingHeuristicEnum matching_;
-  };
+  /// get test result i.e. prob value
+  float getQTresult() const { return qvalue_->qtresult; }
 
-  class DQMStore {
-  public:
-    enum SaveReferenceTag { SaveWithoutReference, SaveWithReference, SaveWithReferenceForQTest };
-    enum OpenRunDirs { KeepRunDirs, StripRunDirs };
+  /// get message attached to test
+  const std::string& getMessage() const { return qvalue_->message; }
 
+  /// get name of quality test
+  /* unused */
+  const std::string& getQRName() const { return qvalue_->qtname; }
+
+  /// get vector of channels that failed test
+  /// (not relevant for all quality tests!)
+  const std::vector<DQMChannel>& getBadChannels() const { return badChannels_; }
+
+private:
+  QReport(DQMNet::QValue* value, QCriterion* qc) : qvalue_(value), qcriterion_(qc) {}
+
+  DQMNet::QValue* qvalue_;               //< Pointer to the actual data.
+  QCriterion* qcriterion_;               //< Pointer to QCriterion algorithm.
+  std::vector<DQMChannel> badChannels_;  //< Bad channels from QCriterion.
+};
+
+#ifndef DQM_ROOT_METHODS
+#define DQM_ROOT_METHODS 1
+#endif
+
+namespace dqm {
+  // eventually to be turned into "base", and most functionality removed.
+  namespace legacy {
+
+    /** The base class for all MonitorElements (ME) */
+    class MonitorElement : private MonitorElementData {
+    public:
+      // we need to make this visible here since it is private-inherited.
+      // TODO: can we get the entire enum at once?
+      using MonitorElementData::DQM_KIND_INT;
+      using MonitorElementData::DQM_KIND_INVALID;
+      using MonitorElementData::DQM_KIND_REAL;
+      using MonitorElementData::DQM_KIND_STRING;
+      using MonitorElementData::DQM_KIND_TH1D;
+      using MonitorElementData::DQM_KIND_TH1F;
+      using MonitorElementData::DQM_KIND_TH1S;
+      using MonitorElementData::DQM_KIND_TH2D;
+      using MonitorElementData::DQM_KIND_TH2F;
+      using MonitorElementData::DQM_KIND_TH2S;
+      using MonitorElementData::DQM_KIND_TH3F;
+      using MonitorElementData::DQM_KIND_TPROFILE;
+      using MonitorElementData::DQM_KIND_TPROFILE2D;
+      using MonitorElementData::Kind;
+      ;
+      using MonitorElementData::DQM_SCOPE_DEFAULT;
+      using MonitorElementData::DQM_SCOPE_JOB;
+      using MonitorElementData::DQM_SCOPE_LUMI;
+      using MonitorElementData::DQM_SCOPE_RUN;
+      using MonitorElementData::Scope;
+
+    private:
+      mutable tbb::spin_mutex lock_;
+      DQM_DEPRECATED TH1* reference_;  //< Current ROOT reference object
+      std::vector<QReport> qreports_;  //< QReports associated to this object.
+
+    public:
+      MonitorElement();
+      MonitorElement(MonitorElement&&);  // needed to construct object inside container?
+      MonitorElement& operator=(const MonitorElement&) = delete;
+      MonitorElement& operator=(MonitorElement&&) = delete;
+      virtual ~MonitorElement();
+
+      // TODO: maybe move to dataformat
+      auto key() const {
+        return std::make_tuple(dirname_,
+                               objname_,
+                               scope_,
+                               coveredrange_.startRun(),
+                               coveredrange_.startLumi(),
+                               coveredrange_.endRun(),
+                               coveredrange_.endLumi());
+      }
+
+      /// Compare monitor elements, for ordering in sets.
+      bool operator<(const MonitorElement& x) const { return this->key() < x.key(); }
+
+      /// Get the type of the monitor element.
+      Kind kind() const { return kind_; }
+
+      /// get name of ME
+      const std::string& getName() const { return objname_; }
+
+      /// get pathname of parent folder
+      const std::string& getPathname() const { return dirname_; }
+
+      /// get full name of ME including Pathname
+      const std::string getFullname() const { return dirname_ + objname_; }
+
+      /// specify whether ME should be reset at end of monitoring cycle (default:false);
+      /// (typically called by Sources that control the original ME)
+      DQM_DEPRECATED  // used by HLXMonitor and LaserDQM, both obsolete.
+          virtual void
+          setResetMe(bool /* flag */) {
+        assert(!"NIY");
+      }
+
+      /// true if ME is meant to be stored for each luminosity section
+      DQM_DEPRECATED  // used only internally
+          virtual bool
+          getLumiFlag() const {
+        return scope_ == MonitorElement::DQM_SCOPE_LUMI;
+      }
+
+      /// this ME is meant to be stored for each luminosity section
+      // We'll probably need to support this kind of interface (better alternative
+      // would be booking call parameters, but there are way too many already), so
+      // this needs to set the Scope, but since the scope is part of the sorting
+      // key, this will require some gymnastics with the owning DQMStore.
+      virtual void setLumiFlag() { assert(!"NIY"); }
+
+      /// this ME is meant to be an efficiency plot that must not be
+      /// normalized when drawn in the DQM GUI.
+      // We'll need this, though DQMIO can't store it atm.
+      virtual void setEfficiencyFlag() { assert(!"NIY"); }
+
+      // A static assert to check that T actually fits in
+      // int64_t.
+      template <typename T>
+      struct fits_in_int64_t {
+        int checkArray[sizeof(int64_t) - sizeof(T) + 1];
+      };
+
+      void Fill(long long x) const {
+        fits_in_int64_t<long long>();
+        doFill(static_cast<int64_t>(x));
+      }
+      void Fill(unsigned long long x) const {
+        fits_in_int64_t<unsigned long long>();
+        doFill(static_cast<int64_t>(x));
+      }
+      void Fill(unsigned long x) const {
+        fits_in_int64_t<unsigned long>();
+        doFill(static_cast<int64_t>(x));
+      }
+      void Fill(long x) const {
+        fits_in_int64_t<long>();
+        doFill(static_cast<int64_t>(x));
+      }
+      void Fill(unsigned int x) const {
+        fits_in_int64_t<unsigned int>();
+        doFill(static_cast<int64_t>(x));
+      }
+      void Fill(int x) const {
+        fits_in_int64_t<int>();
+        doFill(static_cast<int64_t>(x));
+      }
+      void Fill(short x) const {
+        fits_in_int64_t<short>();
+        doFill(static_cast<int64_t>(x));
+      }
+      void Fill(unsigned short x) const {
+        fits_in_int64_t<unsigned short>();
+        doFill(static_cast<int64_t>(x));
+      }
+      void Fill(char x) const {
+        fits_in_int64_t<char>();
+        doFill(static_cast<int64_t>(x));
+      }
+      void Fill(unsigned char x) const {
+        fits_in_int64_t<unsigned char>();
+        doFill(static_cast<int64_t>(x));
+      }
+
+      void Fill(float x) const { Fill(static_cast<double>(x)); }
+      void Fill(double x) const;
+      void Fill(std::string& value) const;
+
+      void Fill(double x, double yw) const;
+      void Fill(double x, double y, double zw) const;
+      void Fill(double x, double y, double z, double w) const;
+      void ShiftFillLast(double y, double ye = 0., int32_t xscale = 1) const;
+
+      // Not sure what to do with this. Let's make it depracated for the beginning.
+      DQM_DEPRECATED
+      virtual void Reset();
+
+      // mostly used for IO, should be private.
+      DQM_DEPRECATED
+      std::string valueString() const;
+      DQM_DEPRECATED
+      /* almost unused */ std::string tagString() const;
+      DQM_DEPRECATED
+      /* almost unused */ std::string tagLabelString() const;
+      DQM_DEPRECATED
+      /* almost unused */ std::string effLabelString() const;
+      DQM_DEPRECATED
+      /* almost unused */ std::string qualityTagString(const DQMNet::QValue& qv) const;
+
+      // these are fine functionality-wise, but not really used much.
+      /// true if at least of one of the quality tests returned an error
+      DQM_DEPRECATED
+      bool hasError() const { assert(!"NIY"); }
+
+      /// true if at least of one of the quality tests returned a warning
+      DQM_DEPRECATED
+      bool hasWarning() const { assert(!"NIY"); }
+
+      /// true if at least of one of the tests returned some other (non-ok) status
+      DQM_DEPRECATED
+      bool hasOtherReport() const { assert(!"NIY"); }
+
+      // We have to figure out how QTests actually work, and how they are supposed to work.
+      /// get QReport corresponding to <qtname> (null pointer if QReport does not exist)
+      const QReport* getQReport(const std::string& qtname) const;
+      /// get map of QReports
+      std::vector<QReport*> getQReports() const;
+      /// get warnings from last set of quality tests
+      std::vector<QReport*> getQWarnings() const;
+      /// get errors from last set of quality tests
+      std::vector<QReport*> getQErrors() const;
+      /// from last set of quality tests
+      std::vector<QReport*> getQOthers() const;
+
+      /// run all quality tests
+      /* almost unused */ void runQTests();
+
+    protected:
+      void doFill(int64_t x) const;
+      TH1* accessRootObject(const char* func, int reqdim) const;
+
+    public:
+#if DQM_ROOT_METHODS
+      // const and data-independent -- safe
+      virtual int getNbinsX() const;
+      virtual int getNbinsY() const;
+      virtual int getNbinsZ() const;
+      virtual std::string getAxisTitle(int axis = 1) const;
+      virtual std::string getTitle() const;
+
+      // const but data-dependent -- semantically unsafe in RECO
+      virtual double getMean(int axis = 1) const;
+      virtual double getMeanError(int axis = 1) const;
+      virtual double getRMS(int axis = 1) const;
+      virtual double getRMSError(int axis = 1) const;
+      virtual double getBinContent(int binx) const;
+      virtual double getBinContent(int binx, int biny) const;
+      virtual double getBinContent(int binx, int biny, int binz) const;
+      virtual double getBinError(int binx) const;
+      virtual double getBinError(int binx, int biny) const;
+      virtual double getBinError(int binx, int biny, int binz) const;
+      virtual double getEntries() const;
+      virtual double getBinEntries(int bin) const;
+
+      // non-const -- thread safety and semantical issues
+      virtual void setBinContent(int binx, double content);
+      virtual void setBinContent(int binx, int biny, double content);
+      virtual void setBinContent(int binx, int biny, int binz, double content);
+      virtual void setBinError(int binx, double error);
+      virtual void setBinError(int binx, int biny, double error);
+      virtual void setBinError(int binx, int biny, int binz, double error);
+      virtual void setBinEntries(int bin, double nentries);
+      virtual void setEntries(double nentries);
+      virtual void setBinLabel(int bin, const std::string& label, int axis = 1);
+      virtual void setAxisRange(double xmin, double xmax, int axis = 1);
+      virtual void setAxisTitle(const std::string& title, int axis = 1);
+      virtual void setAxisTimeDisplay(int value, int axis = 1);
+      virtual void setAxisTimeFormat(const char* format = "", int axis = 1);
+      virtual void setTitle(const std::string& title);
+#endif  // DQM_ROOT_METHODS
+
+      // ------------ Operations for MEs that are normally never reset ---------
+      DQM_DEPRECATED
+      void softReset();
+
+      virtual TObject* getRootObject() const;
+      virtual TH1* getTH1() const;
+      virtual TH1F* getTH1F() const;
+      virtual TH1S* getTH1S() const;
+      virtual TH1D* getTH1D() const;
+      virtual TH2F* getTH2F() const;
+      virtual TH2S* getTH2S() const;
+      virtual TH2D* getTH2D() const;
+      virtual TH3F* getTH3F() const;
+      virtual TProfile* getTProfile() const;
+      virtual TProfile2D* getTProfile2D() const;
+
+      // probably we will drop references entirely.
+      DQM_DEPRECATED
+      virtual TObject* getRefRootObject() const;
+
+      virtual int64_t getIntValue() const;
+      virtual double getFloatValue() const;
+      virtual const std::string& getStringValue() const;
+
+      // --- Operations that origianted in ConcurrentME ---
+      virtual void setXTitle(std::string const& title);
+      virtual void setYTitle(std::string const& title);
+      virtual void enableSumw2();
+      virtual void disableAlphanumeric();
+      virtual void setOption(const char* option);
+    };
+
+  }  // namespace legacy
+  namespace reco {
+
+    class MonitorElement : public dqm::legacy::MonitorElement {
+    public:
+      MonitorElement() = default;
+      MonitorElement(MonitorElement&&) = default;
+      ~MonitorElement() = default;
+
+      // now, we deprecate and assert things that are not allowed on reco MEs.
+      // Eventually, they should be dropped from the base, but for now we need to
+      // allow implicit conversion to legacy with run-time checks.
+#define BAN(thing) \
+  DQM_DEPRECATED thing { assert(!"Operation not permitted."); }
+      BAN(virtual void setEfficiencyFlag())
+      BAN(virtual void Reset())
+    protected:
+      BAN(TH1* accessRootObject(const char* func, int reqdim) const)
+
+    public:
+#if DQM_ROOT_METHODS
+      BAN(virtual double getMean(int axis = 1) const)
+      BAN(virtual double getMeanError(int axis = 1) const)
+      BAN(virtual double getRMS(int axis = 1) const)
+      BAN(virtual double getRMSError(int axis = 1) const)
+      BAN(virtual double getBinContent(int binx) const)
+      BAN(virtual double getBinContent(int binx, int biny) const)
+      BAN(virtual double getBinContent(int binx, int biny, int binz) const)
+      BAN(virtual double getBinError(int binx) const)
+      BAN(virtual double getBinError(int binx, int biny) const)
+      BAN(virtual double getBinError(int binx, int biny, int binz) const)
+      BAN(virtual double getEntries() const)
+      BAN(virtual double getBinEntries(int bin) const)
+
+      BAN(virtual void setBinContent(int binx, double content))
+      BAN(virtual void setBinContent(int binx, int biny, double content))
+      BAN(virtual void setBinContent(int binx, int biny, int binz, double content))
+      BAN(virtual void setBinError(int binx, double error))
+      BAN(virtual void setBinError(int binx, int biny, double error))
+      BAN(virtual void setBinError(int binx, int biny, int binz, double error))
+      BAN(virtual void setBinEntries(int bin, double nentries))
+      BAN(virtual void setEntries(double nentries))
+      BAN(virtual void setBinLabel(int bin, const std::string& label, int axis = 1))
+      BAN(virtual void setAxisRange(double xmin, double xmax, int axis = 1))
+      BAN(virtual void setAxisTitle(const std::string& title, int axis = 1))
+      BAN(virtual void setAxisTimeDisplay(int value, int axis = 1))
+      BAN(virtual void setAxisTimeFormat(const char* format = "", int axis = 1))
+      BAN(virtual void setTitle(const std::string& title))
+#endif  // DQM_ROOT_METHODS
+
+      BAN(virtual TObject* getRootObject() const)
+      BAN(virtual TH1* getTH1() const)
+      BAN(virtual TH1F* getTH1F() const)
+      BAN(virtual TH1S* getTH1S() const)
+      BAN(virtual TH1D* getTH1D() const)
+      BAN(virtual TH2F* getTH2F() const)
+      BAN(virtual TH2S* getTH2S() const)
+      BAN(virtual TH2D* getTH2D() const)
+      BAN(virtual TH3F* getTH3F() const)
+      BAN(virtual TProfile* getTProfile() const)
+      BAN(virtual TProfile2D* getTProfile2D() const)
+
+      BAN(virtual int64_t getIntValue() const)
+      BAN(virtual double getFloatValue() const)
+      BAN(virtual const std::string& getStringValue() const)
+    };
+
+  }  // namespace reco
+  namespace harvesting {
+
+    class MonitorElement : public dqm::reco::MonitorElement {
+    public:
+      MonitorElement() = default;
+      MonitorElement(MonitorElement&&) = default;
+      ~MonitorElement() = default;
+
+      // In harvesting, we un-ban some of the operations banned before. Eventually,
+      // we should get rid of the legacy base and move the implementations here.
+#define UNBAN(name) using dqm::legacy::MonitorElement::name;
+      UNBAN(setEfficiencyFlag)
+      UNBAN(Reset)
+    protected:
+      UNBAN(accessRootObject)
+
+    public:
+#if DQM_ROOT_METHODS
+      UNBAN(getMean)
+      UNBAN(getMeanError)
+      UNBAN(getRMS)
+      UNBAN(getRMSError)
+      UNBAN(getBinContent)
+      UNBAN(getBinError)
+      UNBAN(getEntries)
+      UNBAN(getBinEntries)
+
+      UNBAN(setBinContent)
+      UNBAN(setBinError)
+      UNBAN(setBinEntries)
+      UNBAN(setEntries)
+      UNBAN(setBinLabel)
+      UNBAN(setAxisRange)
+      UNBAN(setAxisTitle)
+      UNBAN(setAxisTimeDisplay)
+      UNBAN(setAxisTimeFormat)
+      UNBAN(setTitle)
+#endif  // DQM_ROOT_METHODS
+
+      UNBAN(getRootObject)
+      UNBAN(getTH1)
+      UNBAN(getTH1F)
+      UNBAN(getTH1S)
+      UNBAN(getTH1D)
+      UNBAN(getTH2F)
+      UNBAN(getTH2S)
+      UNBAN(getTH2D)
+      UNBAN(getTH3F)
+      UNBAN(getTProfile)
+      UNBAN(getTProfile2D)
+
+      UNBAN(getIntValue)
+      UNBAN(getFloatValue)
+      UNBAN(getStringValue)
+    };
+
+  }  // namespace harvesting
+
+  namespace legacy {
+
+    // The basic IBooker is a pure virtual interface that returns the common base
+    // class of MEs (legacy). That justifies it being in the legacy namespace.
     class IBooker {
     public:
-      friend class DQMStore;
+      virtual MonitorElement* bookInt(TString const& name) = 0;
+      virtual MonitorElement* bookFloat(TString const& name) = 0;
+      virtual MonitorElement* bookString(TString const& name, TString const& value) = 0;
+      virtual MonitorElement* book1D(
+          TString const& name, TString const& title, int const nchX, double const lowX, double const highX) = 0;
+      virtual MonitorElement* book1D(TString const& name, TString const& title, int nchX, float const* xbinsize) = 0;
+      virtual MonitorElement* book1D(TString const& name, TH1F* object) = 0;
+      virtual MonitorElement* book1S(TString const& name, TString const& title, int nchX, double lowX, double highX) = 0;
+      virtual MonitorElement* book1S(TString const& name, TH1S* object) = 0;
+      virtual MonitorElement* book1DD(
+          TString const& name, TString const& title, int nchX, double lowX, double highX) = 0;
+      virtual MonitorElement* book1DD(TString const& name, TH1D* object) = 0;
+      virtual MonitorElement* book2D(TString const& name,
+                                     TString const& title,
+                                     int nchX,
+                                     double lowX,
+                                     double highX,
+                                     int nchY,
+                                     double lowY,
+                                     double highY) = 0;
+      virtual MonitorElement* book2D(TString const& name,
+                                     TString const& title,
+                                     int nchX,
+                                     float const* xbinsize,
+                                     int nchY,
+                                     float const* ybinsize) = 0;
+      virtual MonitorElement* book2D(TString const& name, TH2F* object) = 0;
+      virtual MonitorElement* book2S(TString const& name,
+                                     TString const& title,
+                                     int nchX,
+                                     double lowX,
+                                     double highX,
+                                     int nchY,
+                                     double lowY,
+                                     double highY) = 0;
+      virtual MonitorElement* book2S(TString const& name,
+                                     TString const& title,
+                                     int nchX,
+                                     float const* xbinsize,
+                                     int nchY,
+                                     float const* ybinsize) = 0;
+      virtual MonitorElement* book2S(TString const& name, TH2S* object) = 0;
+      virtual MonitorElement* book2DD(TString const& name,
+                                      TString const& title,
+                                      int nchX,
+                                      double lowX,
+                                      double highX,
+                                      int nchY,
+                                      double lowY,
+                                      double highY) = 0;
+      virtual MonitorElement* book2DD(TString const& name, TH2D* object) = 0;
+      virtual MonitorElement* book3D(TString const& name,
+                                     TString const& title,
+                                     int nchX,
+                                     double lowX,
+                                     double highX,
+                                     int nchY,
+                                     double lowY,
+                                     double highY,
+                                     int nchZ,
+                                     double lowZ,
+                                     double highZ) = 0;
+      virtual MonitorElement* book3D(TString const& name, TH3F* object) = 0;
+      virtual MonitorElement* bookProfile(TString const& name,
+                                          TString const& title,
+                                          int nchX,
+                                          double lowX,
+                                          double highX,
+                                          int nchY,
+                                          double lowY,
+                                          double highY,
+                                          char const* option = "s") = 0;
+      virtual MonitorElement* bookProfile(TString const& name,
+                                          TString const& title,
+                                          int nchX,
+                                          double lowX,
+                                          double highX,
+                                          double lowY,
+                                          double highY,
+                                          char const* option = "s") = 0;
+      virtual MonitorElement* bookProfile(TString const& name,
+                                          TString const& title,
+                                          int nchX,
+                                          double const* xbinsize,
+                                          int nchY,
+                                          double lowY,
+                                          double highY,
+                                          char const* option = "s") = 0;
+      virtual MonitorElement* bookProfile(TString const& name,
+                                          TString const& title,
+                                          int nchX,
+                                          double const* xbinsize,
+                                          double lowY,
+                                          double highY,
+                                          char const* option = "s") = 0;
+      virtual MonitorElement* bookProfile(TString const& name, TProfile* object) = 0;
+      virtual MonitorElement* bookProfile2D(TString const& name,
+                                            TString const& title,
+                                            int nchX,
+                                            double lowX,
+                                            double highX,
+                                            int nchY,
+                                            double lowY,
+                                            double highY,
+                                            double lowZ,
+                                            double highZ,
+                                            char const* option = "s") = 0;
+      virtual MonitorElement* bookProfile2D(TString const& name,
+                                            TString const& title,
+                                            int nchX,
+                                            double lowX,
+                                            double highX,
+                                            int nchY,
+                                            double lowY,
+                                            double highY,
+                                            int nchZ,
+                                            double lowZ,
+                                            double highZ,
+                                            char const* option = "s") = 0;
+      virtual MonitorElement* bookProfile2D(TString const& name, TProfile2D* object) = 0;
 
-      MonitorElement* bookInt(TString const& name);
-      MonitorElement* bookFloat(TString const& name);
-      MonitorElement* bookString(TString const& name, TString const& value);
-      MonitorElement* book1D(
+      virtual void cd() = 0;
+      virtual void cd(std::string const& dir) = 0;
+      virtual void setCurrentFolder(std::string const& fullpath) = 0;
+      virtual void goUp() = 0;
+      virtual std::string const& pwd() = 0;
+      DQM_DEPRECATED
+      virtual void tag(MonitorElement*, unsigned int) = 0;
+      DQM_DEPRECATED
+      virtual void tagContents(std::string const&, unsigned int) = 0;
+
+      virtual ~IBooker();
+
+    protected:
+      IBooker();
+    };
+    class IGetter {
+    public:
+      virtual std::vector<MonitorElement*> getContents(std::string const& path) const = 0;
+      virtual std::vector<MonitorElement*> getContents(std::string const& path, unsigned int tag) const = 0;
+      virtual void getContents(std::vector<std::string>& into, bool showContents = true) const = 0;
+
+      // We should not need to delete much from the DQMStore; it might not be save
+      // to really delete objects anyways. There might be good reasons to use these,
+      // lets see.
+      DQM_DEPRECATED
+      virtual void removeContents() = 0;
+      DQM_DEPRECATED
+      virtual void removeContents(std::string const& dir) = 0;
+      DQM_DEPRECATED
+      virtual void removeElement(std::string const& name) = 0;
+      DQM_DEPRECATED
+      virtual void removeElement(std::string const& dir, std::string const& name, bool warning = true) = 0;
+
+      // we have to discuss semantics here -- are run/lumi ever used?
+      virtual std::vector<MonitorElement*> getAllContents(std::string const& path) = 0;
+      DQM_DEPRECATED
+      virtual std::vector<MonitorElement*> getAllContents(std::string const& path,
+                                                          uint32_t runNumber = 0,
+                                                          uint32_t lumi = 0) = 0;
+      virtual MonitorElement* get(std::string const& path) = 0;
+
+      // same as get, throws an exception if histogram not found
+      // Deprecated simply because it is barely used.
+      DQM_DEPRECATED
+      virtual MonitorElement* getElement(std::string const& path) = 0;
+
+      virtual std::vector<std::string> getSubdirs() = 0;
+      virtual std::vector<std::string> getMEs() = 0;
+      virtual bool dirExists(std::string const& path) = 0;
+      virtual void cd() = 0;
+      virtual void cd(std::string const& dir) = 0;
+      virtual void setCurrentFolder(std::string const& fullpath) = 0;
+
+      virtual ~IGetter();
+
+    protected:
+      IGetter();
+    };
+
+  }  // namespace legacy
+  // this namespace is for internal use only.
+  namespace implementation {
+    // this provides a templated implementation of the DQMStore. The operations it
+    // does are rather always the same; the only thing that changes are the return
+    // types. We keep IBooker and IGetter separate, just in case. DQMStore simply
+    // multi-inherits them for now.
+    // We will instantiate this for reco MEs and harvesting MEs, and maybe for
+    // legacy as well.
+    template <class ME, class STORE>
+    class IBooker : public virtual dqm::legacy::IBooker {
+    public:
+      virtual ME* bookInt(TString const& name);
+      virtual ME* bookFloat(TString const& name);
+      virtual ME* bookString(TString const& name, TString const& value);
+      virtual ME* book1D(
           TString const& name, TString const& title, int const nchX, double const lowX, double const highX);
-      MonitorElement* book1D(TString const& name, TString const& title, int nchX, float const* xbinsize);
-      MonitorElement* book1D(TString const& name, TH1F* object);
-      MonitorElement* book1S(TString const& name, TString const& title, int nchX, double lowX, double highX);
-      MonitorElement* book1S(TString const& name, TH1S* object);
-      MonitorElement* book1DD(TString const& name, TString const& title, int nchX, double lowX, double highX);
-      MonitorElement* book1DD(TString const& name, TH1D* object);
-      MonitorElement* book2D(TString const& name,
-                             TString const& title,
-                             int nchX,
-                             double lowX,
-                             double highX,
-                             int nchY,
-                             double lowY,
-                             double highY);
-      MonitorElement* book2D(
+      virtual ME* book1D(TString const& name, TString const& title, int nchX, float const* xbinsize);
+      virtual ME* book1D(TString const& name, TH1F* object);
+      virtual ME* book1S(TString const& name, TString const& title, int nchX, double lowX, double highX);
+      virtual ME* book1S(TString const& name, TH1S* object);
+      virtual ME* book1DD(TString const& name, TString const& title, int nchX, double lowX, double highX);
+      virtual ME* book1DD(TString const& name, TH1D* object);
+      virtual ME* book2D(TString const& name,
+                         TString const& title,
+                         int nchX,
+                         double lowX,
+                         double highX,
+                         int nchY,
+                         double lowY,
+                         double highY);
+      virtual ME* book2D(
           TString const& name, TString const& title, int nchX, float const* xbinsize, int nchY, float const* ybinsize);
-      MonitorElement* book2D(TString const& name, TH2F* object);
-      MonitorElement* book2S(TString const& name,
-                             TString const& title,
-                             int nchX,
-                             double lowX,
-                             double highX,
-                             int nchY,
-                             double lowY,
-                             double highY);
-      MonitorElement* book2S(
+      virtual ME* book2D(TString const& name, TH2F* object);
+      virtual ME* book2S(TString const& name,
+                         TString const& title,
+                         int nchX,
+                         double lowX,
+                         double highX,
+                         int nchY,
+                         double lowY,
+                         double highY);
+      virtual ME* book2S(
           TString const& name, TString const& title, int nchX, float const* xbinsize, int nchY, float const* ybinsize);
-      MonitorElement* book2S(TString const& name, TH2S* object);
-      MonitorElement* book2DD(TString const& name,
+      virtual ME* book2S(TString const& name, TH2S* object);
+      virtual ME* book2DD(TString const& name,
+                          TString const& title,
+                          int nchX,
+                          double lowX,
+                          double highX,
+                          int nchY,
+                          double lowY,
+                          double highY);
+      virtual ME* book2DD(TString const& name, TH2D* object);
+      virtual ME* book3D(TString const& name,
+                         TString const& title,
+                         int nchX,
+                         double lowX,
+                         double highX,
+                         int nchY,
+                         double lowY,
+                         double highY,
+                         int nchZ,
+                         double lowZ,
+                         double highZ);
+      virtual ME* book3D(TString const& name, TH3F* object);
+      virtual ME* bookProfile(TString const& name,
                               TString const& title,
                               int nchX,
                               double lowX,
                               double highX,
                               int nchY,
                               double lowY,
-                              double highY);
-      MonitorElement* book2DD(TString const& name, TH2D* object);
-      MonitorElement* book3D(TString const& name,
-                             TString const& title,
-                             int nchX,
-                             double lowX,
-                             double highX,
-                             int nchY,
-                             double lowY,
-                             double highY,
-                             int nchZ,
-                             double lowZ,
-                             double highZ);
-      MonitorElement* book3D(TString const& name, TH3F* object);
-      MonitorElement* bookProfile(TString const& name,
-                                  TString const& title,
-                                  int nchX,
-                                  double lowX,
-                                  double highX,
-                                  int nchY,
-                                  double lowY,
-                                  double highY,
-                                  char const* option = "s");
-      MonitorElement* bookProfile(TString const& name,
-                                  TString const& title,
-                                  int nchX,
-                                  double lowX,
-                                  double highX,
-                                  double lowY,
-                                  double highY,
-                                  char const* option = "s");
-      MonitorElement* bookProfile(TString const& name,
-                                  TString const& title,
-                                  int nchX,
-                                  double const* xbinsize,
-                                  int nchY,
-                                  double lowY,
-                                  double highY,
-                                  char const* option = "s");
-      MonitorElement* bookProfile(TString const& name,
-                                  TString const& title,
-                                  int nchX,
-                                  double const* xbinsize,
-                                  double lowY,
-                                  double highY,
-                                  char const* option = "s");
-      MonitorElement* bookProfile(TString const& name, TProfile* object);
-      MonitorElement* bookProfile2D(TString const& name,
-                                    TString const& title,
-                                    int nchX,
-                                    double lowX,
-                                    double highX,
-                                    int nchY,
-                                    double lowY,
-                                    double highY,
-                                    double lowZ,
-                                    double highZ,
-                                    char const* option = "s");
-      MonitorElement* bookProfile2D(TString const& name,
-                                    TString const& title,
-                                    int nchX,
-                                    double lowX,
-                                    double highX,
-                                    int nchY,
-                                    double lowY,
-                                    double highY,
-                                    int nchZ,
-                                    double lowZ,
-                                    double highZ,
-                                    char const* option = "s");
-      MonitorElement* bookProfile2D(TString const& name, TProfile2D* object);
-
-      void cd();
-      void cd(std::string const& dir);
-      void setCurrentFolder(std::string const& fullpath);
-      void goUp();
-      std::string const& pwd();
-      void tag(MonitorElement*, unsigned int);
-      void tagContents(std::string const&, unsigned int);
-
-      IBooker() = delete;
-      IBooker(IBooker const&) = delete;
-
-    private:
-      explicit IBooker(DQMStore* store) noexcept : owner_{store} { assert(store); }
-
-      // Embedded classes do not natively own a pointer to the embedding
-      // class. We therefore need to store a pointer to the main
-      // DQMStore instance (owner_).
-      DQMStore* owner_;
-    };  // IBooker
-
-    class ConcurrentBooker : public IBooker {
-    public:
-      friend class DQMStore;
-
-      ConcurrentMonitorElement bookInt(TString const& name);
-      ConcurrentMonitorElement bookFloat(TString const& name);
-      ConcurrentMonitorElement bookString(TString const& name, TString const& value);
-      ConcurrentMonitorElement book1D(
-          TString const& name, TString const& title, int const nchX, double const lowX, double const highX);
-      ConcurrentMonitorElement book1D(TString const& name, TString const& title, int nchX, float const* xbinsize);
-      ConcurrentMonitorElement book1D(TString const& name, TH1F* object);
-      ConcurrentMonitorElement book1S(TString const& name, TString const& title, int nchX, double lowX, double highX);
-      ConcurrentMonitorElement book1S(TString const& name, TH1S* object);
-      ConcurrentMonitorElement book1DD(TString const& name, TString const& title, int nchX, double lowX, double highX);
-      ConcurrentMonitorElement book1DD(TString const& name, TH1D* object);
-      ConcurrentMonitorElement book2D(TString const& name,
-                                      TString const& title,
-                                      int nchX,
-                                      double lowX,
-                                      double highX,
-                                      int nchY,
-                                      double lowY,
-                                      double highY);
-      ConcurrentMonitorElement book2D(
-          TString const& name, TString const& title, int nchX, float const* xbinsize, int nchY, float const* ybinsize);
-      ConcurrentMonitorElement book2D(TString const& name, TH2F* object);
-      ConcurrentMonitorElement book2S(TString const& name,
-                                      TString const& title,
-                                      int nchX,
-                                      double lowX,
-                                      double highX,
-                                      int nchY,
-                                      double lowY,
-                                      double highY);
-      ConcurrentMonitorElement book2S(
-          TString const& name, TString const& title, int nchX, float const* xbinsize, int nchY, float const* ybinsize);
-      ConcurrentMonitorElement book2S(TString const& name, TH2S* object);
-      ConcurrentMonitorElement book2DD(TString const& name,
-                                       TString const& title,
-                                       int nchX,
-                                       double lowX,
-                                       double highX,
-                                       int nchY,
-                                       double lowY,
-                                       double highY);
-      ConcurrentMonitorElement book2DD(TString const& name, TH2D* object);
-      ConcurrentMonitorElement book3D(TString const& name,
-                                      TString const& title,
-                                      int nchX,
-                                      double lowX,
-                                      double highX,
-                                      int nchY,
-                                      double lowY,
-                                      double highY,
-                                      int nchZ,
-                                      double lowZ,
-                                      double highZ);
-      ConcurrentMonitorElement book3D(TString const& name, TH3F* object);
-      ConcurrentMonitorElement bookProfile(TString const& name,
-                                           TString const& title,
-                                           int nchX,
-                                           double lowX,
-                                           double highX,
-                                           int nchY,
-                                           double lowY,
-                                           double highY,
-                                           char const* option = "s");
-      ConcurrentMonitorElement bookProfile(TString const& name,
-                                           TString const& title,
-                                           int nchX,
-                                           double lowX,
-                                           double highX,
-                                           double lowY,
-                                           double highY,
-                                           char const* option = "s");
-      ConcurrentMonitorElement bookProfile(TString const& name,
-                                           TString const& title,
-                                           int nchX,
-                                           double const* xbinsize,
-                                           int nchY,
-                                           double lowY,
-                                           double highY,
-                                           char const* option = "s");
-      ConcurrentMonitorElement bookProfile(TString const& name,
-                                           TString const& title,
-                                           int nchX,
-                                           double const* xbinsize,
-                                           double lowY,
-                                           double highY,
-                                           char const* option = "s");
-      ConcurrentMonitorElement bookProfile(TString const& name, TProfile* object);
-      ConcurrentMonitorElement bookProfile2D(TString const& name,
-                                             TString const& title,
-                                             int nchX,
-                                             double lowX,
-                                             double highX,
-                                             int nchY,
-                                             double lowY,
-                                             double highY,
-                                             double lowZ,
-                                             double highZ,
-                                             char const* option = "s");
-      ConcurrentMonitorElement bookProfile2D(TString const& name,
-                                             TString const& title,
-                                             int nchX,
-                                             double lowX,
-                                             double highX,
-                                             int nchY,
-                                             double lowY,
-                                             double highY,
-                                             int nchZ,
-                                             double lowZ,
-                                             double highZ,
-                                             char const* option = "s");
-      ConcurrentMonitorElement bookProfile2D(TString const& name, TProfile2D* object);
-
-      ConcurrentBooker() = delete;
-      ConcurrentBooker(ConcurrentBooker const&) = delete;
-      ConcurrentBooker(ConcurrentBooker&&) = delete;
-      ConcurrentBooker& operator=(ConcurrentBooker const&) = delete;
-      ConcurrentBooker& operator=(ConcurrentBooker&&) = delete;
-
-    private:
-      explicit ConcurrentBooker(DQMStore* store) noexcept : IBooker{store} {}
-
-      ~ConcurrentBooker() = default;
-    };
-
-    class IGetter {
-    public:
-      friend class DQMStore;
-
-      // for the supported syntaxes, see the declarations of DQMStore::getContents
-      template <typename... Args>
-      std::vector<MonitorElement*> getContents(Args&&... args) {
-        return owner_->getContents(std::forward<Args>(args)...);
-      }
-
-      // for the supported syntaxes, see the declarations of DQMStore::removeElement
-      template <typename... Args>
-      void removeElement(Args&&... args) {
-        return owner_->removeElement(std::forward<Args>(args)...);
-      }
-
-      std::vector<MonitorElement*> getAllContents(std::string const& path, uint32_t runNumber = 0, uint32_t lumi = 0);
-      MonitorElement* get(std::string const& path);
-
-      // same as get, throws an exception if histogram not found
-      MonitorElement* getElement(std::string const& path);
-
-      std::vector<std::string> getSubdirs();
-      std::vector<std::string> getMEs();
-      bool containsAnyMonitorable(std::string const& path);
-      bool dirExists(std::string const& path);
-      void cd();
-      void cd(std::string const& dir);
-      void setCurrentFolder(std::string const& fullpath);
-
-      IGetter() = delete;
-      IGetter(IGetter const&) = delete;
-
-    private:
-      explicit IGetter(DQMStore* store) noexcept : owner_{store} { assert(store); }
-
-      // Embedded classes do not natively own a pointer to the embedding
-      // class. We therefore need to store a pointer to the main
-      // DQMStore instance (owner_).
-      DQMStore* owner_;
-    };  //IGetter
-
-    // Template function to be used inside each DQM Modules' lambda
-    // functions to book MonitorElements into the DQMStore. The function
-    // calls whatever user-supplied code via the function f. The latter
-    // is passed the instance of the IBooker class (owned by the *only*
-    // DQMStore instance), that is capable of booking MonitorElements
-    // into the DQMStore via a public API. The central mutex is acquired
-    // *before* invoking and automatically released upon returns.
-    template <typename iFunc>
-    void bookTransaction(iFunc f, uint32_t run, uint32_t moduleId, bool canSaveByLumi) {
-      std::lock_guard<std::mutex> guard(book_mutex_);
-      /* Set the run number and module id only if multithreading is enabled */
-      if (enableMultiThread_) {
-        run_ = run;
-        moduleId_ = moduleId;
-        canSaveByLumi_ = canSaveByLumi;
-      }
-      IBooker booker{this};
-      f(booker);
-
-      /* Reset the run number and module id only if multithreading is enabled */
-      if (enableMultiThread_) {
-        run_ = 0;
-        moduleId_ = 0;
-        canSaveByLumi_ = false;
-      }
-    }
-
-    // Similar function used to book "global" histograms via the
-    // ConcurrentMonitorElement interface.
-    template <typename iFunc>
-    void bookConcurrentTransaction(iFunc f, uint32_t run) {
-      std::lock_guard<std::mutex> guard(book_mutex_);
-      /* Set the run_ member only if enableMultiThread is enabled */
-      if (enableMultiThread_) {
-        run_ = run;
-      }
-      ConcurrentBooker booker(this);
-      f(booker);
-
-      /* Reset the run_ member only if enableMultiThread is enabled */
-      if (enableMultiThread_) {
-        run_ = 0;
-      }
-    }
-
-    // Signature needed in the harvesting where the booking is done in
-    // the endJob. No handles to the run there. Two arguments ensure the
-    // capability of booking and getting. The method relies on the
-    // initialization of run, stream and module ID to 0. The mutex is
-    // not needed.
-    template <typename iFunc>
-    void meBookerGetter(iFunc f) {
-      IBooker booker{this};
-      IGetter getter{this};
-      f(booker, getter);
-    }
-
-    //-------------------------------------------------------------------------
-    // ---------------------- Constructors ------------------------------------
-    DQMStore(edm::ParameterSet const& pset, edm::ActivityRegistry&);
-    DQMStore(edm::ParameterSet const& pset);
-    DQMStore() {}; // TODO: only to make things compile, will not work.
-    ~DQMStore();
-
-    //-------------------------------------------------------------------------
-    void setVerbose(unsigned level);
-
-    // ---------------------- public navigation -------------------------------
-    std::string const& pwd() const;
-    void cd();
-    void cd(std::string const& subdir);
-    void setCurrentFolder(std::string const& fullpath);
-    void goUp();
-
-    bool dirExists(std::string const& path) const;
-
-    // Conversion class to allow specifications of TString const&,
-    // std::string const&, and char const* for the booking functions.
-    // Ideally, this will be replaced with std::string_view (what to do
-    // about TString?) whenever we move to C++17.
-    class char_string {
-    public:
-      char_string(TString const& str) : data_{str.Data()} {}
-      char_string(char const* str) : data_{str} {}
-      char_string(std::string const& str) : data_{str} {}
-      operator std::string const&() const { return data_; }
-      operator char const*() const { return data_.c_str(); }
-
-    private:
-      std::string data_;
-    };
-
-    //-------------------------------------------------------------------------
-    // ---------------------- public ME booking -------------------------------
-    MonitorElement* bookInt(char_string const& name);
-    MonitorElement* bookFloat(char_string const& name);
-    MonitorElement* bookString(char_string const& name, char_string const& value);
-    MonitorElement* book1D(
-        char_string const& name, char_string const& title, int const nchX, double const lowX, double const highX);
-    MonitorElement* book1D(char_string const& name, char_string const& title, int nchX, float const* xbinsize);
-    MonitorElement* book1D(char_string const& name, TH1F* h);
-    MonitorElement* book1S(char_string const& name, char_string const& title, int nchX, double lowX, double highX);
-    MonitorElement* book1S(char_string const& name, TH1S* h);
-    MonitorElement* book1DD(char_string const& name, char_string const& title, int nchX, double lowX, double highX);
-    MonitorElement* book1DD(char_string const& name, TH1D* h);
-    MonitorElement* book2D(char_string const& name,
-                           char_string const& title,
-                           int nchX,
-                           double lowX,
-                           double highX,
-                           int nchY,
-                           double lowY,
-                           double highY);
-    MonitorElement* book2D(char_string const& name,
-                           char_string const& title,
-                           int nchX,
-                           float const* xbinsize,
-                           int nchY,
-                           float const* ybinsize);
-    MonitorElement* book2D(char_string const& name, TH2F* h);
-    MonitorElement* book2S(char_string const& name,
-                           char_string const& title,
-                           int nchX,
-                           double lowX,
-                           double highX,
-                           int nchY,
-                           double lowY,
-                           double highY);
-    MonitorElement* book2S(char_string const& name,
-                           char_string const& title,
-                           int nchX,
-                           float const* xbinsize,
-                           int nchY,
-                           float const* ybinsize);
-    MonitorElement* book2S(char_string const& name, TH2S* h);
-    MonitorElement* book2DD(char_string const& name,
-                            char_string const& title,
-                            int nchX,
-                            double lowX,
-                            double highX,
-                            int nchY,
-                            double lowY,
-                            double highY);
-    MonitorElement* book2DD(char_string const& name, TH2D* h);
-    MonitorElement* book3D(char_string const& name,
-                           char_string const& title,
-                           int nchX,
-                           double lowX,
-                           double highX,
-                           int nchY,
-                           double lowY,
-                           double highY,
-                           int nchZ,
-                           double lowZ,
-                           double highZ);
-    MonitorElement* book3D(char_string const& name, TH3F* h);
-    MonitorElement* bookProfile(char_string const& name,
-                                char_string const& title,
+                              double highY,
+                              char const* option = "s");
+      virtual ME* bookProfile(TString const& name,
+                              TString const& title,
+                              int nchX,
+                              double lowX,
+                              double highX,
+                              double lowY,
+                              double highY,
+                              char const* option = "s");
+      virtual ME* bookProfile(TString const& name,
+                              TString const& title,
+                              int nchX,
+                              double const* xbinsize,
+                              int nchY,
+                              double lowY,
+                              double highY,
+                              char const* option = "s");
+      virtual ME* bookProfile(TString const& name,
+                              TString const& title,
+                              int nchX,
+                              double const* xbinsize,
+                              double lowY,
+                              double highY,
+                              char const* option = "s");
+      virtual ME* bookProfile(TString const& name, TProfile* object);
+      virtual ME* bookProfile2D(TString const& name,
+                                TString const& title,
                                 int nchX,
                                 double lowX,
                                 double highX,
                                 int nchY,
                                 double lowY,
                                 double highY,
+                                double lowZ,
+                                double highZ,
                                 char const* option = "s");
-    MonitorElement* bookProfile(char_string const& name,
-                                char_string const& title,
+      virtual ME* bookProfile2D(TString const& name,
+                                TString const& title,
                                 int nchX,
                                 double lowX,
                                 double highX,
-                                double lowY,
-                                double highY,
-                                char const* option = "s");
-    MonitorElement* bookProfile(char_string const& name,
-                                char_string const& title,
-                                int nchX,
-                                double const* xbinsize,
                                 int nchY,
                                 double lowY,
                                 double highY,
+                                int nchZ,
+                                double lowZ,
+                                double highZ,
                                 char const* option = "s");
-    MonitorElement* bookProfile(char_string const& name,
-                                char_string const& title,
-                                int nchX,
-                                double const* xbinsize,
-                                double lowY,
-                                double highY,
-                                char const* option = "s");
-    MonitorElement* bookProfile(char_string const& name, TProfile* h);
-    MonitorElement* bookProfile2D(char_string const& name,
-                                  char_string const& title,
-                                  int nchX,
-                                  double lowX,
-                                  double highX,
-                                  int nchY,
-                                  double lowY,
-                                  double highY,
-                                  double lowZ,
-                                  double highZ,
-                                  char const* option = "s");
-    MonitorElement* bookProfile2D(char_string const& name,
-                                  char_string const& title,
-                                  int nchX,
-                                  double lowX,
-                                  double highX,
-                                  int nchY,
-                                  double lowY,
-                                  double highY,
-                                  int nchZ,
-                                  double lowZ,
-                                  double highZ,
-                                  char const* option = "s");
-    MonitorElement* bookProfile2D(char_string const& name, TProfile2D* h);
+      virtual ME* bookProfile2D(TString const& name, TProfile2D* object);
 
-    //-------------------------------------------------------------------------
-    // ---------------------- public tagging ----------------------------------
-    void tag(MonitorElement* me, unsigned int myTag);
-    void tag(std::string const& path, unsigned int myTag);
-    void tagContents(std::string const& path, unsigned int myTag);
-    void tagAllContents(std::string const& path, unsigned int myTag);
+      virtual void cd();
+      virtual void cd(std::string const& dir);
+      virtual void setCurrentFolder(std::string const& fullpath);
+      virtual void goUp();
+      virtual std::string const& pwd();
+      DQM_DEPRECATED
+      virtual void tag(dqm::legacy::MonitorElement*, unsigned int) { assert(!"No longer supported."); }
+      DQM_DEPRECATED
+      virtual void tagContents(std::string const&, unsigned int) { assert(!"No longer supported."); }
 
-    //-------------------------------------------------------------------------
-    // ---------------------- public ME getters -------------------------------
-    std::vector<std::string> getSubdirs() const;
-    std::vector<std::string> getMEs() const;
-    bool containsAnyMonitorable(std::string const& path) const;
+      virtual ~IBooker(){};
 
-    MonitorElement* get(std::string const& path) const;
-    std::vector<MonitorElement*> get(unsigned int tag) const;
-    std::vector<MonitorElement*> getContents(std::string const& path) const;
-    std::vector<MonitorElement*> getContents(std::string const& path, unsigned int tag) const;
-    void getContents(std::vector<std::string>& into, bool showContents = true) const;
+    protected:
+      IBooker(STORE* store);
 
-    // ---------------------- softReset methods -------------------------------
-    void softReset(MonitorElement* me);
-    void disableSoftReset(MonitorElement* me);
+      std::string cwd_;
+      STORE* store_;
+    };
 
-    // ---------------------- Public deleting ---------------------------------
-    void rmdir(std::string const& fullpath);
-    void removeContents();
-    void removeContents(std::string const& dir);
-    void removeElement(std::string const& name);
-    void removeElement(std::string const& dir, std::string const& name, bool warning = true);
+    template <class ME, class STORE>
+    class IGetter : public dqm::legacy::IGetter {
+    public:
+      // TODO: while we can have covariant return types for individual ME*, it seems we can't for the vectors.
+      virtual std::vector<dqm::legacy::MonitorElement*> getContents(std::string const& path) const;
+      virtual std::vector<dqm::legacy::MonitorElement*> getContents(std::string const& path, unsigned int tag) const;
+      virtual void getContents(std::vector<std::string>& into, bool showContents = true) const;
 
-    // ------------------------------------------------------------------------
-    // ---------------------- public I/O --------------------------------------
-    void save(std::string const& filename,
-              std::string const& path = "",
-              std::string const& pattern = "",
-              std::string const& rewrite = "",
-              uint32_t run = 0,
-              uint32_t lumi = 0,
-              SaveReferenceTag ref = SaveWithReference,
-              int minStatus = dqm::qstatus::STATUS_OK,
-              std::string const& fileupdate = "RECREATE");
-    void savePB(std::string const& filename, std::string const& path = "", uint32_t run = 0, uint32_t lumi = 0);
-    bool open(std::string const& filename,
-              bool overwrite = false,
-              std::string const& path = "",
-              std::string const& prepend = "",
-              OpenRunDirs stripdirs = KeepRunDirs,
-              bool fileMustExist = true);
-    bool load(std::string const& filename, OpenRunDirs stripdirs = StripRunDirs, bool fileMustExist = true);
-    bool mtEnabled() { return enableMultiThread_; };
+      DQM_DEPRECATED
+      virtual void removeContents();
+      DQM_DEPRECATED
+      virtual void removeContents(std::string const& dir);
+      DQM_DEPRECATED
+      virtual void removeElement(std::string const& name);
+      DQM_DEPRECATED
+      virtual void removeElement(std::string const& dir, std::string const& name, bool warning = true);
 
-  public:
-    // -------------------------------------------------------------------------
-    // ---------------------- Public print methods -----------------------------
-    void showDirStructure() const;
+      virtual std::vector<dqm::legacy::MonitorElement*> getAllContents(std::string const& path);
+      DQM_DEPRECATED
+      virtual std::vector<dqm::legacy::MonitorElement*> getAllContents(std::string const& path,
+                                                                       uint32_t runNumber,
+                                                                       uint32_t lumi);
+      virtual ME* get(std::string const& path);
 
-    // ---------------------- Public check options -----------------------------
-    bool isCollate() const;
+      DQM_DEPRECATED
+      virtual ME* getElement(std::string const& path);
 
-    // -------------------------------------------------------------------------
-    // ---------------------- Quality Test methods -----------------------------
-    QCriterion* getQCriterion(std::string const& qtname) const;
-    QCriterion* createQTest(std::string const& algoname, std::string const& qtname);
-    void useQTest(std::string const& dir, std::string const& qtname);
-    int useQTestByMatch(std::string const& pattern, std::string const& qtname);
-    void runQTests();
-    int getStatus(std::string const& path = "") const;
-    void scaleElements();
+      virtual std::vector<std::string> getSubdirs();
+      virtual std::vector<std::string> getMEs();
+      virtual bool dirExists(std::string const& path);
+      virtual void cd();
+      virtual void cd(std::string const& dir);
+      virtual void setCurrentFolder(std::string const& fullpath);
 
-  private:
-    // ---------------- Navigation -----------------------
-    bool cdInto(std::string const& path) const;
+      virtual ~IGetter(){};
 
-    // ------------------- Reference ME -------------------------------
-    bool isCollateME(MonitorElement* me) const;
+    protected:
+      IGetter(STORE* store);
 
-    // ------------------- Private "getters" ------------------------------
-    bool readFilePB(std::string const& filename,
-                    bool overwrite = false,
-                    std::string const& path = "",
-                    std::string const& prepend = "",
-                    OpenRunDirs stripdirs = StripRunDirs,
-                    bool fileMustExist = true);
-    bool readFile(std::string const& filename,
-                  bool overwrite = false,
-                  std::string const& path = "",
-                  std::string const& prepend = "",
-                  OpenRunDirs stripdirs = StripRunDirs,
-                  bool fileMustExist = true);
-    void makeDirectory(std::string const& path);
-    unsigned int readDirectory(TFile* file,
-                               bool overwrite,
-                               std::string const& path,
-                               std::string const& prepend,
-                               std::string const& curdir,
-                               OpenRunDirs stripdirs);
+      std::string cwd_;
+      STORE* store_;
+    };
 
-    MonitorElement* findObject(
-        uint32_t run, uint32_t lumi, uint32_t moduleId, std::string const& dir, std::string const& name) const;
+    // TODO: Maybe we need to inline IBooker/IGetter impl here to get the semantics
+    // on combined booking/getting right (only one cwd, cd() affects both).
+    // For now, explicit IBooker::/IGetter:: prefixing is required on cd() etc. in
+    // legacy booking/getting due to the conflicting multiple inheritance.
+    // This can be avoided by using an IBooker/IGetter variable, but then both have
+    // independent state.
+    // When inlining, we again loose the ability to have multiple bookers/getters
+    // for one DQMSotre, but then we should not need that since everybody gets
+    // their own DQMStore...
+    template <class ME>
+    class DQMStore : public IGetter<ME, DQMStore<ME>>, public IBooker<ME, DQMStore<ME>> {
+    public:
+      // TODO: we should gt rid of these.
+      enum SaveReferenceTag { SaveWithoutReference, SaveWithReference, SaveWithReferenceForQTest };
+      enum OpenRunDirs { KeepRunDirs, StripRunDirs };
 
-    void get_info(dqmstorepb::ROOTFilePB_Histo const&, std::string& dirname, std::string& objname, TObject** obj);
+      //-------------------------------------------------------------------------
+      // ---------------------- Constructors ------------------------------------
+      DQMStore();
+      ~DQMStore();
 
-  public:
-    std::vector<MonitorElement*> getAllContents(std::string const& path,
-                                                uint32_t runNumber = 0,
-                                                uint32_t lumi = 0) const;
-    std::vector<MonitorElement*> getMatchingContents(std::string const& pattern,
-                                                     lat::Regexp::Syntax syntaxType = lat::Regexp::Wildcard) const;
+      //-------------------------------------------------------------------------
+      void setVerbose(unsigned level);
 
-    // lumisection based histograms manipulations
-    void cloneLumiHistograms(uint32_t run, uint32_t lumi, uint32_t moduleId);
-    void cloneRunHistograms(uint32_t run, uint32_t moduleId);
+      // ---------------------- softReset methods -------------------------------
+      DQM_DEPRECATED
+      void softReset(dqm::legacy::MonitorElement* me);
+      DQM_DEPRECATED
+      void disableSoftReset(dqm::legacy::MonitorElement* me);
 
-    void deleteUnusedLumiHistograms(uint32_t run, uint32_t lumi);
+      // ---------------------- Public deleting ---------------------------------
+      // TODO: this should go into the getter, but probably it should just disappear.
+      DQM_DEPRECATED
+      void rmdir(std::string const& fullpath);
 
-    DQMStore(DQMStore const&) = delete;
-    DQMStore& operator=(DQMStore const&) = delete;
+      // ------------------------------------------------------------------------
+      // ---------------------- public I/O --------------------------------------
+      // TODO: these need some cleanup, though in general we want to keep the
+      // functionality. Maybe move it to a different class, and change the (rather
+      // few) usages.
+      void save(std::string const& filename,
+                std::string const& path = "",
+                std::string const& pattern = "",
+                std::string const& rewrite = "",
+                uint32_t run = 0,
+                uint32_t lumi = 0,
+                SaveReferenceTag ref = SaveWithReference,
+                int minStatus = dqm::qstatus::STATUS_OK,
+                std::string const& fileupdate = "RECREATE");
+      void savePB(std::string const& filename, std::string const& path = "", uint32_t run = 0, uint32_t lumi = 0);
+      bool open(std::string const& filename,
+                bool overwrite = false,
+                std::string const& path = "",
+                std::string const& prepend = "",
+                OpenRunDirs stripdirs = KeepRunDirs,
+                bool fileMustExist = true);
+      bool load(std::string const& filename, OpenRunDirs stripdirs = StripRunDirs, bool fileMustExist = true);
 
-  private:
-    // ---------------- Miscellaneous -----------------------------
-    void initializeFrom(const edm::ParameterSet&);
-    void reset();
-    void forceReset();
-    void postGlobalBeginLumi(const edm::GlobalContext&);
+      DQM_DEPRECATED
+      bool mtEnabled() { assert(!"NIY"); }
 
-    bool extract(TObject* obj, std::string const& dir, bool overwrite, bool collateHistograms);
-    TObject* extractNextObject(TBufferFile&) const;
+    public:
+      // -------------------------------------------------------------------------
+      // ---------------------- Public print methods -----------------------------
+      // This is a sort of nice feature, but we really cannot allow random printing
+      DQM_DEPRECATED
+      void showDirStructure() const;
 
-    // ---------------------- Booking ------------------------------------
-    MonitorElement* initialise(MonitorElement* me, std::string const& path);
-    MonitorElement* book_(std::string const& dir, std::string const& name, char const* context);
-    template <class HISTO, class COLLATE>
-    MonitorElement* book_(std::string const& dir,
-                          std::string const& name,
-                          char const* context,
-                          MonitorElement::Kind const kind,
-                          HISTO* h,
-                          COLLATE collate);
+      // -------------------------------------------------------------------------
+      // ---------------------- Quality Test methods -----------------------------
+      // TODO: to be figured out
+      QCriterion* getQCriterion(std::string const& qtname) const;
+      QCriterion* createQTest(std::string const& algoname, std::string const& qtname);
+      /* almost unused */ void useQTest(std::string const& dir, std::string const& qtname);
+      int useQTestByMatch(std::string const& pattern, std::string const& qtname);
+      void runQTests();
+      int getStatus(std::string const& path = "") const;
+      void scaleElements();
 
-    MonitorElement* bookInt_(std::string const& dir, std::string const& name);
-    MonitorElement* bookFloat_(std::string const& dir, std::string const& name);
-    MonitorElement* bookString_(std::string const& dir, std::string const& name, std::string const& value);
-    MonitorElement* book1D_(std::string const& dir, std::string const& name, TH1F* h);
-    MonitorElement* book1S_(std::string const& dir, std::string const& name, TH1S* h);
-    MonitorElement* book1DD_(std::string const& dir, std::string const& name, TH1D* h);
-    MonitorElement* book2D_(std::string const& dir, std::string const& name, TH2F* h);
-    MonitorElement* book2S_(std::string const& dir, std::string const& name, TH2S* h);
-    MonitorElement* book2DD_(std::string const& dir, std::string const& name, TH2D* h);
-    MonitorElement* book3D_(std::string const& dir, std::string const& name, TH3F* h);
-    MonitorElement* bookProfile_(std::string const& dir, std::string const& name, TProfile* h);
-    MonitorElement* bookProfile2D_(std::string const& dir, std::string const& name, TProfile2D* h);
+      DQM_DEPRECATED
+      std::vector<ME*> getMatchingContents(std::string const& pattern) const;
 
-    static bool checkBinningMatches(MonitorElement* me, TH1* h, unsigned verbose);
+      DQMStore(DQMStore const&) = delete;
+      DQMStore& operator=(DQMStore const&) = delete;
 
-    static void collate1D(MonitorElement* me, TH1F* h, unsigned verbose);
-    static void collate1S(MonitorElement* me, TH1S* h, unsigned verbose);
-    static void collate1DD(MonitorElement* me, TH1D* h, unsigned verbose);
-    static void collate2D(MonitorElement* me, TH2F* h, unsigned verbose);
-    static void collate2S(MonitorElement* me, TH2S* h, unsigned verbose);
-    static void collate2DD(MonitorElement* me, TH2D* h, unsigned verbose);
-    static void collate3D(MonitorElement* me, TH3F* h, unsigned verbose);
-    static void collateProfile(MonitorElement* me, TProfile* h, unsigned verbose);
-    static void collateProfile2D(MonitorElement* me, TProfile2D* h, unsigned verbose);
+    private:
+    };
+  }  // namespace implementation
+  namespace reco {
+    class DQMStore : public dqm::implementation::DQMStore<MonitorElement> {
+    public:
+      typedef dqm::implementation::IBooker<MonitorElement, dqm::implementation::DQMStore<MonitorElement>> IBooker;
+      typedef dqm::implementation::IGetter<MonitorElement, dqm::implementation::DQMStore<MonitorElement>> IGetter;
+    };
+  }  // namespace reco
+  namespace harvesting {
+    class DQMStore : public dqm::implementation::DQMStore<MonitorElement> {
+    public:
+      typedef dqm::implementation::IBooker<MonitorElement, dqm::implementation::DQMStore<MonitorElement>> IBooker;
+      typedef dqm::implementation::IGetter<MonitorElement, dqm::implementation::DQMStore<MonitorElement>> IGetter;
+    };
+  }  // namespace harvesting
+  namespace legacy {
+    class DQMStore : public dqm::implementation::DQMStore<MonitorElement> {
+    public:
+      typedef dqm::implementation::IBooker<MonitorElement, dqm::implementation::DQMStore<MonitorElement>> IBooker;
+      typedef dqm::implementation::IGetter<MonitorElement, dqm::implementation::DQMStore<MonitorElement>> IGetter;
+    };
+  }  // namespace legacy
+}  // namespace dqm
 
-    // --- Operations on MEs that are normally reset at end of monitoring cycle ---
-    void setAccumulate(MonitorElement* me, bool flag);
-
-    void print_trace(std::string const& dir, std::string const& name);
-
-    //-------------------------------------------------------------------------------
-    //-------------------------------------------------------------------------------
-    using QTestSpec = std::pair<fastmatch*, QCriterion*>;
-    using QTestSpecs = std::list<QTestSpec>;
-    using MEMap = std::set<MonitorElement>;
-    using QCMap = std::map<std::string, QCriterion*>;
-    using QAMap = std::map<std::string, QCriterion* (*)(std::string const&)>;
-
-    // ------------------------ private I/O helpers ------------------------------
-    void saveMonitorElementToPB(MonitorElement const& me, dqmstorepb::ROOTFilePB& file);
-    void saveMonitorElementRangeToPB(std::string const& dir,
-                                     unsigned int run,
-                                     MEMap::const_iterator begin,
-                                     MEMap::const_iterator end,
-                                     dqmstorepb::ROOTFilePB& file,
-                                     unsigned int& counter);
-    void saveMonitorElementToROOT(MonitorElement const& me, TFile& file);
-    void saveMonitorElementRangeToROOT(std::string const& dir,
-                                       std::string const& refpath,
-                                       SaveReferenceTag ref,
-                                       int minStatus,
-                                       unsigned int run,
-                                       MEMap::const_iterator begin,
-                                       MEMap::const_iterator end,
-                                       TFile& file,
-                                       unsigned int& counter);
-
-    unsigned verbose_{1};
-    unsigned verboseQT_{1};
-    bool reset_{false};
-    double scaleFlag_;
-    bool collateHistograms_{false};
-    bool enableMultiThread_{false};
-    bool LSbasedMode_;
-    bool forceResetOnBeginLumi_{false};
-    std::string readSelectedDirectory_{};
-    uint32_t run_{};
-    uint32_t moduleId_{};
-    // set to true in the transaction if module supports per-lumi saving.
-    bool canSaveByLumi_{false};
-    // set to true in configuration if per-lumi saving is requested.
-    bool doSaveByLumi_{false};
-    std::unique_ptr<std::ostream> stream_{nullptr};
-
-    std::string pwd_{};
-    MEMap data_;
-    std::set<std::string> dirs_;
-
-    QCMap qtests_;
-    QAMap qalgos_;
-    QTestSpecs qtestspecs_;
-
-    std::mutex book_mutex_;
-
-    friend DQMService;
-    friend DQMNet;
-    friend DQMArchiver;
-    friend DQMStoreExample;  // for get{All,Matching}Contents -- sole user of this method!
-    friend DQMRootOutputModule;
-    friend DQMRootSource;
-    friend DQMFileSaver;
-    friend MEtoEDMConverter;
-  };
-
-}  // namespace dqm::impl
-
-// These will become distinct classes in the future.
-namespace dqm::legacy {
-  typedef dqm::impl::DQMStore DQMStore;
-}
-namespace dqm::reco {
-  typedef dqm::impl::DQMStore DQMStore;
-}
-namespace dqm::harvesting {
-  typedef dqm::impl::DQMStore DQMStore;
-}
-
-#endif  // DQMServices_Core_DQMStore_h
+#endif

@@ -1,12 +1,12 @@
 #include "DQMServices/Core/interface/QTest.h"
 #include "DQMServices/Core/interface/DQMStore.h"
-#include "DQMServices/Core/src/DQMError.h"
 #include "DQMServices/Core/src/QStatisticalTests.h"
-#include "Math/ProbFuncMathCore.h"
+#include "DQMServices/Core/src/DQMError.h"
 #include "TMath.h"
-#include <cmath>
 #include <iostream>
 #include <sstream>
+#include <math.h>
+#include "Math/ProbFuncMathCore.h"
 
 using namespace std;
 
@@ -36,489 +36,28 @@ float QCriterion::runTest(const MonitorElement* /* me */) {
 //-------------------------------------------------------//
 // run the test (result: [0, 1] or <0 for failure)
 float Comp2RefEqualH::runTest(const MonitorElement* me) {
-  badChannels_.clear();
-
-  if (!me)
-    return -1;
-  if (!me->getRootObject() || !me->getRefRootObject())
-    return -1;
-  TH1* h = nullptr;  //initialize histogram pointer
-  TH1* ref_ = nullptr;
-
-  if (verbose_ > 1)
-    std::cout << "QTest:" << getAlgoName() << "::runTest called on " << me->getFullname() << "\n";
-
-  int nbins = 0;
-  int nbinsref = 0;
-  //-- TH1F
-  if (me->kind() == MonitorElement::Kind::TH1F) {
-    nbins = me->getTH1F()->GetXaxis()->GetNbins();
-    nbinsref = me->getRefTH1F()->GetXaxis()->GetNbins();
-    h = me->getTH1F();        // access Test histo
-    ref_ = me->getRefTH1F();  //access Ref hiso
-    if (nbins != nbinsref)
-      return -1;
-  }
-  //-- TH1S
-  else if (me->kind() == MonitorElement::Kind::TH1S) {
-    nbins = me->getTH1S()->GetXaxis()->GetNbins();
-    nbinsref = me->getRefTH1S()->GetXaxis()->GetNbins();
-    h = me->getTH1S();        // access Test histo
-    ref_ = me->getRefTH1S();  //access Ref hiso
-    if (nbins != nbinsref)
-      return -1;
-  }
-  //-- TH1D
-  else if (me->kind() == MonitorElement::Kind::TH1D) {
-    nbins = me->getTH1D()->GetXaxis()->GetNbins();
-    nbinsref = me->getRefTH1D()->GetXaxis()->GetNbins();
-    h = me->getTH1D();        // access Test histo
-    ref_ = me->getRefTH1D();  //access Ref hiso
-    if (nbins != nbinsref)
-      return -1;
-  }
-  //-- TPROFILE
-  else if (me->kind() == MonitorElement::Kind::TPROFILE) {
-    nbins = me->getTProfile()->GetXaxis()->GetNbins();
-    nbinsref = me->getRefTProfile()->GetXaxis()->GetNbins();
-    h = me->getTProfile();        // access Test histo
-    ref_ = me->getRefTProfile();  //access Ref hiso
-    if (nbins != nbinsref)
-      return -1;
-  }
-
-  //-- TH2
-  else if (me->kind() == MonitorElement::Kind::TH2F) {
-    nbins = me->getTH2F()->GetXaxis()->GetNbins() * me->getTH2F()->GetYaxis()->GetNbins();
-    nbinsref = me->getRefTH2F()->GetXaxis()->GetNbins() * me->getRefTH2F()->GetYaxis()->GetNbins();
-    h = me->getTH2F();        // access Test histo
-    ref_ = me->getRefTH2F();  //access Ref hiso
-    if (nbins != nbinsref)
-      return -1;
-  }
-
-  //-- TH2
-  else if (me->kind() == MonitorElement::Kind::TH2S) {
-    nbins = me->getTH2S()->GetXaxis()->GetNbins() * me->getTH2S()->GetYaxis()->GetNbins();
-    nbinsref = me->getRefTH2S()->GetXaxis()->GetNbins() * me->getRefTH2S()->GetYaxis()->GetNbins();
-    h = me->getTH2S();        // access Test histo
-    ref_ = me->getRefTH2S();  //access Ref hiso
-    if (nbins != nbinsref)
-      return -1;
-  }
-
-  //-- TH2
-  else if (me->kind() == MonitorElement::Kind::TH2D) {
-    nbins = me->getTH2D()->GetXaxis()->GetNbins() * me->getTH2D()->GetYaxis()->GetNbins();
-    nbinsref = me->getRefTH2D()->GetXaxis()->GetNbins() * me->getRefTH2D()->GetYaxis()->GetNbins();
-    h = me->getTH2D();        // access Test histo
-    ref_ = me->getRefTH2D();  //access Ref hiso
-    if (nbins != nbinsref)
-      return -1;
-  }
-
-  //-- TH3
-  else if (me->kind() == MonitorElement::Kind::TH3F) {
-    nbins = me->getTH3F()->GetXaxis()->GetNbins() * me->getTH3F()->GetYaxis()->GetNbins() *
-            me->getTH3F()->GetZaxis()->GetNbins();
-    nbinsref = me->getRefTH3F()->GetXaxis()->GetNbins() * me->getRefTH3F()->GetYaxis()->GetNbins() *
-               me->getRefTH3F()->GetZaxis()->GetNbins();
-    h = me->getTH3F();        // access Test histo
-    ref_ = me->getRefTH3F();  //access Ref hiso
-    if (nbins != nbinsref)
-      return -1;
-  }
-
-  else {
-    if (verbose_ > 0)
-      std::cout << "QTest:Comp2RefEqualH"
-                << " ME does not contain TH1F/TH1S/TH1D/TH2F/TH2S/TH2D/TH3F, exiting\n";
-    return -1;
-  }
-
-  //--  QUALITY TEST itself
-  int first = 0;         // 1 //(use underflow bin)
-  int last = nbins + 1;  //(use overflow bin)
-  bool failure = false;
-  for (int bin = first; bin <= last; bin++) {
-    double contents = h->GetBinContent(bin);
-    if (contents != ref_->GetBinContent(bin)) {
-      failure = true;
-      DQMChannel chan(bin, 0, 0, contents, h->GetBinError(bin));
-      badChannels_.push_back(chan);
-    }
-  }
-  if (failure)
-    return 0;
-  return 1;
+  // almost unused
+  assert(!"Comp2Ref QTests NIY.");
 }
 
 //-------------------------------------------------------//
 //-----------------  Comp2RefChi2    --------------------//
 //-------------------------------------------------------//
-float Comp2RefChi2::runTest(const MonitorElement* me) {
-  if (!me)
-    return -1;
-  if (!me->getRootObject() || !me->getRefRootObject())
-    return -1;
-  TH1* h = nullptr;
-  TH1* ref_ = nullptr;
-
-  if (verbose_ > 1)
-    std::cout << "QTest:" << getAlgoName() << "::runTest called on " << me->getFullname() << "\n";
-  //-- TH1F
-  if (me->kind() == MonitorElement::Kind::TH1F) {
-    h = me->getTH1F();        // access Test histo
-    ref_ = me->getRefTH1F();  //access Ref histo
-  }
-  //-- TH1S
-  else if (me->kind() == MonitorElement::Kind::TH1S) {
-    h = me->getTH1S();        // access Test histo
-    ref_ = me->getRefTH1S();  //access Ref histo
-  }
-  //-- TH1D
-  else if (me->kind() == MonitorElement::Kind::TH1D) {
-    h = me->getTH1D();        // access Test histo
-    ref_ = me->getRefTH1D();  //access Ref histo
-  }
-  //-- TProfile
-  else if (me->kind() == MonitorElement::Kind::TPROFILE) {
-    h = me->getTProfile();        // access Test histo
-    ref_ = me->getRefTProfile();  //access Ref histo
-  } else {
-    if (verbose_ > 0)
-      std::cout << "QTest::Comp2RefChi2"
-                << " ME does not contain TH1F/TH1S/TH1D/TProfile, exiting\n";
-    return -1;
-  }
-
-  //-- isInvalid ? - Check consistency in number of channels
-  int ncx1 = h->GetXaxis()->GetNbins();
-  int ncx2 = ref_->GetXaxis()->GetNbins();
-  if (ncx1 != ncx2) {
-    if (verbose_ > 0)
-      std::cout << "QTest:Comp2RefChi2"
-                << " different number of channels! (" << ncx1 << ", " << ncx2 << "), exiting\n";
-    return -1;
-  }
-
-  //--  QUALITY TEST itself
-  //reset Results
-  Ndof_ = 0;
-  chi2_ = -1.;
-  ncx1 = ncx2 = -1;
-
-  int i, i_start, i_end;
-  double chi2 = 0.;
-  int ndof = 0;
-  int constraint = 0;
-
-  i_start = 1;
-  i_end = ncx1;
-  //  if (fXaxis.TestBit(TAxis::kAxisRange)) {
-  i_start = h->GetXaxis()->GetFirst();
-  i_end = h->GetXaxis()->GetLast();
-  //  }
-  ndof = i_end - i_start + 1 - constraint;
-
-  //Compute the normalisation factor
-  double sum1 = 0, sum2 = 0;
-  for (i = i_start; i <= i_end; i++) {
-    sum1 += h->GetBinContent(i);
-    sum2 += ref_->GetBinContent(i);
-  }
-
-  //check that the histograms are not empty
-  if (sum1 == 0) {
-    if (verbose_ > 0)
-      std::cout << "QTest:Comp2RefChi2"
-                << " Test Histogram " << h->GetName() << " is empty, exiting\n";
-    return -1;
-  }
-  if (sum2 == 0) {
-    if (verbose_ > 0)
-      std::cout << "QTest:Comp2RefChi2"
-                << " Ref Histogram " << ref_->GetName() << " is empty, exiting\n";
-    return -1;
-  }
-
-  double bin1, bin2, err1, err2, temp;
-  for (i = i_start; i <= i_end; i++) {
-    bin1 = h->GetBinContent(i) / sum1;
-    bin2 = ref_->GetBinContent(i) / sum2;
-    if (bin1 == 0 && bin2 == 0) {
-      --ndof;  //no data means one less degree of freedom
-    } else {
-      temp = bin1 - bin2;
-      err1 = h->GetBinError(i);
-      err2 = ref_->GetBinError(i);
-      if (err1 == 0 && err2 == 0) {
-        if (verbose_ > 0)
-          std::cout << "QTest:Comp2RefChi2"
-                    << " bins with non-zero content and zero error, exiting\n";
-        return -1;
-      }
-      err1 *= err1;
-      err2 *= err2;
-      err1 /= sum1 * sum1;
-      err2 /= sum2 * sum2;
-      chi2 += temp * temp / (err1 + err2);
-    }
-  }
-  chi2_ = chi2;
-  Ndof_ = ndof;
-  return TMath::Prob(0.5 * chi2, int(0.5 * ndof));
-}
+float Comp2RefChi2::runTest(const MonitorElement* me) { assert(!"Comp2Ref QTests NIY."); }
 
 //-------------------------------------------------------//
 //-----------------  Comp2Ref2DChi2 ---------------------//
 //-------------------------------------------------------//
 float Comp2Ref2DChi2::runTest(const MonitorElement* me) {
-  if (!me)
-    return -1;
-  if (!me->getRootObject() || !me->getRefRootObject())
-    return -1;
-  if (minEntries_ != 0 && me->getEntries() < minEntries_)
-    return -1;
-
-  TH2* h = nullptr;
-  TH2* ref_ = nullptr;
-
-  if (verbose_ > 1)
-    std::cout << "QTest:" << getAlgoName() << "::runTest called on " << me->getFullname() << "\n";
-  //-- TH2F
-  if (me->kind() == MonitorElement::Kind::TH2F) {
-    h = me->getTH2F();        // access Test histo
-    ref_ = me->getRefTH2F();  //access Ref histo
-  }
-  //-- TH2S
-  else if (me->kind() == MonitorElement::Kind::TH2S) {
-    h = me->getTH2S();        // access Test histo
-    ref_ = me->getRefTH2S();  //access Ref histo
-  }
-  //-- TH2D
-  else if (me->kind() == MonitorElement::Kind::TH2D) {
-    h = me->getTH2D();        // access Test histo
-    ref_ = me->getRefTH2D();  //access Ref histo
-  }
-  //-- TProfile
-  else if (me->kind() == MonitorElement::Kind::TPROFILE2D) {
-    h = me->getTProfile2D();        // access Test histo
-    ref_ = me->getRefTProfile2D();  //access Ref histo
-  } else {
-    if (verbose_ > 0)
-      std::cout << "QTest::Comp2Ref2DChi2"
-                << " ME does not contain TH2F/TH2S/TH2D/TProfile2D, exiting\n";
-    return -1;
-  }
-
-  //-- isInvalid ? - Check consistency in number of channels
-  int ncx1 = h->GetXaxis()->GetNbins();
-  int ncx2 = ref_->GetXaxis()->GetNbins();
-  int ncy1 = h->GetYaxis()->GetNbins();
-  int ncy2 = ref_->GetYaxis()->GetNbins();
-  if ((ncx1 != ncx2) || (ncy1 != ncy2)) {
-    if (verbose_ > 0)
-      std::cout << "QTest:Comp2Ref2DChi2"
-                << " different number of channels! (" << ncx1 << ", " << ncx2 << "), (" << ncy1 << ", " << ncy2
-                << "), exiting\n";
-    return -1;
-  }
-
-  //--  QUALITY TEST itself
-  //reset Results
-  Ndof_ = 0;
-  chi2_ = -1.;
-
-  //check that the histograms are not empty
-  int i_start = h->GetXaxis()->GetFirst();
-  int i_end = h->GetXaxis()->GetLast();
-  int j_start = h->GetYaxis()->GetFirst();
-  int j_end = h->GetYaxis()->GetLast();
-  if (h->Integral(i_start, i_end, j_start, j_end) == 0) {
-    if (verbose_ > 0)
-      std::cout << "QTest:Comp2Ref2DChi2"
-                << " Test Histogram " << h->GetName() << " is empty, exiting\n";
-    return -1;
-  }
-  if (ref_->Integral(i_start, i_end, j_start, j_end) == 0) {
-    if (verbose_ > 0)
-      std::cout << "QTest:Comp2Ref2DChi2"
-                << " Ref Histogram " << ref_->GetName() << " is empty, exiting\n";
-    return -1;
-  }
-
-  //use the chi2 test for 2D histograms defined in ROOT
-  int igood = 0;
-  double pValue = h->Chi2TestX(ref_, chi2_, Ndof_, igood, "");
-
-  if (chi2_ == -1. && Ndof_ == 0)
-    return -1;
-
-  return pValue;
+  //  unused
+  assert(!"Comp2Ref QTests NIY.");
 }
 
 //-------------------------------------------------------//
 //-----------------  Comp2RefKolmogorov    --------------//
 //-------------------------------------------------------//
 
-float Comp2RefKolmogorov::runTest(const MonitorElement* me) {
-  const double difprec = 1e-5;
-
-  if (!me)
-    return -1;
-  if (!me->getRootObject() || !me->getRefRootObject())
-    return -1;
-  TH1* h = nullptr;
-  TH1* ref_ = nullptr;
-
-  if (verbose_ > 1)
-    std::cout << "QTest:" << getAlgoName() << "::runTest called on " << me->getFullname() << "\n";
-  //-- TH1F
-  if (me->kind() == MonitorElement::Kind::TH1F) {
-    h = me->getTH1F();        // access Test histo
-    ref_ = me->getRefTH1F();  //access Ref histo
-  }
-  //-- TH1S
-  else if (me->kind() == MonitorElement::Kind::TH1S) {
-    h = me->getTH1S();        // access Test histo
-    ref_ = me->getRefTH1S();  //access Ref histo
-  }
-  //-- TH1D
-  else if (me->kind() == MonitorElement::Kind::TH1D) {
-    h = me->getTH1D();        // access Test histo
-    ref_ = me->getRefTH1D();  //access Ref histo
-  }
-  //-- TProfile
-  else if (me->kind() == MonitorElement::Kind::TPROFILE) {
-    h = me->getTProfile();        // access Test histo
-    ref_ = me->getRefTProfile();  //access Ref histo
-  } else {
-    if (verbose_ > 0)
-      std::cout << "QTest:Comp2RefKolmogorov"
-                << " ME does not contain TH1F/TH1S/TH1D/TProfile, exiting\n";
-    return -1;
-  }
-
-  //-- isInvalid ? - Check consistency in number of channels
-  int ncx1 = h->GetXaxis()->GetNbins();
-  int ncx2 = ref_->GetXaxis()->GetNbins();
-  if (ncx1 != ncx2) {
-    if (verbose_ > 0)
-      std::cout << "QTest:Comp2RefKolmogorov"
-                << " different number of channels! (" << ncx1 << ", " << ncx2 << "), exiting\n";
-    return -1;
-  }
-  //-- isInvalid ? - Check consistency in channel edges
-  double diff1 = std::abs(h->GetXaxis()->GetXmin() - ref_->GetXaxis()->GetXmin());
-  double diff2 = std::abs(h->GetXaxis()->GetXmax() - ref_->GetXaxis()->GetXmax());
-  if (diff1 > difprec || diff2 > difprec) {
-    if (verbose_ > 0)
-      std::cout << "QTest:Comp2RefKolmogorov"
-                << " histograms with different binning, exiting\n";
-    return -1;
-  }
-
-  //--  QUALITY TEST itself
-  Bool_t afunc1 = kFALSE;
-  Bool_t afunc2 = kFALSE;
-  double sum1 = 0, sum2 = 0;
-  double ew1, ew2, w1 = 0, w2 = 0;
-  int bin;
-  for (bin = 1; bin <= ncx1; bin++) {
-    sum1 += h->GetBinContent(bin);
-    sum2 += ref_->GetBinContent(bin);
-    ew1 = h->GetBinError(bin);
-    ew2 = ref_->GetBinError(bin);
-    w1 += ew1 * ew1;
-    w2 += ew2 * ew2;
-  }
-
-  if (sum1 == 0) {
-    if (verbose_ > 0)
-      std::cout << "QTest:Comp2RefKolmogorov"
-                << " Test Histogram: " << h->GetName() << ": integral is zero, exiting\n";
-    return -1;
-  }
-  if (sum2 == 0) {
-    if (verbose_ > 0)
-      std::cout << "QTest:Comp2RefKolmogorov"
-                << " Ref Histogram: " << ref_->GetName() << ": integral is zero, exiting\n";
-    return -1;
-  }
-
-  double tsum1 = sum1;
-  double tsum2 = sum2;
-  tsum1 += h->GetBinContent(0);
-  tsum2 += ref_->GetBinContent(0);
-  tsum1 += h->GetBinContent(ncx1 + 1);
-  tsum2 += ref_->GetBinContent(ncx1 + 1);
-
-  // Check if histograms are weighted.
-  // If number of entries = number of channels, probably histograms were
-  // not filled via Fill(), but via SetBinContent()
-  double ne1 = h->GetEntries();
-  double ne2 = ref_->GetEntries();
-  // look at first histogram
-  double difsum1 = (ne1 - tsum1) / tsum1;
-  double esum1 = sum1;
-  if (difsum1 > difprec && int(ne1) != ncx1) {
-    if (h->GetSumw2N() == 0) {
-      if (verbose_ > 0)
-        std::cout << "QTest:Comp2RefKolmogorov"
-                  << " Weighted events and no Sumw2 for " << h->GetName() << "\n";
-    } else {
-      esum1 = sum1 * sum1 / w1;  //number of equivalent entries
-    }
-  }
-  // look at second histogram
-  double difsum2 = (ne2 - tsum2) / tsum2;
-  double esum2 = sum2;
-  if (difsum2 > difprec && int(ne2) != ncx1) {
-    if (ref_->GetSumw2N() == 0) {
-      if (verbose_ > 0)
-        std::cout << "QTest:Comp2RefKolmogorov"
-                  << " Weighted events and no Sumw2 for " << ref_->GetName() << "\n";
-    } else {
-      esum2 = sum2 * sum2 / w2;  //number of equivalent entries
-    }
-  }
-
-  double s1 = 1 / tsum1;
-  double s2 = 1 / tsum2;
-  // Find largest difference for Kolmogorov Test
-  double dfmax = 0, rsum1 = 0, rsum2 = 0;
-  // use underflow bin
-  int first = 0;  // 1
-  // use overflow bin
-  int last = ncx1 + 1;  // ncx1
-  for (bin = first; bin <= last; bin++) {
-    rsum1 += s1 * h->GetBinContent(bin);
-    rsum2 += s2 * ref_->GetBinContent(bin);
-    dfmax = TMath::Max(dfmax, std::abs(rsum1 - rsum2));
-  }
-
-  // Get Kolmogorov probability
-  double z = 0;
-  if (afunc1)
-    z = dfmax * TMath::Sqrt(esum2);
-  else if (afunc2)
-    z = dfmax * TMath::Sqrt(esum1);
-  else
-    z = dfmax * TMath::Sqrt(esum1 * esum2 / (esum1 + esum2));
-
-  // This numerical error condition should never occur:
-  if (std::abs(rsum1 - 1) > 0.002)
-    if (verbose_ > 0)
-      std::cout << "QTest:Comp2RefKolmogorov"
-                << " Numerical problems with histogram " << h->GetName() << "\n";
-  if (std::abs(rsum2 - 1) > 0.002)
-    if (verbose_ > 0)
-      std::cout << "QTest:Comp2RefKolmogorov"
-                << " Numerical problems with histogram " << ref_->GetName() << "\n";
-
-  return TMath::KolmogorovProb(z);
-}
+float Comp2RefKolmogorov::runTest(const MonitorElement* me) { assert(!"Comp2Ref QTests NIY."); }
 
 //----------------------------------------------------//
 //--------------- ContentsXRange ---------------------//
@@ -535,15 +74,15 @@ float ContentsXRange::runTest(const MonitorElement* me) {
   if (verbose_ > 1)
     std::cout << "QTest:" << getAlgoName() << "::runTest called on " << me->getFullname() << "\n";
   // -- TH1F
-  if (me->kind() == MonitorElement::Kind::TH1F) {
+  if (me->kind() == MonitorElement::DQM_KIND_TH1F) {
     h = me->getTH1F();
   }
   // -- TH1S
-  else if (me->kind() == MonitorElement::Kind::TH1S) {
+  else if (me->kind() == MonitorElement::DQM_KIND_TH1S) {
     h = me->getTH1S();
   }
   // -- TH1D
-  else if (me->kind() == MonitorElement::Kind::TH1D) {
+  else if (me->kind() == MonitorElement::DQM_KIND_TH1D) {
     h = me->getTH1D();
   } else {
     if (verbose_ > 0)
@@ -597,11 +136,11 @@ float ContentsYRange::runTest(const MonitorElement* me) {
   if (verbose_ > 1)
     std::cout << "QTest:" << getAlgoName() << "::runTest called on " << me->getFullname() << "\n";
 
-  if (me->kind() == MonitorElement::Kind::TH1F) {
+  if (me->kind() == MonitorElement::DQM_KIND_TH1F) {
     h = me->getTH1F();  //access Test histo
-  } else if (me->kind() == MonitorElement::Kind::TH1S) {
+  } else if (me->kind() == MonitorElement::DQM_KIND_TH1S) {
     h = me->getTH1S();  //access Test histo
-  } else if (me->kind() == MonitorElement::Kind::TH1D) {
+  } else if (me->kind() == MonitorElement::DQM_KIND_TH1D) {
     h = me->getTH1D();  //access Test histo
   } else {
     if (verbose_ > 0)
@@ -628,7 +167,7 @@ float ContentsYRange::runTest(const MonitorElement* me) {
       bool failure = false;
       failure = (contents < ymin_ || contents > ymax_);  // allowed y-range: [ymin_, ymax_]
       if (failure) {
-        DQMChannel chan(bin, 0, 0, contents, h->GetBinError(bin));
+        DQMChannel chan(bin, 0, contents, h->GetBinError(bin));
         badChannels_.push_back(chan);
         ++fail;
       }
@@ -665,27 +204,27 @@ float DeadChannel::runTest(const MonitorElement* me) {
   if (verbose_ > 1)
     std::cout << "QTest:" << getAlgoName() << "::runTest called on " << me->getFullname() << "\n";
   //TH1F
-  if (me->kind() == MonitorElement::Kind::TH1F) {
+  if (me->kind() == MonitorElement::DQM_KIND_TH1F) {
     h1 = me->getTH1F();  //access Test histo
   }
   //TH1S
-  else if (me->kind() == MonitorElement::Kind::TH1S) {
+  else if (me->kind() == MonitorElement::DQM_KIND_TH1S) {
     h1 = me->getTH1S();  //access Test histo
   }
   //TH1D
-  else if (me->kind() == MonitorElement::Kind::TH1D) {
+  else if (me->kind() == MonitorElement::DQM_KIND_TH1D) {
     h1 = me->getTH1D();  //access Test histo
   }
   //-- TH2F
-  else if (me->kind() == MonitorElement::Kind::TH2F) {
+  else if (me->kind() == MonitorElement::DQM_KIND_TH2F) {
     h2 = me->getTH2F();  // access Test histo
   }
   //-- TH2S
-  else if (me->kind() == MonitorElement::Kind::TH2S) {
+  else if (me->kind() == MonitorElement::DQM_KIND_TH2S) {
     h2 = me->getTH2S();  // access Test histo
   }
   //-- TH2D
-  else if (me->kind() == MonitorElement::Kind::TH2D) {
+  else if (me->kind() == MonitorElement::DQM_KIND_TH2D) {
     h2 = me->getTH2D();  // access Test histo
   } else {
     if (verbose_ > 0)
@@ -711,7 +250,7 @@ float DeadChannel::runTest(const MonitorElement* me) {
       bool failure = false;
       failure = contents <= ymin_;  // dead channel: equal to or less than ymin_
       if (failure) {
-        DQMChannel chan(bin, 0, 0, contents, h1->GetBinError(bin));
+        DQMChannel chan(bin, 0, contents, h1->GetBinError(bin));
         badChannels_.push_back(chan);
         ++fail;
       }
@@ -733,7 +272,7 @@ float DeadChannel::runTest(const MonitorElement* me) {
         bool failure = false;
         failure = contents <= ymin_;  // dead channel: equal to or less than ymin_
         if (failure) {
-          DQMChannel chan(cx, cy, 0, contents, h2->GetBinError(h2->GetBin(cx, cy)));
+          DQMChannel chan(cx, cy, contents, h2->GetBinError(h2->GetBin(cx, cy)));
           badChannels_.push_back(chan);
           ++fail;
         }
@@ -769,34 +308,34 @@ float NoisyChannel::runTest(const MonitorElement* me) {
   int nbins = 0;
   int nbinsX = 0, nbinsY = 0;
   //-- TH1F
-  if (me->kind() == MonitorElement::Kind::TH1F) {
+  if (me->kind() == MonitorElement::DQM_KIND_TH1F) {
     nbins = me->getTH1F()->GetXaxis()->GetNbins();
     h = me->getTH1F();  // access Test histo
   }
   //-- TH1S
-  else if (me->kind() == MonitorElement::Kind::TH1S) {
+  else if (me->kind() == MonitorElement::DQM_KIND_TH1S) {
     nbins = me->getTH1S()->GetXaxis()->GetNbins();
     h = me->getTH1S();  // access Test histo
   }
   //-- TH1D
-  else if (me->kind() == MonitorElement::Kind::TH1D) {
+  else if (me->kind() == MonitorElement::DQM_KIND_TH1D) {
     nbins = me->getTH1D()->GetXaxis()->GetNbins();
     h = me->getTH1D();  // access Test histo
   }
   //-- TH2
-  else if (me->kind() == MonitorElement::Kind::TH2F) {
+  else if (me->kind() == MonitorElement::DQM_KIND_TH2F) {
     nbinsX = me->getTH2F()->GetXaxis()->GetNbins();
     nbinsY = me->getTH2F()->GetYaxis()->GetNbins();
     h2 = me->getTH2F();  // access Test histo
   }
   //-- TH2
-  else if (me->kind() == MonitorElement::Kind::TH2S) {
+  else if (me->kind() == MonitorElement::DQM_KIND_TH2S) {
     nbinsX = me->getTH2S()->GetXaxis()->GetNbins();
     nbinsY = me->getTH2S()->GetYaxis()->GetNbins();
     h2 = me->getTH2S();  // access Test histo
   }
   //-- TH2
-  else if (me->kind() == MonitorElement::Kind::TH2D) {
+  else if (me->kind() == MonitorElement::DQM_KIND_TH2D) {
     nbinsX = me->getTH2F()->GetXaxis()->GetNbins();
     nbinsY = me->getTH2F()->GetYaxis()->GetNbins();
     h2 = me->getTH2D();  // access Test histo
@@ -831,7 +370,7 @@ float NoisyChannel::runTest(const MonitorElement* me) {
 
       if (failure) {
         ++fail;
-        DQMChannel chan(bin, 0, 0, contents, h->GetBinError(bin));
+        DQMChannel chan(bin, 0, contents, h->GetBinError(bin));
         badChannels_.push_back(chan);
       }
     }
@@ -848,7 +387,7 @@ float NoisyChannel::runTest(const MonitorElement* me) {
           failure = (((contents - average) / std::abs(average)) > tolerance_);
         if (failure) {
           ++fail;
-          DQMChannel chan(binX, 0, 0, contents, h2->GetBinError(binX));
+          DQMChannel chan(binX, 0, contents, h2->GetBinError(binX));
           badChannels_.push_back(chan);
         }
       }  //end x loop
@@ -994,37 +533,37 @@ float ContentSigma::runTest(const MonitorElement* me) {
   unsigned nbinsY;
 
   //-- TH1F
-  if (me->kind() == MonitorElement::Kind::TH1F) {
+  if (me->kind() == MonitorElement::DQM_KIND_TH1F) {
     nbinsX = me->getTH1F()->GetXaxis()->GetNbins();
     nbinsY = me->getTH1F()->GetYaxis()->GetNbins();
     h = me->getTH1F();  // access Test histo
   }
   //-- TH1S
-  else if (me->kind() == MonitorElement::Kind::TH1S) {
+  else if (me->kind() == MonitorElement::DQM_KIND_TH1S) {
     nbinsX = me->getTH1S()->GetXaxis()->GetNbins();
     nbinsY = me->getTH1S()->GetYaxis()->GetNbins();
     h = me->getTH1S();  // access Test histo
   }
   //-- TH1D
-  else if (me->kind() == MonitorElement::Kind::TH1D) {
+  else if (me->kind() == MonitorElement::DQM_KIND_TH1D) {
     nbinsX = me->getTH1D()->GetXaxis()->GetNbins();
     nbinsY = me->getTH1D()->GetYaxis()->GetNbins();
     h = me->getTH1D();  // access Test histo
   }
   //-- TH2
-  else if (me->kind() == MonitorElement::Kind::TH2F) {
+  else if (me->kind() == MonitorElement::DQM_KIND_TH2F) {
     nbinsX = me->getTH2F()->GetXaxis()->GetNbins();
     nbinsY = me->getTH2F()->GetYaxis()->GetNbins();
     h = me->getTH2F();  // access Test histo
   }
   //-- TH2
-  else if (me->kind() == MonitorElement::Kind::TH2S) {
+  else if (me->kind() == MonitorElement::DQM_KIND_TH2S) {
     nbinsX = me->getTH2S()->GetXaxis()->GetNbins();
     nbinsY = me->getTH2S()->GetYaxis()->GetNbins();
     h = me->getTH2S();  // access Test histo
   }
   //-- TH2
-  else if (me->kind() == MonitorElement::Kind::TH2D) {
+  else if (me->kind() == MonitorElement::DQM_KIND_TH2D) {
     nbinsX = me->getTH2D()->GetXaxis()->GetNbins();
     nbinsY = me->getTH2D()->GetYaxis()->GetNbins();
     h = me->getTH2D();  // access Test histo
@@ -1061,18 +600,20 @@ float ContentSigma::runTest(const MonitorElement* me) {
     neighborsY = 0;
   }
 
-  //give users option for automatic mininum and maximum selection by inputting 0 to any of the parameters
-  // check that user's parameters are completely in agreement with histogram
-  // for instance, if inputted xMax is out of range xMin will automatically be ignored
-  if (xMin_ != 0 && xMax_ != 0) {
+  if (xMin_ != 0 &&
+      xMax_ !=
+          0) {  //give users option for automatic mininum and maximum selection by inputting 0 to any of the parameters
+                // check that user's parameters are completely in agreement with histogram
+                // for instance, if inputted xMax is out of range xMin will automatically be ignored
     if ((xMax_ <= nbinsX) && (xMin_ <= xMax_)) {  // rescale area of histogram being analyzed
       nbinsX = xMax_ - xMin_ + 1;
       xMax = xMax_;  // do NOT use overflow bin
       xMin = xMin_;  // do NOT use underflow bin
     }
   }
-  //give users option for automatic mininum and maximum selection by inputting 0 to any of the parameters
-  if (yMin_ != 0 && yMax_ != 0) {
+  if (yMin_ != 0 &&
+      yMax_ !=
+          0) {  //give users option for automatic mininum and maximum selection by inputting 0 to any of the parameters
     if ((yMax_ <= nbinsY) && (yMin_ <= yMax_)) {
       nbinsY = yMax_ - yMin_ + 1;
       yMax = yMax_;
@@ -1136,8 +677,8 @@ float ContentSigma::runTest(const MonitorElement* me) {
 
       double average = sum / (XWidth * YWidth - 1);
       double sigma = getNeighborSigma(average, groupx, groupy, XBlocks, YBlocks, neighborsX, neighborsY, h);
-      //get rid of block being tested just like we did with the average
-      sigma -= (average - blocksum) * (average - blocksum);
+      sigma -= (average - blocksum) *
+               (average - blocksum);  //get rid of block being tested just like we did with the average
       double sigma_2 = sqrt(sigma) / sqrt(XWidth * YWidth - 2);  //N-1 where N=XWidth*YWidth - 1
       double sigma_real = sigma_2 / (XWidth * YWidth - 1);
       //double avg_uncrt = average*sqrt(sum)/sum;//Obsolete now(Chad Freer)
@@ -1203,10 +744,11 @@ double ContentSigma::getNeighborSum(unsigned groupx,
   unsigned Xbinnum = 1;
   unsigned Ybinnum = 1;
 
-  //give users option for automatic mininum and maximum selection by inputting 0 to any of the parameters
-  // check that user's parameters are completely in agreement with histogram
-  // for instance, if inputted xMax is out of range xMin will automatically be ignored
-  if (xMin_ != 0 && xMax_ != 0) {
+  if (xMin_ != 0 &&
+      xMax_ !=
+          0) {  //give users option for automatic mininum and maximum selection by inputting 0 to any of the parameters
+                // check that user's parameters are completely in agreement with histogram
+                // for instance, if inputted xMax is out of range xMin will automatically be ignored
     if ((xMax_ <= nbinsX) && (xMin_ <= xMax_)) {
       nbinsX = xMax_ - xMin_ + 1;
       xMax = xMax_;  // do NOT use overflow bin
@@ -1370,31 +912,31 @@ float ContentsWithinExpected::runTest(const MonitorElement* me) {
 
   if (useEmptyBins_) {
     //-- TH2
-    if (me->kind() == MonitorElement::Kind::TH2F) {
+    if (me->kind() == MonitorElement::DQM_KIND_TH2F) {
       ncx = me->getTH2F()->GetXaxis()->GetNbins();
       ncy = me->getTH2F()->GetYaxis()->GetNbins();
       h = me->getTH2F();  // access Test histo
     }
     //-- TH2S
-    else if (me->kind() == MonitorElement::Kind::TH2S) {
+    else if (me->kind() == MonitorElement::DQM_KIND_TH2S) {
       ncx = me->getTH2S()->GetXaxis()->GetNbins();
       ncy = me->getTH2S()->GetYaxis()->GetNbins();
       h = me->getTH2S();  // access Test histo
     }
     //-- TH2D
-    else if (me->kind() == MonitorElement::Kind::TH2D) {
+    else if (me->kind() == MonitorElement::DQM_KIND_TH2D) {
       ncx = me->getTH2D()->GetXaxis()->GetNbins();
       ncy = me->getTH2D()->GetYaxis()->GetNbins();
       h = me->getTH2D();  // access Test histo
     }
     //-- TProfile
-    else if (me->kind() == MonitorElement::Kind::TPROFILE) {
+    else if (me->kind() == MonitorElement::DQM_KIND_TPROFILE) {
       ncx = me->getTProfile()->GetXaxis()->GetNbins();
       ncy = 1;
       h = me->getTProfile();  // access Test histo
     }
     //-- TProfile2D
-    else if (me->kind() == MonitorElement::Kind::TPROFILE2D) {
+    else if (me->kind() == MonitorElement::DQM_KIND_TPROFILE2D) {
       ncx = me->getTProfile2D()->GetXaxis()->GetNbins();
       ncy = me->getTProfile2D()->GetYaxis()->GetNbins();
       h = me->getTProfile2D();  // access Test histo
@@ -1413,21 +955,21 @@ float ContentsWithinExpected::runTest(const MonitorElement* me) {
 
       for (int cx = 1; cx <= ncx; ++cx) {
         for (int cy = 1; cy <= ncy; ++cy) {
-          if (me->kind() == MonitorElement::Kind::TH2F) {
+          if (me->kind() == MonitorElement::DQM_KIND_TH2F) {
             sum += h->GetBinContent(h->GetBin(cx, cy));
             ++nsum;
-          } else if (me->kind() == MonitorElement::Kind::TH2S) {
+          } else if (me->kind() == MonitorElement::DQM_KIND_TH2S) {
             sum += h->GetBinContent(h->GetBin(cx, cy));
             ++nsum;
-          } else if (me->kind() == MonitorElement::Kind::TH2D) {
+          } else if (me->kind() == MonitorElement::DQM_KIND_TH2D) {
             sum += h->GetBinContent(h->GetBin(cx, cy));
             ++nsum;
-          } else if (me->kind() == MonitorElement::Kind::TPROFILE) {
+          } else if (me->kind() == MonitorElement::DQM_KIND_TPROFILE) {
             if (me->getTProfile()->GetBinEntries(h->GetBin(cx)) >= minEntries_ / (ncx)) {
               sum += h->GetBinContent(h->GetBin(cx));
               ++nsum;
             }
-          } else if (me->kind() == MonitorElement::Kind::TPROFILE2D) {
+          } else if (me->kind() == MonitorElement::DQM_KIND_TPROFILE2D) {
             if (me->getTProfile2D()->GetBinEntries(h->GetBin(cx, cy)) >= minEntries_ / (ncx * ncy)) {
               sum += h->GetBinContent(h->GetBin(cx, cy));
               ++nsum;
@@ -1449,11 +991,11 @@ float ContentsWithinExpected::runTest(const MonitorElement* me) {
         bool failRMS = false;
         bool failMeanTolerance = false;
 
-        if (me->kind() == MonitorElement::Kind::TPROFILE &&
+        if (me->kind() == MonitorElement::DQM_KIND_TPROFILE &&
             me->getTProfile()->GetBinEntries(h->GetBin(cx)) < minEntries_ / (ncx))
           continue;
 
-        if (me->kind() == MonitorElement::Kind::TPROFILE2D &&
+        if (me->kind() == MonitorElement::DQM_KIND_TPROFILE2D &&
             me->getTProfile2D()->GetBinEntries(h->GetBin(cx, cy)) < minEntries_ / (ncx * ncy))
           continue;
 
@@ -1473,25 +1015,22 @@ float ContentsWithinExpected::runTest(const MonitorElement* me) {
         }
 
         if (failMean || failRMS || failMeanTolerance) {
-          if (me->kind() == MonitorElement::Kind::TH2F) {
-            DQMChannel chan(cx, cy, 0, h->GetBinContent(h->GetBin(cx, cy)), h->GetBinError(h->GetBin(cx, cy)));
+          if (me->kind() == MonitorElement::DQM_KIND_TH2F) {
+            DQMChannel chan(cx, cy, h->GetBinContent(h->GetBin(cx, cy)), h->GetBinError(h->GetBin(cx, cy)));
             badChannels_.push_back(chan);
-          } else if (me->kind() == MonitorElement::Kind::TH2S) {
-            DQMChannel chan(cx, cy, 0, h->GetBinContent(h->GetBin(cx, cy)), h->GetBinError(h->GetBin(cx, cy)));
+          } else if (me->kind() == MonitorElement::DQM_KIND_TH2S) {
+            DQMChannel chan(cx, cy, h->GetBinContent(h->GetBin(cx, cy)), h->GetBinError(h->GetBin(cx, cy)));
             badChannels_.push_back(chan);
-          } else if (me->kind() == MonitorElement::Kind::TH2D) {
-            DQMChannel chan(cx, cy, 0, h->GetBinContent(h->GetBin(cx, cy)), h->GetBinError(h->GetBin(cx, cy)));
+          } else if (me->kind() == MonitorElement::DQM_KIND_TH2D) {
+            DQMChannel chan(cx, cy, h->GetBinContent(h->GetBin(cx, cy)), h->GetBinError(h->GetBin(cx, cy)));
             badChannels_.push_back(chan);
-          } else if (me->kind() == MonitorElement::Kind::TPROFILE) {
-            DQMChannel chan(
-                cx, cy, int(me->getTProfile()->GetBinEntries(h->GetBin(cx))), 0, h->GetBinError(h->GetBin(cx)));
+          } else if (me->kind() == MonitorElement::DQM_KIND_TPROFILE) {
+            assert(!"Code may be broken since 2008 (1259767ed501), please check semantics before continuing.");
+            DQMChannel chan(cx, cy, me->getTProfile()->GetBinContent(h->GetBin(cx)), h->GetBinError(h->GetBin(cx)));
             badChannels_.push_back(chan);
-          } else if (me->kind() == MonitorElement::Kind::TPROFILE2D) {
-            DQMChannel chan(cx,
-                            cy,
-                            int(me->getTProfile2D()->GetBinEntries(h->GetBin(cx, cy))),
-                            h->GetBinContent(h->GetBin(cx, cy)),
-                            h->GetBinError(h->GetBin(cx, cy)));
+          } else if (me->kind() == MonitorElement::DQM_KIND_TPROFILE2D) {
+            assert(!"Code may be broken since 2008 (1259767ed501), please check semantics before continuing.");
+            DQMChannel chan(cx, cy, h->GetBinContent(h->GetBin(cx, cy)), h->GetBinError(h->GetBin(cx, cy)));
             badChannels_.push_back(chan);
           }
           ++fail;
@@ -1503,15 +1042,15 @@ float ContentsWithinExpected::runTest(const MonitorElement* me) {
 
   else  /// AS quality test !!!
   {
-    if (me->kind() == MonitorElement::Kind::TH2F) {
+    if (me->kind() == MonitorElement::DQM_KIND_TH2F) {
       ncx = me->getTH2F()->GetXaxis()->GetNbins();
       ncy = me->getTH2F()->GetYaxis()->GetNbins();
       h = me->getTH2F();  // access Test histo
-    } else if (me->kind() == MonitorElement::Kind::TH2S) {
+    } else if (me->kind() == MonitorElement::DQM_KIND_TH2S) {
       ncx = me->getTH2S()->GetXaxis()->GetNbins();
       ncy = me->getTH2S()->GetYaxis()->GetNbins();
       h = me->getTH2S();  // access Test histo
-    } else if (me->kind() == MonitorElement::Kind::TH2D) {
+    } else if (me->kind() == MonitorElement::DQM_KIND_TH2D) {
       ncx = me->getTH2D()->GetXaxis()->GetNbins();
       ncy = me->getTH2D()->GetYaxis()->GetNbins();
       h = me->getTH2D();  // access Test histo
@@ -1585,11 +1124,11 @@ float MeanWithinExpected::runTest(const MonitorElement* me) {
   if (minEntries_ != 0 && me->getEntries() < minEntries_)
     return -1;
 
-  if (me->kind() == MonitorElement::Kind::TH1F) {
+  if (me->kind() == MonitorElement::DQM_KIND_TH1F) {
     h = me->getTH1F();  //access Test histo
-  } else if (me->kind() == MonitorElement::Kind::TH1S) {
+  } else if (me->kind() == MonitorElement::DQM_KIND_TH1S) {
     h = me->getTH1S();  //access Test histo
-  } else if (me->kind() == MonitorElement::Kind::TH1D) {
+  } else if (me->kind() == MonitorElement::DQM_KIND_TH1D) {
     h = me->getTH1D();  //access Test histo
   } else {
     if (verbose_ > 0)
@@ -1685,7 +1224,7 @@ float CompareToMedian::runTest(const MonitorElement* me) {
     std::cout << "\tUseEmptyBins = " << (_emptyBins ? "Yes" : "No") << "\n";
   }
 
-  if (me->kind() == MonitorElement::Kind::TPROFILE2D) {
+  if (me->kind() == MonitorElement::DQM_KIND_TPROFILE2D) {
     h = me->getTProfile2D();  // access Test histo
   } else {
     if (verbose_ > 0)
@@ -1734,7 +1273,7 @@ float CompareToMedian::runTest(const MonitorElement* me) {
         if (entries == 0)
           continue;
         if (content > _maxMed || content < _minMed) {
-          DQMChannel chan(binX, binY, 0, content, h->GetBinError(bin));
+          DQMChannel chan(binX, binY, content, h->GetBinError(bin));
           badChannels_.push_back(chan);
           failed++;
         }
@@ -1754,7 +1293,7 @@ float CompareToMedian::runTest(const MonitorElement* me) {
         entries = me->getTProfile2D()->GetBinEntries(bin);
         if (entries == 0)
           continue;
-        DQMChannel chan(binX, binY, 0, content / median, h->GetBinError(bin));
+        DQMChannel chan(binX, binY, content / median, h->GetBinError(bin));
         badChannels_.push_back(chan);
         failed++;
       }
@@ -1771,7 +1310,7 @@ float CompareToMedian::runTest(const MonitorElement* me) {
       if (entries == 0)
         continue;
       if (content > maxCut || content < minCut) {
-        DQMChannel chan(binX, binY, 0, content / median, h->GetBinError(bin));
+        DQMChannel chan(binX, binY, content / median, h->GetBinError(bin));
         badChannels_.push_back(chan);
         failed++;
       }
@@ -1806,9 +1345,9 @@ float CompareLastFilledBin::runTest(const MonitorElement* me) {
     std::cout << "QTest:" << getAlgoName() << "::runTest called on " << me->getFullname() << "\n";
     std::cout << "\tMin = " << _min << "; Max = " << _max << "\n";
   }
-  if (me->kind() == MonitorElement::Kind::TH1F) {
+  if (me->kind() == MonitorElement::DQM_KIND_TH1F) {
     h1 = me->getTH1F();  // access Test histo
-  } else if (me->kind() == MonitorElement::Kind::TH2F) {
+  } else if (me->kind() == MonitorElement::DQM_KIND_TH2F) {
     h2 = me->getTH2F();  // access Test histo
   } else {
     if (verbose_ > 0)
@@ -1860,13 +1399,13 @@ float CheckVariance::runTest(const MonitorElement* me) {
   if (verbose_ > 1)
     std::cout << "QTest:" << getAlgoName() << "::runTest called on " << me->getFullname() << "\n";
   // -- TH1F
-  if (me->kind() == MonitorElement::Kind::TH1F) {
+  if (me->kind() == MonitorElement::DQM_KIND_TH1F) {
     h = me->getTH1F();
   }
   // -- TH1D
-  else if (me->kind() == MonitorElement::Kind::TH1D) {
+  else if (me->kind() == MonitorElement::DQM_KIND_TH1D) {
     h = me->getTH1D();
-  } else if (me->kind() == MonitorElement::Kind::TPROFILE) {
+  } else if (me->kind() == MonitorElement::DQM_KIND_TPROFILE) {
     h = me->getTProfile();  // access Test histo
   } else {
     if (verbose_ > 0)

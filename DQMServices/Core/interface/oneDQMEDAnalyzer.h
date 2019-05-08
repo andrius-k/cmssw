@@ -35,30 +35,20 @@ namespace one {
     public:
       typedef dqm::reco::DQMStore DQMStore;
       typedef dqm::reco::MonitorElement MonitorElement;
-      std::unique_ptr<DQMStore> dqmstore_; // only to make things compile
-      DQMRunEDProducer() : runToken_{this->template produces<DQMToken, edm::Transition::EndRun>("endRun")} {}
+      DQMRunEDProducer()
+          : runToken_{this->template produces<DQMToken, edm::Transition::EndRun>("endRun")},
+            dqmstore_{std::make_unique<DQMStore>()} {}
       ~DQMRunEDProducer() override = default;
       DQMRunEDProducer(DQMRunEDProducer<T...> const&) = delete;
       DQMRunEDProducer(DQMRunEDProducer<T...>&&) = delete;
 
       void beginRun(edm::Run const& run, edm::EventSetup const& setup) final {
         dqmBeginRun(run, setup);
-        edm::Service<DQMStore>()->bookTransaction(
-            [this, &run, &setup](DQMStore::IBooker& booker) {
-              booker.cd();
-              this->bookHistograms(booker, run, setup);
-            },
-            run.run(),
-            this->moduleDescription().id(),
-            this->getCanSaveByLumi());
+        this->bookHistograms(*dqmstore_, run, setup);
       }
 
       void endRun(edm::Run const& run, edm::EventSetup const& setup) override {}
-      void endRunProduce(edm::Run& run, edm::EventSetup const& setup) override {
-        edm::Service<DQMStore>()->cloneRunHistograms(run.run(), this->moduleDescription().id());
-
-        run.emplace<DQMToken>(runToken_);
-      }
+      void endRunProduce(edm::Run& run, edm::EventSetup const& setup) override { run.emplace<DQMToken>(runToken_); }
 
       virtual void dqmBeginRun(edm::Run const&, edm::EventSetup const&) {}
       virtual void bookHistograms(DQMStore::IBooker& i, edm::Run const&, edm::EventSetup const&) = 0;
@@ -68,16 +58,15 @@ namespace one {
 
       virtual bool getCanSaveByLumi() { return false; }
 
-    private:
+    protected:
       edm::EDPutTokenT<DQMToken> runToken_;
+      std::unique_ptr<DQMStore> dqmstore_;
     };
 
     class DQMLumisEDProducer : public DQMRunEDProducer<edm::EndLuminosityBlockProducer, edm::one::WatchLuminosityBlocks>
 
     {
     public:
-      typedef dqm::reco::DQMStore DQMStore;
-      typedef dqm::reco::MonitorElement MonitorElement;
       DQMLumisEDProducer();
       ~DQMLumisEDProducer() override = default;
       DQMLumisEDProducer(DQMLumisEDProducer const&) = delete;

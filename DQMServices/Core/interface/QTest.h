@@ -1,7 +1,6 @@
 #ifndef DQMSERVICES_CORE_Q_CRITERION_H
 #define DQMSERVICES_CORE_Q_CRITERION_H
 
-#include "DQMServices/Core/interface/MonitorElement.h"
 #include "TProfile2D.h"
 #include "TProfile.h"
 #include "TH2F.h"
@@ -11,7 +10,7 @@
 #include <map>
 #include <utility>
 
-//#include "DQMServices/Core/interface/DQMStore.h"
+#include "DQMServices/Core/interface/DQMStore.h"
 
 class Comp2RefChi2;
 using Comp2RefChi2ROOT = Comp2RefChi2;
@@ -72,7 +71,6 @@ class QCriterion {
   /// (class should be created by DQMStore class)
 
 public:
-  typedef dqm::impl::MonitorElement MonitorElement;
   /// get test status (see Core/interface/DQMDefinitions.h)
   int getStatus() const { return status_; }
   /// get message attached to test
@@ -151,9 +149,9 @@ private:
   static const float ERROR_PROB_THRESHOLD;
 
   /// for creating and deleting class instances
-  friend class dqm::impl::DQMStore;
+  friend class DQMStore;
   /// for running the test
-  friend class dqm::impl::MonitorElement;
+  friend class MonitorElement;
 };
 
 //////////////////////////////////////////////////////////////////////
