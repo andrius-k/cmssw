@@ -76,7 +76,7 @@
 // constructors and destructor
 //
 LogMessageMonitor::LogMessageMonitor(const edm::ParameterSet& iConfig)
-    : dqmStore_(std::make_unique<DQMStore>()),
+    : dqmStore_(std::unique_ptr<DQMStore>(dqmstore_.release())),
       conf_(iConfig),
       pluginsMonName_(iConfig.getParameter<std::string>("pluginsMonName")),
       modules_vector_(iConfig.getParameter<std::vector<std::string> >("modules")),

@@ -42,7 +42,7 @@ class TFile;
 
 //Constructor
 SiStripTrackingRecHitsValid::SiStripTrackingRecHitsValid(const edm::ParameterSet &ps)
-    : dbe_(std::make_unique<DQMStore>()),
+    : dbe_(std::unique_ptr<DQMStore>(dqmstore_.release())),
       conf_(ps),
       trackerHitAssociatorConfig_(ps, consumesCollector()),
       m_cacheID_(0)

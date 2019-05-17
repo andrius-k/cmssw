@@ -190,7 +190,7 @@ void DummyBookFillDQMStoreMultiThread::bookHistograms(DQMStore::IBooker& iBooker
 
   std::cout << "Booking" << std::endl;
 
-  auto dstore = std::make_unique<DQMStore>();
+  auto dstore = std::unique_ptr<DQMStore>(dqmstore_.release());
 
   iBooker.setCurrentFolder(folder_);
 

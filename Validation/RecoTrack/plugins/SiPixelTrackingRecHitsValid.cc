@@ -123,7 +123,7 @@ void SiPixelTrackingRecHitsValid::bookHistograms(DQMStore::IBooker& ibooker,
                                                  const edm::Run& run,
                                                  const edm::EventSetup& es) {
   // Book histograms
-  dbe_ = std::make_unique<DQMStore>();
+  dbe_ = std::unique_ptr<DQMStore>(dqmstore_.release());
   //dbe_->showDirStructure();
 
   //float math_pi = 3.14159265;

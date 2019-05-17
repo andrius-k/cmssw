@@ -20,7 +20,7 @@
 #include "TMath.h"
 
 dEdxAnalyzer::dEdxAnalyzer(const edm::ParameterSet& iConfig)
-    : dqmStore_(std::make_unique<DQMStore>()),
+    : dqmStore_(std::unique_ptr<DQMStore>(dqmstore_.release())),
       fullconf_(iConfig),
       conf_(fullconf_.getParameter<edm::ParameterSet>("dEdxParameters")),
       doAllPlots_(conf_.getParameter<bool>("doAllPlots")),
