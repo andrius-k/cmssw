@@ -69,7 +69,6 @@ private:
                                                     const reco::Vertex& vtx);
 
   std::string fName_;
-  std::unique_ptr<DQMStore> dbe_;
   edm::ESHandle<MagneticField> theMF_;
 
   int verbosity_;

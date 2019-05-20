@@ -84,7 +84,6 @@ public:
 private:
   TrackerHitAssociator::Config trackerHitAssociatorConfig_;
   //TrackLocalAngle *anglefinder_;
-  std::unique_ptr<DQMStore> dbe_;
   bool runStandalone;
   std::string outputFile_;
   std::string debugNtuple_;

@@ -47,8 +47,6 @@
 TrackEfficiencyMonitor::TrackEfficiencyMonitor(const edm::ParameterSet& iConfig)
 //-----------------------------------------------------------------------------------
 {
-  dqmStore_ = std::unique_ptr<DQMStore>(dqmstore_.release());
-
   theRadius_ = iConfig.getParameter<double>("theRadius");
   theMaxZ_ = iConfig.getParameter<double>("theMaxZ");
   isBFieldOff_ = iConfig.getParameter<bool>("isBFieldOff");
@@ -374,7 +372,7 @@ void TrackEfficiencyMonitor::endJob(void)
   std::string outputFileName = conf_.getParameter<std::string>("OutputFileName");
   if (outputMEsInRootFile) {
     //dqmStore_->showDirStructure();
-    dqmStore_->save(outputFileName);
+    dqmstore_->save(outputFileName);
   }
 
   //if ( theNavigation ) delete theNavigation;

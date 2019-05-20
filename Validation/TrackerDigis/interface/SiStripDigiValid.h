@@ -167,7 +167,6 @@ private:
   MonitorElement *meNDigiTECWheelzp_[9];
 
   // Back-End Interface
-  std::unique_ptr<DQMStore> dbe_;
   bool runStandalone;
   std::string outputFile_;
   edm::EDGetTokenT<edm::DetSetVector<SiStripDigi>> edmDetSetVector_SiStripDigi_Token_;

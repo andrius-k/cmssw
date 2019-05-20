@@ -25,16 +25,14 @@
 SiPixelDigiValid::SiPixelDigiValid(const edm::ParameterSet &ps)
     : outputFile_(ps.getUntrackedParameter<std::string>("outputFile", "pixeldigihisto.root")),
       runStandalone(ps.getParameter<bool>("runStandalone")),
-      dbe_(nullptr),
       edmDetSetVector_PixelDigi_Token_(consumes<edm::DetSetVector<PixelDigi>>(ps.getParameter<edm::InputTag>("src"))) {}
 
 SiPixelDigiValid::~SiPixelDigiValid() {}
 
 void SiPixelDigiValid::bookHistograms(DQMStore::IBooker &ibooker, const edm::Run &run, const edm::EventSetup &es) {
-  dbe_ = std::unique_ptr<DQMStore>(dqmstore_.release());
   es.get<TrackerRecoGeometryRecord>().get(tracker);
 
-  if (dbe_) {
+  if (dqmstore_) {
     ibooker.setCurrentFolder("TrackerDigisV/TrackerDigis/Pixel");
 
     meDigiMultiLayer1Ring1_ = ibooker.book1D("digimulti_layer1ring1", "Digi Multiplicity ", 30, 0., 30.);
@@ -274,8 +272,8 @@ void SiPixelDigiValid::bookHistograms(DQMStore::IBooker &ibooker, const edm::Run
 
 void SiPixelDigiValid::endJob() {
   // Save histos in a file only in standalone mode
-  if (runStandalone && !outputFile_.empty() && dbe_) {
-    dbe_->save(outputFile_);
+  if (runStandalone && !outputFile_.empty() && dqmstore_) {
+    dqmstore_->save(outputFile_);
   }
 }
 

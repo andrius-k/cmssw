@@ -154,9 +154,6 @@ void TkConvValidator::bookHistograms(DQMStore::IBooker& iBooker, edm::Run const&
 
   nInvalidPCA_ = 0;
 
-  dbe_ = nullptr;
-  dbe_ = std::unique_ptr<DQMStore>(dqmstore_.release());
-
   double etMin = parameters_.getParameter<double>("etMin");
   double etMax = parameters_.getParameter<double>("etMax");
   int etBin = parameters_.getParameter<int>("etBin");
@@ -218,7 +215,7 @@ void TkConvValidator::bookHistograms(DQMStore::IBooker& iBooker, edm::Run const&
   maxPhoZForPurity = parameters_.getParameter<double>("maxPhoZForPurity");
   maxPhoRForPurity = parameters_.getParameter<double>("maxPhoRForPurity");
 
-  if (dbe_) {
+  if (dqmstore_) {
     //// All MC photons
     // SC from reco photons
 
@@ -2236,7 +2233,7 @@ void TkConvValidator::analyze(const edm::Event& e, const edm::EventSetup& esup) 
 void TkConvValidator::endJob() {
   std::string outputFileName = parameters_.getParameter<std::string>("OutputFileName");
   if (!isRunCentrally_) {
-    dbe_->save(outputFileName);
+    dqmstore_->save(outputFileName);
   }
 
   edm::LogInfo("TkConvValidator") << "Analyzed " << nEvt_ << "\n";

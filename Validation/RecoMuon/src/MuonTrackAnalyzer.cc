@@ -75,7 +75,6 @@ MuonTrackAnalyzer::MuonTrackAnalyzer(const ParameterSet &ps) {
   // number of reco tracks
   numberOfRecTracks = 0;
 
-  dbe_ = std::unique_ptr<DQMStore>(dqmstore_.release());
   out = pset.getUntrackedParameter<string>("rootFileName");
   dirName_ = pset.getUntrackedParameter<std::string>("dirName");
   subsystemname_ = pset.getUntrackedParameter<std::string>("subSystemFolder", "YourSubsystem");
@@ -183,8 +182,8 @@ void MuonTrackAnalyzer::endRun(DQMStore::IBooker &ibooker) {
     double eff = hRecoSeedInner->computeEfficiency(hSimTracks, ibooker);
     LogInfo("MuonTrackAnalyzer") << " *Seed Efficiency* = " << eff << "%";
   }
-  if (!out.empty() && dbe_)
-    dbe_->save(out);
+  if (!out.empty() && dqmstore_)
+    dqmstore_->save(out);
 }
 void MuonTrackAnalyzer::analyze(const Event &event, const EventSetup &eventSetup) {
   LogDebug("MuonTrackAnalyzer") << "Run: " << event.id().run() << " Event: " << event.id().event();

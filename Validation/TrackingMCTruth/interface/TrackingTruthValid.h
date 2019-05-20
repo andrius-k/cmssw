@@ -28,7 +28,6 @@ private:
   bool runStandalone;
   std::string outputFile;
 
-  std::unique_ptr<DQMStore> dbe_;
   MonitorElement *meTPMass;
   MonitorElement *meTPCharge;
   MonitorElement *meTPId;

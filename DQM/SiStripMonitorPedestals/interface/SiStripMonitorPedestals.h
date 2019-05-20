@@ -89,7 +89,6 @@ private:
     MonitorElement *BadStripsDB;
   };
 
-  std::unique_ptr<DQMStore> dqmStore_;
   edm::ParameterSet conf_;
   std::map<uint32_t, ModMEs> PedMEs;
   edm::ESHandle<SiStripDetCabling> detcabling;

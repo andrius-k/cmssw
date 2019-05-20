@@ -41,8 +41,7 @@
 #include <numeric>
 
 SiStripMonitorQuality::SiStripMonitorQuality(edm::ParameterSet const &iConfig)
-    : dqmStore_(std::unique_ptr<DQMStore>(dqmstore_.release())),
-      conf_(iConfig),
+    : conf_(iConfig),
       m_cacheID_(0)
 
 {
@@ -185,7 +184,7 @@ void SiStripMonitorQuality::endRun(edm::Run const &run, edm::EventSetup const &e
   std::string outputFileName = conf_.getParameter<std::string>("OutputFileName");
   if (outputMEsInRootFile) {
     // dqmStore_->showDirStructure();
-    dqmStore_->save(outputFileName);
+    dqmstore_->save(outputFileName);
   }
 }
 //

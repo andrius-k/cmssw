@@ -49,7 +49,6 @@ GlobalMuonMatchAnalyzer::GlobalMuonMatchAnalyzer(const edm::ParameterSet &ps)
   glbName_ = iConfig.getUntrackedParameter<edm::InputTag>("glbLabel");
 
   out = iConfig.getUntrackedParameter<std::string>("out");
-  dbe_ = std::unique_ptr<DQMStore>(dqmstore_.release());
 
   tpToken_ = consumes<edm::View<reco::Track> >(tpName_);
   tkToken_ = consumes<edm::View<reco::Track> >(tkName_);
@@ -213,8 +212,8 @@ void GlobalMuonMatchAnalyzer::endRun(edm::Run const &, edm::EventSetup const &) 
   computeEfficiencyEta(h_fake, h_fakeMatch, h_totReco);
   computeEfficiencyPt(h_fakePt, h_fakeMatch, h_totReco);
 
-  if (!out.empty() && dbe_)
-    dbe_->save(out);
+  if (!out.empty() && dqmstore_)
+    dqmstore_->save(out);
 }
 
 //void GlobalMuonMatchAnalyzer::beginRun(const edm::Run&, const edm::EventSetup& setup)

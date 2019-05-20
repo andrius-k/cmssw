@@ -41,7 +41,6 @@
 
 SiStripMonitorRawData::SiStripMonitorRawData(edm::ParameterSet const &iConfig)
     : BadFedNumber(nullptr),
-      dqmStore_(std::unique_ptr<DQMStore>(dqmstore_.release())),
       conf_(iConfig),
       m_cacheID_(0)
 
@@ -122,7 +121,7 @@ void SiStripMonitorRawData::endRun(edm::Run const &run, edm::EventSetup const &e
   std::string outputFileName = conf_.getParameter<std::string>("OutputFileName");
   if (outputMEsInRootFile) {
     // dqmStore_->showDirStructure();
-    dqmStore_->save(outputFileName);
+    dqmstore_->save(outputFileName);
   }
 }
 //

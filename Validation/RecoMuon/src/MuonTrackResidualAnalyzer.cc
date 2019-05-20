@@ -51,7 +51,6 @@ MuonTrackResidualAnalyzer::MuonTrackResidualAnalyzer(const edm::ParameterSet &ps
   theDTSimHitToken = consumes<std::vector<PSimHit> >(dtSimHitLabel);
   theRPCSimHitToken = consumes<std::vector<PSimHit> >(rpcSimHitLabel);
 
-  dbe_ = std::unique_ptr<DQMStore>(dqmstore_.release());
   out = pset.getUntrackedParameter<string>("rootFileName");
   dirName_ = pset.getUntrackedParameter<std::string>("dirName");
   subsystemname_ = pset.getUntrackedParameter<std::string>("subSystemFolder", "YourSubsystem");
@@ -117,8 +116,8 @@ void MuonTrackResidualAnalyzer::bookHistograms(DQMStore::IBooker &ibooker,
 }
 
 void MuonTrackResidualAnalyzer::endRun(edm::Run const &, edm::EventSetup const &) {
-  if (!out.empty() && dbe_)
-    dbe_->save(out);
+  if (!out.empty() && dqmstore_)
+    dqmstore_->save(out);
 }
 void MuonTrackResidualAnalyzer::analyze(const edm::Event &event, const edm::EventSetup &eventSetup) {
   LogDebug("MuonTrackResidualAnalyzer") << "Analyze";
