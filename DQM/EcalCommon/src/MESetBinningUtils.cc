@@ -922,17 +922,17 @@ namespace ecaldqm {
 
     dqm::reco::MonitorElement::Kind translateKind(std::string const &_kindName) {
       if (_kindName == "REAL")
-        return dqm::reco::MonitorElement::Kind::REAL;
+        return dqm::reco::MonitorElement::DQM_KIND_REAL;
       else if (_kindName == "TH1F")
-        return dqm::reco::MonitorElement::Kind::TH1F;
+        return dqm::reco::MonitorElement::DQM_KIND_TH1F;
       else if (_kindName == "TProfile")
-        return dqm::reco::MonitorElement::Kind::TPROFILE;
+        return dqm::reco::MonitorElement::DQM_KIND_TPROFILE;
       else if (_kindName == "TH2F")
-        return dqm::reco::MonitorElement::Kind::TH2F;
+        return dqm::reco::MonitorElement::DQM_KIND_TH2F;
       else if (_kindName == "TProfile2D")
-        return dqm::reco::MonitorElement::Kind::TPROFILE2D;
+        return dqm::reco::MonitorElement::DQM_KIND_TPROFILE2D;
       else
-        return dqm::reco::MonitorElement::Kind::INVALID;
+        return dqm::reco::MonitorElement::DQM_KIND_INVALID;
     }
   }  // namespace binning
 }  // namespace ecaldqm
