@@ -977,6 +977,21 @@ namespace dqm {
       DQMStore(DQMStore const&) = delete;
       DQMStore& operator=(DQMStore const&) = delete;
 
+      // ------------------------------------------------------------------------
+      // ------------ IBooker/IGetter overrides to prevent ambiguity ------------
+      virtual void cd() {
+        this->IBooker<ME, DQMStore<ME>>::cd();
+        this->IGetter<ME, DQMStore<ME>>::cd();
+      }
+      virtual void cd(std::string const& dir) {
+        this->IBooker<ME, DQMStore<ME>>::cd(dir);
+        this->IGetter<ME, DQMStore<ME>>::cd(dir);
+      }
+      virtual void setCurrentFolder(std::string const& fullpath) {
+        this->IBooker<ME, DQMStore<ME>>::setCurrentFolder(fullpath);
+        this->IGetter<ME, DQMStore<ME>>::setCurrentFolder(fullpath);
+      }
+
     private:
     };
   }  // namespace implementation

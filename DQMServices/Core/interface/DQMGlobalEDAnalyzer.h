@@ -24,6 +24,10 @@ private:
   virtual void dqmAnalyze(edm::Event const&, edm::EventSetup const&, H const&) const = 0;
 
   std::unique_ptr<DQMStore> dqmstore_ = std::make_unique<DQMStore>();
+
+public:
+  typedef dqm::reco::DQMStore DQMStore;
+  typedef dqm::reco::MonitorElement MonitorElement;
 };
 
 template <typename H, typename... Args>
