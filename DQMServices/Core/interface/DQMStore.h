@@ -664,8 +664,9 @@ namespace dqm {
     };
     class IGetter {
     public:
-      virtual std::vector<MonitorElement*> getContents(std::string const& path) const = 0;
-      virtual std::vector<MonitorElement*> getContents(std::string const& path, unsigned int tag) const = 0;
+      virtual std::vector<dqm::harvesting::MonitorElement*> getContents(std::string const& path) const = 0;
+      virtual std::vector<dqm::harvesting::MonitorElement*> getContents(std::string const& path,
+                                                                        unsigned int tag) const = 0;
       virtual void getContents(std::vector<std::string>& into, bool showContents = true) const = 0;
 
       // We should not need to delete much from the DQMStore; it might not be save
@@ -681,21 +682,21 @@ namespace dqm {
       virtual void removeElement(std::string const& dir, std::string const& name, bool warning = true) = 0;
 
       // we have to discuss semantics here -- are run/lumi ever used?
-      virtual std::vector<MonitorElement*> getAllContents(std::string const& path) = 0;
+      virtual std::vector<dqm::harvesting::MonitorElement*> getAllContents(std::string const& path) const = 0;
       DQM_DEPRECATED
-      virtual std::vector<MonitorElement*> getAllContents(std::string const& path,
-                                                          uint32_t runNumber = 0,
-                                                          uint32_t lumi = 0) = 0;
-      virtual MonitorElement* get(std::string const& path) = 0;
+      virtual std::vector<dqm::harvesting::MonitorElement*> getAllContents(std::string const& path,
+                                                                           uint32_t runNumber = 0,
+                                                                           uint32_t lumi = 0) const = 0;
+      virtual MonitorElement* get(std::string const& path) const = 0;
 
       // same as get, throws an exception if histogram not found
       // Deprecated simply because it is barely used.
       DQM_DEPRECATED
-      virtual MonitorElement* getElement(std::string const& path) = 0;
+      virtual MonitorElement* getElement(std::string const& path) const = 0;
 
-      virtual std::vector<std::string> getSubdirs() = 0;
-      virtual std::vector<std::string> getMEs() = 0;
-      virtual bool dirExists(std::string const& path) = 0;
+      virtual std::vector<std::string> getSubdirs() const = 0;
+      virtual std::vector<std::string> getMEs() const = 0;
+      virtual bool dirExists(std::string const& path) const = 0;
       virtual void cd() = 0;
       virtual void cd(std::string const& dir) = 0;
       virtual void setCurrentFolder(std::string const& fullpath) = 0;
@@ -853,8 +854,9 @@ namespace dqm {
     class IGetter : public dqm::legacy::IGetter {
     public:
       // TODO: while we can have covariant return types for individual ME*, it seems we can't for the vectors.
-      virtual std::vector<dqm::legacy::MonitorElement*> getContents(std::string const& path) const;
-      virtual std::vector<dqm::legacy::MonitorElement*> getContents(std::string const& path, unsigned int tag) const;
+      virtual std::vector<dqm::harvesting::MonitorElement*> getContents(std::string const& path) const;
+      virtual std::vector<dqm::harvesting::MonitorElement*> getContents(std::string const& path,
+                                                                        unsigned int tag) const;
       virtual void getContents(std::vector<std::string>& into, bool showContents = true) const;
 
       DQM_DEPRECATED
@@ -866,19 +868,19 @@ namespace dqm {
       DQM_DEPRECATED
       virtual void removeElement(std::string const& dir, std::string const& name, bool warning = true);
 
-      virtual std::vector<dqm::legacy::MonitorElement*> getAllContents(std::string const& path);
+      virtual std::vector<dqm::harvesting::MonitorElement*> getAllContents(std::string const& path) const;
       DQM_DEPRECATED
-      virtual std::vector<dqm::legacy::MonitorElement*> getAllContents(std::string const& path,
-                                                                       uint32_t runNumber,
-                                                                       uint32_t lumi);
-      virtual ME* get(std::string const& path);
+      virtual std::vector<dqm::harvesting::MonitorElement*> getAllContents(std::string const& path,
+                                                                           uint32_t runNumber,
+                                                                           uint32_t lumi) const;
+      virtual ME* get(std::string const& path) const;
 
       DQM_DEPRECATED
-      virtual ME* getElement(std::string const& path);
+      virtual ME* getElement(std::string const& path) const;
 
-      virtual std::vector<std::string> getSubdirs();
-      virtual std::vector<std::string> getMEs();
-      virtual bool dirExists(std::string const& path);
+      virtual std::vector<std::string> getSubdirs() const;
+      virtual std::vector<std::string> getMEs() const;
+      virtual bool dirExists(std::string const& path) const;
       virtual void cd();
       virtual void cd(std::string const& dir);
       virtual void setCurrentFolder(std::string const& fullpath);

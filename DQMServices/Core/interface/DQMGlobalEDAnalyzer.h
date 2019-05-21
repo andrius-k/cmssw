@@ -9,7 +9,10 @@
 
 template <typename H, typename... Args>
 class DQMGlobalEDAnalyzer : public edm::global::EDAnalyzer<edm::RunCache<H>, Args...> {
-private:
+public:
+  typedef dqm::reco::DQMStore DQMStore;
+  typedef dqm::reco::MonitorElement MonitorElement;
+
   std::shared_ptr<H> globalBeginRun(edm::Run const&, edm::EventSetup const&) const final;
 
   void globalEndRun(edm::Run const&, edm::EventSetup const&) const final;
@@ -23,11 +26,8 @@ private:
 
   virtual void dqmAnalyze(edm::Event const&, edm::EventSetup const&, H const&) const = 0;
 
+private:
   std::unique_ptr<DQMStore> dqmstore_ = std::make_unique<DQMStore>();
-
-public:
-  typedef dqm::reco::DQMStore DQMStore;
-  typedef dqm::reco::MonitorElement MonitorElement;
 };
 
 template <typename H, typename... Args>
@@ -35,15 +35,8 @@ std::shared_ptr<H> DQMGlobalEDAnalyzer<H, Args...>::globalBeginRun(edm::Run cons
                                                                    edm::EventSetup const& setup) const {
   auto h = std::make_shared<H>();
   dqmBeginRun(run, setup, *h);
-  dqmstore_->bookTransaction(
-      [&, this](DQMStore::IBooker& b) {
-        // this runs while holding the DQMStore lock
-        b.cd();
-        bookHistograms(b, run, setup, *h);
-      },
-      run.run(),
-      0 /* moduleId */,
-      false /* canSaveByLumi */);
+  dqmstore_->cd();
+  bookHistograms(*dqmstore_, run, setup, *h);
   return h;
 }
 
