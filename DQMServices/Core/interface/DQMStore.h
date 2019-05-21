@@ -1012,8 +1012,8 @@ namespace dqm {
   namespace legacy {
     class DQMStore : public dqm::implementation::DQMStore<MonitorElement> {
     public:
-      typedef dqm::implementation::IBooker<MonitorElement, dqm::implementation::DQMStore<MonitorElement>> IBooker;
-      typedef dqm::implementation::IGetter<MonitorElement, dqm::implementation::DQMStore<MonitorElement>> IGetter;
+      typedef dqm::legacy::IBooker IBooker;
+      typedef dqm::legacy::IGetter IGetter;
     };
   }  // namespace legacy
 }  // namespace dqm
