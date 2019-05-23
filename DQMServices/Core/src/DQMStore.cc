@@ -316,7 +316,6 @@ namespace dqm {
 
     template <class ME>
     DQMStore<ME>::DQMStore() : IGetter<ME, DQMStore<ME>>(this), IBooker<ME, DQMStore<ME>>(this) {
-      assert(!"NIY");
     }
     template <class ME>
     DQMStore<ME>::~DQMStore() {}
