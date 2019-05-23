@@ -1,4 +1,6 @@
 #include "DQMServices/Core/interface/DQMStore.h"
+#include <string>
+#include <regex>
 
 namespace dqm {
 
@@ -10,6 +12,39 @@ namespace dqm {
   }  // namespace legacy
 
   namespace implementation {
+
+    std::string const& NavigatorBase::pwd() { return cwd_; }
+    void NavigatorBase::cd() { setCurrentFolder(""); }
+    void NavigatorBase::cd(std::string const& dir) { setCurrentFolder(cwd_ + dir); }
+    void NavigatorBase::goUp() { cd(".."); }
+    void NavigatorBase::setCurrentFolder(std::string const& fullpath) {
+      // clean up the path and normalize it to preserve certain invariants.
+      // this is the only method that should set cwd_.
+      // Instead of reasoning about whatever properties of paths, we just parse
+      // the thing and build a normalized instance with no slash in the beginning
+      // and a slash in the end.
+      std::string in(fullpath);
+      std::vector<std::string> buf;
+      std::regex dir("^/*([^/]+)");
+      std::smatch m;
+      while (std::regex_search(in, m, dir)) {
+        in = m.suffix().str();
+        if (m[0] == "..") {
+          if (!buf.empty()) {
+            buf.pop_back();
+          }
+        } else {
+          buf.push_back(m[0]);
+        }
+      }
+      std::string normalized;
+      for (auto& s : buf) {
+        normalized += s;
+        normalized += "/";
+      }
+      cwd_ = normalized;
+    }
+
     template <class ME, class STORE>
     ME* IBooker<ME, STORE>::bookInt(TString const& name) {
       assert(!"NIY");
@@ -207,27 +242,6 @@ namespace dqm {
     }
 
     template <class ME, class STORE>
-    void IBooker<ME, STORE>::cd() {
-      assert(!"NIY");
-    }
-    template <class ME, class STORE>
-    void IBooker<ME, STORE>::cd(std::string const& dir) {
-      assert(!"NIY");
-    }
-    template <class ME, class STORE>
-    void IBooker<ME, STORE>::setCurrentFolder(std::string const& fullpath) {
-      assert(!"NIY");
-    }
-    template <class ME, class STORE>
-    void IBooker<ME, STORE>::goUp() {
-      assert(!"NIY");
-    }
-    template <class ME, class STORE>
-    std::string const& IBooker<ME, STORE>::pwd() {
-      assert(!"NIY");
-    }
-
-    template <class ME, class STORE>
     IBooker<ME, STORE>::IBooker(STORE* store) {
       store_ = store;
     }
@@ -296,18 +310,6 @@ namespace dqm {
     bool IGetter<ME, STORE>::dirExists(std::string const& path) const {
       assert(!"NIY");
     }
-    template <class ME, class STORE>
-    void IGetter<ME, STORE>::cd() {
-      assert(!"NIY");
-    }
-    template <class ME, class STORE>
-    void IGetter<ME, STORE>::cd(std::string const& dir) {
-      assert(!"NIY");
-    }
-    template <class ME, class STORE>
-    void IGetter<ME, STORE>::setCurrentFolder(std::string const& fullpath) {
-      assert(!"NIY");
-    }
 
     template <class ME, class STORE>
     IGetter<ME, STORE>::IGetter(STORE* store) {
@@ -315,8 +317,7 @@ namespace dqm {
     }
 
     template <class ME>
-    DQMStore<ME>::DQMStore() : IGetter<ME, DQMStore<ME>>(this), IBooker<ME, DQMStore<ME>>(this) {
-    }
+    DQMStore<ME>::DQMStore() : IGetter<ME, DQMStore<ME>>(this), IBooker<ME, DQMStore<ME>>(this) {}
     template <class ME>
     DQMStore<ME>::~DQMStore() {}
 

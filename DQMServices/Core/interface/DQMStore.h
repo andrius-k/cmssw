@@ -652,6 +652,7 @@ namespace dqm {
       virtual void setCurrentFolder(std::string const& fullpath) = 0;
       virtual void goUp() = 0;
       virtual std::string const& pwd() = 0;
+
       DQM_DEPRECATED
       virtual void tag(MonitorElement*, unsigned int) = 0;
       DQM_DEPRECATED
@@ -697,9 +698,12 @@ namespace dqm {
       virtual std::vector<std::string> getSubdirs() const = 0;
       virtual std::vector<std::string> getMEs() const = 0;
       virtual bool dirExists(std::string const& path) const = 0;
+
       virtual void cd() = 0;
       virtual void cd(std::string const& dir) = 0;
       virtual void setCurrentFolder(std::string const& fullpath) = 0;
+      virtual void goUp() = 0;
+      virtual std::string const& pwd() = 0;
 
       virtual ~IGetter();
 
@@ -716,9 +720,29 @@ namespace dqm {
     // multi-inherits them for now.
     // We will instantiate this for reco MEs and harvesting MEs, and maybe for
     // legacy as well.
-    template <class ME, class STORE>
-    class IBooker : public virtual dqm::legacy::IBooker {
+
+    class NavigatorBase {
     public:
+      void cd();
+      void cd(std::string const& dir);
+      void setCurrentFolder(std::string const& fullpath);
+      void goUp();
+      std::string const& pwd();
+
+    protected:
+      NavigatorBase(){};
+      std::string cwd_ = "";
+    };
+
+    template <class ME, class STORE>
+    class IBooker : public virtual dqm::legacy::IBooker, public NavigatorBase {
+    public:
+      // NavigatorBase -- C++ multi-inheritance requires this
+      using NavigatorBase::cd;
+      using NavigatorBase::goUp;
+      using NavigatorBase::pwd;
+      using NavigatorBase::setCurrentFolder;
+
       virtual ME* bookInt(TString const& name);
       virtual ME* bookFloat(TString const& name);
       virtual ME* bookString(TString const& name, TString const& value);
@@ -831,11 +855,6 @@ namespace dqm {
                                 char const* option = "s");
       virtual ME* bookProfile2D(TString const& name, TProfile2D* object);
 
-      virtual void cd();
-      virtual void cd(std::string const& dir);
-      virtual void setCurrentFolder(std::string const& fullpath);
-      virtual void goUp();
-      virtual std::string const& pwd();
       DQM_DEPRECATED
       virtual void tag(dqm::legacy::MonitorElement*, unsigned int) { assert(!"No longer supported."); }
       DQM_DEPRECATED
@@ -846,13 +865,18 @@ namespace dqm {
     protected:
       IBooker(STORE* store);
 
-      std::string cwd_;
       STORE* store_;
     };
 
     template <class ME, class STORE>
-    class IGetter : public dqm::legacy::IGetter {
+    class IGetter : public dqm::legacy::IGetter, public NavigatorBase {
     public:
+      // NavigatorBase -- C++ multi-inheritance requires this
+      using NavigatorBase::cd;
+      using NavigatorBase::goUp;
+      using NavigatorBase::pwd;
+      using NavigatorBase::setCurrentFolder;
+
       // TODO: while we can have covariant return types for individual ME*, it seems we can't for the vectors.
       virtual std::vector<dqm::harvesting::MonitorElement*> getContents(std::string const& path) const;
       virtual std::vector<dqm::harvesting::MonitorElement*> getContents(std::string const& path,
@@ -881,9 +905,6 @@ namespace dqm {
       virtual std::vector<std::string> getSubdirs() const;
       virtual std::vector<std::string> getMEs() const;
       virtual bool dirExists(std::string const& path) const;
-      virtual void cd();
-      virtual void cd(std::string const& dir);
-      virtual void setCurrentFolder(std::string const& fullpath);
 
       virtual ~IGetter(){};
 
@@ -894,15 +915,6 @@ namespace dqm {
       STORE* store_;
     };
 
-    // TODO: Maybe we need to inline IBooker/IGetter impl here to get the semantics
-    // on combined booking/getting right (only one cwd, cd() affects both).
-    // For now, explicit IBooker::/IGetter:: prefixing is required on cd() etc. in
-    // legacy booking/getting due to the conflicting multiple inheritance.
-    // This can be avoided by using an IBooker/IGetter variable, but then both have
-    // independent state.
-    // When inlining, we again loose the ability to have multiple bookers/getters
-    // for one DQMSotre, but then we should not need that since everybody gets
-    // their own DQMStore...
     template <class ME>
     class DQMStore : public IGetter<ME, DQMStore<ME>>, public IBooker<ME, DQMStore<ME>> {
     public:
@@ -993,6 +1005,11 @@ namespace dqm {
         this->IBooker<ME, DQMStore<ME>>::setCurrentFolder(fullpath);
         this->IGetter<ME, DQMStore<ME>>::setCurrentFolder(fullpath);
       }
+      virtual void goUp() {
+        this->IBooker<ME, DQMStore<ME>>::goUp();
+        this->IGetter<ME, DQMStore<ME>>::goUp();
+      }
+      std::string const& pwd() { return this->IBooker<ME, DQMStore<ME>>::pwd(); }
 
     private:
     };
