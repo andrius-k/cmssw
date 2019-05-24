@@ -9,6 +9,12 @@ namespace dqm {
     IBooker::~IBooker() {}
     IGetter::IGetter() {}
     IGetter::~IGetter() {}
+
+    bool MonitorElement::checkCompatibility(MonitorElement const& a, MonitorElement const& b) {
+      // TODO
+      return true;
+    }
+
   }  // namespace legacy
 
   namespace implementation {
@@ -46,16 +52,52 @@ namespace dqm {
     }
 
     template <class ME, class STORE>
+    ME* IBooker<ME, STORE>::bookME(TString const& name, MonitorElementData::Kind kind, TH1* object) {
+      MonitorElementData data;
+      data.kind_ = kind;
+      data.object_ = object;
+      data.objname_ = std::string(name.View());
+      data.dirname_ = pwd();
+      data.scope_ = MonitorElementData::DQM_SCOPE_DEFAULT;
+
+      ME* me = store_->putME(data);
+      return me;
+    }
+
+    template <class ME>
+    ME* DQMStore<ME>::putME(MonitorElementData const& data) {
+      auto& existing = localmes_[data.key()];
+      auto newme = std::make_shared<ME>(data);
+      if (existing) {
+        bool ok = ME::checkCompatibility(*existing, *newme);
+        if (!ok) {
+          assert(!"Incompatible re-booking.");
+          // in case we want to allow that, we probably want to replace the existing.
+          existing = newme;
+        } else {
+          newme = existing;
+        }
+      } else {
+        existing = newme;
+      }
+      // existing and newme are always the same now.
+      // return a bare pointer, the object is owned by localmes in the end. We use
+      // a shared pointer since other DQMStores (in case of edm::stream) might
+      // co-own it. Also makes it easier to handle.
+      return &*newme;
+    }
+
+    template <class ME, class STORE>
     ME* IBooker<ME, STORE>::bookInt(TString const& name) {
-      assert(!"NIY");
+      return bookME(name, MonitorElementData::DQM_KIND_INT, nullptr);
     }
     template <class ME, class STORE>
     ME* IBooker<ME, STORE>::bookFloat(TString const& name) {
-      assert(!"NIY");
+      return bookME(name, MonitorElementData::DQM_KIND_INT, nullptr);
     }
     template <class ME, class STORE>
     ME* IBooker<ME, STORE>::bookString(TString const& name, TString const& value) {
-      assert(!"NIY");
+      return bookME(name, MonitorElementData::DQM_KIND_INT, nullptr);
     }
     template <class ME, class STORE>
     ME* IBooker<ME, STORE>::book1D(

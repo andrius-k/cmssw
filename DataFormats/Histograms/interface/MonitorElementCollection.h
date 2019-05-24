@@ -109,20 +109,35 @@ struct MonitorElementData {
   edm::LuminosityBlockRange coveredrange_;
   Scope scope_;
 
-  // Copying this stucture would be dangerous due to the ROOT object pointer,
-  // but moving should be fine.
+  // Copying with the root object pointer inside is dangerous, but very useful
+  // when used as a base class.
   MonitorElementData() = default;
-  MonitorElementData(MonitorElementData const&) = delete;
+  MonitorElementData(MonitorElementData const&) = default;
   MonitorElementData(MonitorElementData&&) = default;
   // We don't delete the ROOT object at destruction so that it is easier/safer
   // to use this as a base class for the actual, mutable ME classes.
   ~MonitorElementData() = default;
 
-  // TODO: We'll probably need a total order on the MEs for any sort of
-  // efficient data structure. Would not hurt to define it here, to avoid
-  // confusion. It should probably include:
-  // (dirname, objname, scope, beginrun, beginlumi, endrun, endlumi)
-  // where the latter items come from the coveredrange.
+  // Metadata tuple. The range is included here in case we have e.g.
+  // multiple per-lumi histograms in one collection. For a logical comparison,
+  // one should look only at the name.
+  // The tuple in there should be inlined and rarely actually created.
+  typedef decltype(std::make_tuple(dirname_,
+                                   objname_,
+                                   scope_,
+                                   coveredrange_.startRun(),
+                                   coveredrange_.startLumi(),
+                                   coveredrange_.endRun(),
+                                   coveredrange_.endLumi())) Key;
+  Key key() const {
+    return std::make_tuple(dirname_,
+                           objname_,
+                           scope_,
+                           coveredrange_.startRun(),
+                           coveredrange_.startLumi(),
+                           coveredrange_.endRun(),
+                           coveredrange_.endLumi());
+  }
 };
 
 // For now, no additional (meta-)data is needed apart from the MEs themselves.
