@@ -1,4 +1,5 @@
 sed -i 's|DQMServices/Core/interface/MonitorElement.h|DQMServices/Core/interface/DQMStore.h|g' $(ag -l --cpp 'DQMServices/Core/interface/DQMStore.h')
+sed -i 's|DQMServices/Core/interface/MonitorElement.h|DQMServices/Core/interface/DQMStore.h|g' $(ag -l --cpp 'DQMServices/Core/interface/MonitorElement.h')
 for f in $(ag -l --cpp 'DQMServices/Core/interface/DQMStore.h'); do
   awk '/DQMServices.Core.interface.DQMStore.h/ { if (!haveit) { print; haveit = 1; } } !/DQMServices.Core.interface.DQMStore.h/ { print; }' $f > newfile
   mv newfile $f
