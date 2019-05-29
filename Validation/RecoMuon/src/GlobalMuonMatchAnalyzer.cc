@@ -49,7 +49,7 @@ GlobalMuonMatchAnalyzer::GlobalMuonMatchAnalyzer(const edm::ParameterSet &ps)
   glbName_ = iConfig.getUntrackedParameter<edm::InputTag>("glbLabel");
 
   out = iConfig.getUntrackedParameter<std::string>("out");
-  dbe_ = edm::Service<DQMStore>().operator->();
+  dbe_ = std::make_unique<DQMStore>();
 
   tpToken_ = consumes<edm::View<reco::Track> >(tpName_);
   tkToken_ = consumes<edm::View<reco::Track> >(tkName_);

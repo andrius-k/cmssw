@@ -48,7 +48,7 @@ private:
   std::vector<int> steps;
   G4NavigationHistory fHistory;
 
-  DQMStore *dbe_;
+  std::unique_ptr<DQMStore> dbe_;
   std::vector<MonitorElement *> meStep, meCall, meStepCH, meStepNH, meStepC;
   std::vector<MonitorElement *> meStepE, meStepG, meStepMu, meStepNu, meStepN;
 };

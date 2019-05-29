@@ -64,7 +64,7 @@ protected:
   edm::ParameterSet pset;
 
   MuonServiceProxy* theMuonService;
-  DQMStore* dbe_;
+  std::unique_ptr<DQMStore> dbe_;
 
   bool doAbsEta_;
   bool doAssoc_;

@@ -66,7 +66,7 @@ private:
   histomap histos;
   histomap summaryhisto;
 
-  DQMStore* dbe_;
+  std::unique_ptr<DQMStore> dbe_;
 
   detparmap detmap;
   detparmap summarydetmap;

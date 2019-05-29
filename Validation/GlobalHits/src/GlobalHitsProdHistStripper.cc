@@ -36,7 +36,7 @@ GlobalHitsProdHistStripper::GlobalHitsProdHistStripper(const edm::ParameterSet &
 
   // get dqm info
   dbe = nullptr;
-  dbe = edm::Service<DQMStore>().operator->();
+  dbe = std::make_unique<DQMStore>();
   if (dbe) {
     if (verbosity > 0) {
       dbe->setVerbose(1);

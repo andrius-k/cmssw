@@ -43,7 +43,7 @@ EcalSimHitsValidation::EcalSimHitsValidation(const edm::ParameterSet &ps)
   dbe_ = nullptr;
 
   // get hold of back-end interface
-  dbe_ = edm::Service<DQMStore>().operator->();
+  dbe_ = std::make_unique<DQMStore>();
   if (dbe_) {
     if (verbose_) {
       dbe_->setVerbose(1);

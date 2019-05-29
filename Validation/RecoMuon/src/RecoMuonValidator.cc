@@ -674,7 +674,7 @@ RecoMuonValidator::RecoMuonValidator(const edm::ParameterSet& pset)
   theMuonService = new MuonServiceProxy(serviceParameters);
 
   // retrieve the instance of DQMService
-  dbe_ = Service<DQMStore>().operator->();
+  dbe_ = std::make_unique<DQMStore>();
   subsystemname_ = pset.getUntrackedParameter<std::string>("subSystemFolder", "YourSubsystem");
 
   subDir_ = pset.getUntrackedParameter<string>("subDir");

@@ -14,7 +14,7 @@ FieldStepWatcher::FieldStepWatcher(const edm::ParameterSet &p) {
 
   edm::LogInfo("FieldStepWatcher") << "FieldStepWatcher initialised to monitor"
                                    << " level " << level << " with o/p on " << outFile;
-  dbe_ = edm::Service<DQMStore>().operator->();
+  dbe_ = std::make_unique<DQMStore>();
   if (dbe_) {
     dbe_->setVerbose(0);
   }

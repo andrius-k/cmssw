@@ -57,7 +57,7 @@ private:
   void computeEfficiencyPt(MonitorElement *, MonitorElement *recoTH2, MonitorElement *simTH2);
   // ----------member data ---------------------------
   std::string out;
-  DQMStore *dbe_;
+  std::unique_ptr<DQMStore> dbe_;
   edm::ParameterSet iConfig;
   std::string subsystemname_;
   MonitorElement *h_shouldMatch, *h_goodMatchSim, *h_tkOnlySim, *h_staOnlySim;

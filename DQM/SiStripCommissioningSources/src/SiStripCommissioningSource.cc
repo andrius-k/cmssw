@@ -133,7 +133,7 @@ void SiStripCommissioningSource::beginRun(edm::Run const& run, const edm::EventS
 
   // ---------- DQM back-end interface ----------
 
-  dqm_ = edm::Service<DQMStore>().operator->();
+  dqm_ = std::make_unique<DQMStore>();
   edm::LogInfo(mlDqmSource_) << "[SiStripCommissioningSource::" << __func__ << "]"
                              << " DQMStore service: " << dqm_;
   dqm(__func__);

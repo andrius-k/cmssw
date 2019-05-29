@@ -31,7 +31,7 @@ SiPixelDigiValid::SiPixelDigiValid(const edm::ParameterSet &ps)
 SiPixelDigiValid::~SiPixelDigiValid() {}
 
 void SiPixelDigiValid::bookHistograms(DQMStore::IBooker &ibooker, const edm::Run &run, const edm::EventSetup &es) {
-  dbe_ = edm::Service<DQMStore>().operator->();
+  dbe_ = std::make_unique<DQMStore>();
   es.get<TrackerRecoGeometryRecord>().get(tracker);
 
   if (dbe_) {

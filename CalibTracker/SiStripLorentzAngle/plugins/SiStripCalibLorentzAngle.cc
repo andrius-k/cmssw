@@ -38,7 +38,7 @@ void SiStripCalibLorentzAngle::algoBeginJob(const edm::EventSetup& c) {
   c.get<SiStripLorentzAngleRcd>().get(SiStripLorentzAngle_);
   detid_la = SiStripLorentzAngle_->getLorentzAngles();
 
-  DQMStore* dbe_ = edm::Service<DQMStore>().operator->();
+  std::unique_ptr<DQMStore> dbe_ = std::make_unique<DQMStore>();
 
   std::string inputFile_ = conf_.getUntrackedParameter<std::string>("fileName", "LAProfiles.root");
   std::string LAreport_ = conf_.getUntrackedParameter<std::string>("LA_Report", "LA_Report.txt");

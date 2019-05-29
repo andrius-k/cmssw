@@ -377,7 +377,7 @@ void DQMGenericClient::dqmEndJob(DQMStore::IBooker& ibooker, DQMStore::IGetter& 
 
   // needed to access the DQMStore::save method
   theDQM = nullptr;
-  theDQM = Service<DQMStore>().operator->();
+  theDQM = std::make_unique<DQMStore>();
 
   if (runOnEndJob_) {
     makeAllPlots(ibooker, igetter);

@@ -77,7 +77,7 @@ namespace edmtest {
       output.write((const char*)&(*tb)[0], tb->size());
       output.close();
 
-      DQMStore* dqm = &*edm::Service<DQMStore>();
+      std::unique_ptr<DQMStore> dqm = std::make_unique<DQMStore>();
       dqm->open(outfile, false, "", "Reference");
       remove(outfile.c_str());
 

@@ -58,7 +58,7 @@ BeamMonitorBx::BeamMonitorBx(const ParameterSet& ps) : countBx_(0), countEvt_(0)
   fitNLumi_ = parameters_.getUntrackedParameter<int>("fitEveryNLumi", -1);
   resetFitNLumi_ = parameters_.getUntrackedParameter<int>("resetEveryNLumi", -1);
 
-  dbe_ = Service<DQMStore>().operator->();
+  dbe_ = std::make_unique<DQMStore>();
 
   if (!monitorName_.empty())
     monitorName_ = monitorName_ + "/";

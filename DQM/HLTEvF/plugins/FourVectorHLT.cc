@@ -161,7 +161,7 @@ void FourVectorHLT::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
 // -- method called once each job just before starting event loop  --------
 void FourVectorHLT::beginJob() {
   nev_ = 0;
-  DQMStore* dbe = nullptr;
+  std::unique_ptr<DQMStore> dbe = nullptr;
   dbe = Service<DQMStore>().operator->();
 
   if (dbe) {

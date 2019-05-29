@@ -224,7 +224,7 @@ protected:
   double recPt_cut;
   double maxEta_cut;
   unsigned int entry_;
-  DQMStore *dbe_;
+  std::unique_ptr<DQMStore> dbe_;
 };
 
 #endif  // RecoParticleFlow_Benchmark_PFJetBenchmark_h

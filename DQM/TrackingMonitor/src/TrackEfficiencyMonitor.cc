@@ -47,7 +47,7 @@
 TrackEfficiencyMonitor::TrackEfficiencyMonitor(const edm::ParameterSet& iConfig)
 //-----------------------------------------------------------------------------------
 {
-  dqmStore_ = edm::Service<DQMStore>().operator->();
+  dqmStore_ = std::make_unique<DQMStore>();
 
   theRadius_ = iConfig.getParameter<double>("theRadius");
   theMaxZ_ = iConfig.getParameter<double>("theMaxZ");

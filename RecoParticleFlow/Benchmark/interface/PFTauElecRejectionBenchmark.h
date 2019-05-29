@@ -112,7 +112,7 @@ private:
   std::vector<TLorentzVector> _GenObjects;
 
 protected:
-  DQMStore *db_;
+  std::unique_ptr<DQMStore> db_;
 };
 
 #endif  // RecoParticleFlow_Benchmark_PFTauElecRejectionBenchmark_h

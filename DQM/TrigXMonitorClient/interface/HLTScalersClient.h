@@ -139,7 +139,7 @@ public:
   void analyze(const edm::Event &e, const edm::EventSetup &c) override;
 
 private:
-  DQMStore *dbe_;
+  std::unique_ptr<DQMStore> dbe_;
 
   int nev_;    // Number of events processed
   int nLumi_;  // number of lumi blocks

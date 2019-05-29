@@ -118,7 +118,7 @@ namespace {
     }
 
   private:
-    DQMStore* store_;
+    std::unique_ptr<DQMStore> store_;
     std::string folder_;
     std::string name_;
     std::map<int, int> entries_per_LS_;
@@ -168,7 +168,7 @@ namespace {
     };
 
   private:
-    DQMStore* store_;
+    std::unique_ptr<DQMStore> store_;
     std::string folder_;
     std::string name_;
     std::map<int, int> entries_per_LS_;

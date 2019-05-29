@@ -340,7 +340,7 @@ void ValidationHcalIsoTrackAlCaReco::analyze(const edm::Event& iEvent, const edm
 }
 
 void ValidationHcalIsoTrackAlCaReco::beginJob() {
-  dbe_ = edm::Service<DQMStore>().operator->();
+  dbe_ = std::make_unique<DQMStore>();
   dbe_->setCurrentFolder(folderName_);
 
   hl3Pt = dbe_->book1D("hl3Pt", "pT of hlt L3 objects", 1000, 0, 1000);

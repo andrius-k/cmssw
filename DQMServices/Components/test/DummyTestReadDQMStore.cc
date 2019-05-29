@@ -84,7 +84,7 @@ namespace {
   private:
     std::string folder_;
     std::string m_name;
-    DQMStore* m_store;
+    std::unique_ptr<DQMStore> m_store;
     MonitorElement* m_element;
     std::vector<double> m_means;
     std::vector<double> m_entries;
@@ -146,7 +146,7 @@ namespace {
   private:
     std::string folder_;
     std::string m_name;
-    DQMStore* m_store;
+    std::unique_ptr<DQMStore> m_store;
     MonitorElement* m_element;
     std::vector<double> m_means;
     std::vector<double> m_entries;

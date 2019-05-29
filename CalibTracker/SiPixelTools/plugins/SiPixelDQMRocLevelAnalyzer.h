@@ -66,7 +66,7 @@ private:
 
   // ----------member data ---------------------------
   edm::ParameterSet conf_;
-  DQMStore *dbe;
+  std::unique_ptr<DQMStore> dbe;
   edm::Service<TFileService> fs_;
 
   std::vector<MonitorElement *> mes;

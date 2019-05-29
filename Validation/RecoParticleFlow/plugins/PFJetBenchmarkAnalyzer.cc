@@ -74,7 +74,7 @@ double deltaRMax = 0.1;
 string benchmarkLabel_;
 double recPt;
 double maxEta;
-dqm::legacy::DQMStore *dbe_;
+std::unique_ptr<DQMStore> dbe_;
 //
 // constants, enums and typedefs
 //
@@ -101,7 +101,7 @@ PFJetBenchmarkAnalyzer::PFJetBenchmarkAnalyzer(const edm::ParameterSet &iConfig)
   recPt = iConfig.getParameter<double>("recPt");
   maxEta = iConfig.getParameter<double>("maxEta");
 
-  dbe_ = edm::Service<DQMStore>().operator->();
+  dbe_ = std::make_unique<DQMStore>();
 
   PFJetBenchmark_.setup(
       outjetfilename, pfjBenchmarkDebug, plotAgainstReco, onlyTwoJets, deltaRMax, benchmarkLabel_, recPt, maxEta, dbe_);

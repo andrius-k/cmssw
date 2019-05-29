@@ -95,6 +95,6 @@ public:
 
 private:
   std::string TopFolderName;
-  DQMStore* dbe_;
+  std::unique_ptr<DQMStore> dbe_;
 };
 #endif

@@ -60,7 +60,7 @@ private:
   std::string vertexProducer_;
   float sample_;
 
-  DQMStore* dbe_;
+  std::unique_ptr<DQMStore> dbe_;
 
   MonitorElement* h1_scEta_;
   MonitorElement* h1_deltaEtaSC_;

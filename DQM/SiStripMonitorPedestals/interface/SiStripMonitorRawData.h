@@ -60,7 +60,7 @@ private:
 
   MonitorElement *BadFedNumber;
 
-  DQMStore *dqmStore_;
+  std::unique_ptr<DQMStore> dqmStore_;
   edm::ParameterSet conf_;
   edm::ESHandle<SiStripDetCabling> detcabling;
   std::vector<uint32_t> SelectedDetIds;

@@ -56,7 +56,7 @@ public:
 private:
   MonitorElement *getQualityME(uint32_t idet, const TrackerTopology *tTopo);
 
-  DQMStore *dqmStore_;
+  std::unique_ptr<DQMStore> dqmStore_;
   edm::ParameterSet conf_;
   edm::ESHandle<SiStripDetCabling> detCabling_;
   edm::ESHandle<SiStripQuality> stripQuality_;

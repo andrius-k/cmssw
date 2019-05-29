@@ -51,7 +51,7 @@ MuonTrackResidualAnalyzer::MuonTrackResidualAnalyzer(const edm::ParameterSet &ps
   theDTSimHitToken = consumes<std::vector<PSimHit> >(dtSimHitLabel);
   theRPCSimHitToken = consumes<std::vector<PSimHit> >(rpcSimHitLabel);
 
-  dbe_ = edm::Service<DQMStore>().operator->();
+  dbe_ = std::make_unique<DQMStore>();
   out = pset.getUntrackedParameter<string>("rootFileName");
   dirName_ = pset.getUntrackedParameter<std::string>("dirName");
   subsystemname_ = pset.getUntrackedParameter<std::string>("subSystemFolder", "YourSubsystem");

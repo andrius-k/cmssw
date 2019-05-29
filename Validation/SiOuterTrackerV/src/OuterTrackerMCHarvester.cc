@@ -33,7 +33,7 @@ void OuterTrackerMCHarvester::dqmEndJob(DQMStore::IBooker &ibooker, DQMStore::IG
   int eta_binnum = 6;
 
   dbe = nullptr;
-  dbe = edm::Service<DQMStore>().operator->();
+  dbe = std::make_unique<DQMStore>();
 
   if (dbe) {
     // Find all monitor elements for histograms

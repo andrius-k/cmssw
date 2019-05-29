@@ -81,7 +81,7 @@ HLTScalersClient::HLTScalersClient(const edm::ParameterSet &ps)
     }
   }
   // get back-end interface
-  dbe_ = edm::Service<DQMStore>().operator->();
+  dbe_ = std::make_unique<DQMStore>();
   dbe_->setVerbose(1);
   dbe_->setCurrentFolder(folderName_);
 

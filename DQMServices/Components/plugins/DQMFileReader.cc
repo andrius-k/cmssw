@@ -5,7 +5,7 @@
 DQMFileReader::DQMFileReader(const edm::ParameterSet& ps) {
   pset_ = ps;
 
-  dbe_ = edm::Service<DQMStore>().operator->();
+  dbe_ = std::make_unique<DQMStore>();
 
   filenames_.clear();
   filenames_ = pset_.getUntrackedParameter<std::vector<std::string> >("FileNames");

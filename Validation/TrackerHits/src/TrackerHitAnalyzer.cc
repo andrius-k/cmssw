@@ -72,7 +72,7 @@ TrackerHitAnalyzer::TrackerHitAnalyzer(const edm::ParameterSet &ps)
 
 void TrackerHitAnalyzer::bookHistograms(DQMStore::IBooker &ibooker, const edm::Run &run, const edm::EventSetup &es) {
   ////// booking histograms
-  fDBE = edm::Service<DQMStore>().operator->();
+  fDBE = std::make_unique<DQMStore>();
 
   Char_t hname1[50], htitle1[80];
   Char_t hname2[50], htitle2[80];

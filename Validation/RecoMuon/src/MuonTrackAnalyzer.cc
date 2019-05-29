@@ -75,7 +75,7 @@ MuonTrackAnalyzer::MuonTrackAnalyzer(const ParameterSet &ps) {
   // number of reco tracks
   numberOfRecTracks = 0;
 
-  dbe_ = edm::Service<DQMStore>().operator->();
+  dbe_ = std::make_unique<DQMStore>();
   out = pset.getUntrackedParameter<string>("rootFileName");
   dirName_ = pset.getUntrackedParameter<std::string>("dirName");
   subsystemname_ = pset.getUntrackedParameter<std::string>("subSystemFolder", "YourSubsystem");

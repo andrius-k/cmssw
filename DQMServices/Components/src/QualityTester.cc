@@ -32,7 +32,7 @@ QualityTester::QualityTester(const ParameterSet& ps) {
   qtestOnEndLumi = ps.getUntrackedParameter<bool>("qtestOnEndLumi", false);
   verboseQT = ps.getUntrackedParameter<bool>("verboseQT", true);
 
-  bei = &*edm::Service<DQMStore>();
+  bei = std::make_unique<DQMStore>();
 
   qtHandler = new QTestHandle;
 

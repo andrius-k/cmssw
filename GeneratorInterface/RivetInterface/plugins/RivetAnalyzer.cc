@@ -55,7 +55,7 @@ RivetAnalyzer::RivetAnalyzer(const edm::ParameterSet& pset)
   if (_produceDQM) {
     // book stuff needed for DQM
     dbe = nullptr;
-    dbe = edm::Service<DQMStore>().operator->();
+    dbe = std::make_unique<DQMStore>();
     dbe->setVerbose(50);
   }
 }

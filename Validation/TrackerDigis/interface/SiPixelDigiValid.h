@@ -258,7 +258,7 @@ private:
   MonitorElement *meNdigiZmDisk2PerPanel1_;
   MonitorElement *meNdigiZmDisk2PerPanel2_;
 
-  DQMStore *dbe_;
+  std::unique_ptr<DQMStore> dbe_;
   edm::EDGetTokenT<edm::DetSetVector<PixelDigi>> edmDetSetVector_PixelDigi_Token_;
   edm::ESHandle<GeometricSearchTracker> tracker;
 };
