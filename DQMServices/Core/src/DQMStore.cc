@@ -102,31 +102,38 @@ namespace dqm {
     template <class ME, class STORE>
     ME* IBooker<ME, STORE>::book1D(
         TString const& name, TString const& title, int const nchX, double const lowX, double const highX) {
-      assert(!"NIY");
+      auto th1 = new TH1F(name, title, nchX, lowX, highX);
+      return bookME(name, MonitorElementData::DQM_KIND_TH1F, th1);
     }
     template <class ME, class STORE>
     ME* IBooker<ME, STORE>::book1D(TString const& name, TString const& title, int nchX, float const* xbinsize) {
-      assert(!"NIY");
+      auto th1 = new TH1F(name, title, nchX, xbinsize);
+      return bookME(name, MonitorElementData::DQM_KIND_TH1F, th1);
     }
     template <class ME, class STORE>
     ME* IBooker<ME, STORE>::book1D(TString const& name, TH1F* object) {
-      assert(!"NIY");
+      auto th1 = static_cast<TH1*>(object->Clone(name));
+      return bookME(name, MonitorElementData::DQM_KIND_TH1F, th1);
     }
     template <class ME, class STORE>
     ME* IBooker<ME, STORE>::book1S(TString const& name, TString const& title, int nchX, double lowX, double highX) {
-      assert(!"NIY");
+      auto th1 = new TH1S(name, title, nchX, lowX, highX);
+      return bookME(name, MonitorElementData::DQM_KIND_TH1S, th1);
     }
     template <class ME, class STORE>
     ME* IBooker<ME, STORE>::book1S(TString const& name, TH1S* object) {
-      assert(!"NIY");
+      auto th1 = static_cast<TH1*>(object->Clone(name));
+      return bookME(name, MonitorElementData::DQM_KIND_TH1S, th1);
     }
     template <class ME, class STORE>
     ME* IBooker<ME, STORE>::book1DD(TString const& name, TString const& title, int nchX, double lowX, double highX) {
-      assert(!"NIY");
+      auto th1 = new TH1D(name, title, nchX, lowX, highX);
+      return bookME(name, MonitorElementData::DQM_KIND_TH1D, th1);
     }
     template <class ME, class STORE>
     ME* IBooker<ME, STORE>::book1DD(TString const& name, TH1D* object) {
-      assert(!"NIY");
+      auto th1 = static_cast<TH1*>(object->Clone(name));
+      return bookME(name, MonitorElementData::DQM_KIND_TH1D, th1);
     }
     template <class ME, class STORE>
     ME* IBooker<ME, STORE>::book2D(TString const& name,
@@ -137,16 +144,19 @@ namespace dqm {
                                    int nchY,
                                    double lowY,
                                    double highY) {
-      assert(!"NIY");
+      auto th2 = new TH2F(name, title, nchX, lowX, highX, nchY, lowY, highY);
+      return bookME(name, MonitorElementData::DQM_KIND_TH2F, th2);
     }
     template <class ME, class STORE>
     ME* IBooker<ME, STORE>::book2D(
         TString const& name, TString const& title, int nchX, float const* xbinsize, int nchY, float const* ybinsize) {
-      assert(!"NIY");
+      auto th2 = new TH2F(name, title, nchX, xbinsize, nchY, ybinsize);
+      return bookME(name, MonitorElementData::DQM_KIND_TH2F, th2);
     }
     template <class ME, class STORE>
     ME* IBooker<ME, STORE>::book2D(TString const& name, TH2F* object) {
-      assert(!"NIY");
+      auto th2 = static_cast<TH1*>(object->Clone(name));
+      return bookME(name, MonitorElementData::DQM_KIND_TH2F, th2);
     }
     template <class ME, class STORE>
     ME* IBooker<ME, STORE>::book2S(TString const& name,
@@ -157,16 +167,19 @@ namespace dqm {
                                    int nchY,
                                    double lowY,
                                    double highY) {
-      assert(!"NIY");
+      auto th2 = new TH2S(name, title, nchX, lowX, highX, nchY, lowY, highY);
+      return bookME(name, MonitorElementData::DQM_KIND_TH2S, th2);
     }
     template <class ME, class STORE>
     ME* IBooker<ME, STORE>::book2S(
         TString const& name, TString const& title, int nchX, float const* xbinsize, int nchY, float const* ybinsize) {
-      assert(!"NIY");
+      auto th2 = new TH2S(name, title, nchX, xbinsize, nchY, ybinsize);
+      return bookME(name, MonitorElementData::DQM_KIND_TH2S, th2);
     }
     template <class ME, class STORE>
     ME* IBooker<ME, STORE>::book2S(TString const& name, TH2S* object) {
-      assert(!"NIY");
+      auto th2 = static_cast<TH1*>(object->Clone(name));
+      return bookME(name, MonitorElementData::DQM_KIND_TH2S, th2);
     }
     template <class ME, class STORE>
     ME* IBooker<ME, STORE>::book2DD(TString const& name,
@@ -177,11 +190,13 @@ namespace dqm {
                                     int nchY,
                                     double lowY,
                                     double highY) {
-      assert(!"NIY");
+      auto th2 = new TH2D(name, title, nchX, lowX, highX, nchY, lowY, highY);
+      return bookME(name, MonitorElementData::DQM_KIND_TH2D, th2);
     }
     template <class ME, class STORE>
     ME* IBooker<ME, STORE>::book2DD(TString const& name, TH2D* object) {
-      assert(!"NIY");
+      auto th2 = static_cast<TH1*>(object->Clone(name));
+      return bookME(name, MonitorElementData::DQM_KIND_TH2D, th2);
     }
     template <class ME, class STORE>
     ME* IBooker<ME, STORE>::book3D(TString const& name,
@@ -195,11 +210,13 @@ namespace dqm {
                                    int nchZ,
                                    double lowZ,
                                    double highZ) {
-      assert(!"NIY");
+      auto th3 = new TH3F(name, title, nchX, lowX, highX, nchY, lowY, highY, nchZ, lowZ, highZ);
+      return bookME(name, MonitorElementData::DQM_KIND_TH3F, th3);
     }
     template <class ME, class STORE>
     ME* IBooker<ME, STORE>::book3D(TString const& name, TH3F* object) {
-      assert(!"NIY");
+      auto th3 = static_cast<TH1*>(object->Clone(name));
+      return bookME(name, MonitorElementData::DQM_KIND_TH3F, th3);
     }
     template <class ME, class STORE>
     ME* IBooker<ME, STORE>::bookProfile(TString const& name,
@@ -207,11 +224,12 @@ namespace dqm {
                                         int nchX,
                                         double lowX,
                                         double highX,
-                                        int nchY,
+                                        int /* nchY */,
                                         double lowY,
                                         double highY,
                                         char const* option) {
-      assert(!"NIY");
+      auto tprofile = new TProfile(name, title, nchX, lowX, highX, lowY, highY, option);
+      return bookME(name, MonitorElementData::DQM_KIND_TPROFILE, tprofile);
     }
     template <class ME, class STORE>
     ME* IBooker<ME, STORE>::bookProfile(TString const& name,
@@ -222,18 +240,20 @@ namespace dqm {
                                         double lowY,
                                         double highY,
                                         char const* option) {
-      assert(!"NIY");
+      auto tprofile = new TProfile(name, title, nchX, lowX, highX, lowY, highY, option);
+      return bookME(name, MonitorElementData::DQM_KIND_TPROFILE, tprofile);
     }
     template <class ME, class STORE>
     ME* IBooker<ME, STORE>::bookProfile(TString const& name,
                                         TString const& title,
                                         int nchX,
                                         double const* xbinsize,
-                                        int nchY,
+                                        int /* nchY */,
                                         double lowY,
                                         double highY,
                                         char const* option) {
-      assert(!"NIY");
+      auto tprofile = new TProfile(name, title, nchX, xbinsize, lowY, highY, option);
+      return bookME(name, MonitorElementData::DQM_KIND_TPROFILE, tprofile);
     }
     template <class ME, class STORE>
     ME* IBooker<ME, STORE>::bookProfile(TString const& name,
@@ -243,11 +263,13 @@ namespace dqm {
                                         double lowY,
                                         double highY,
                                         char const* option) {
-      assert(!"NIY");
+      auto tprofile = new TProfile(name, title, nchX, xbinsize, lowY, highY, option);
+      return bookME(name, MonitorElementData::DQM_KIND_TPROFILE, tprofile);
     }
     template <class ME, class STORE>
     ME* IBooker<ME, STORE>::bookProfile(TString const& name, TProfile* object) {
-      assert(!"NIY");
+      auto tprofile = static_cast<TH1*>(object->Clone(name));
+      return bookME(name, MonitorElementData::DQM_KIND_TPROFILE, tprofile);
     }
     template <class ME, class STORE>
     ME* IBooker<ME, STORE>::bookProfile2D(TString const& name,
@@ -261,7 +283,8 @@ namespace dqm {
                                           double lowZ,
                                           double highZ,
                                           char const* option) {
-      assert(!"NIY");
+      auto tprofile = new TProfile2D(name, title, nchX, lowX, highX, nchY, lowY, highY, lowZ, highZ, option);
+      return bookME(name, MonitorElementData::DQM_KIND_TPROFILE2D, tprofile);
     }
     template <class ME, class STORE>
     ME* IBooker<ME, STORE>::bookProfile2D(TString const& name,
@@ -272,15 +295,17 @@ namespace dqm {
                                           int nchY,
                                           double lowY,
                                           double highY,
-                                          int nchZ,
+                                          int /* nchZ */,
                                           double lowZ,
                                           double highZ,
                                           char const* option) {
-      assert(!"NIY");
+      auto tprofile = new TProfile2D(name, title, nchX, lowX, highX, nchY, lowY, highY, lowZ, highZ, option);
+      return bookME(name, MonitorElementData::DQM_KIND_TPROFILE2D, tprofile);
     }
     template <class ME, class STORE>
     ME* IBooker<ME, STORE>::bookProfile2D(TString const& name, TProfile2D* object) {
-      assert(!"NIY");
+      auto tprofile = static_cast<TH1*>(object->Clone(name));
+      return bookME(name, MonitorElementData::DQM_KIND_TPROFILE2D, tprofile);
     }
 
     template <class ME, class STORE>
