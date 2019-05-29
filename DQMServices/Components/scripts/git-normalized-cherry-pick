@@ -19,13 +19,13 @@ FILES="ls -d $(git diff --name-only $SUBJECT^..$SUBJECT)"
 git checkout $SUBJECT^
 # format only affected files.
 clang-format -i $($FILES)
-git commit -a -m "Format before subject"
+git commit -a -m "Format before subject" --allow-empty
 BEFORE=$(git rev-parse HEAD)
 
 # then, after.
 git checkout $SUBJECT
 clang-format -i $($FILES)
-git commit -a -m "Format after subject"
+git commit -a -m "Format after subject" --allow-empty
 AFTER=$(git rev-parse HEAD)
 
 # Now, the two formatted commits are unrelated. We force the AFTER state onto 
@@ -44,7 +44,7 @@ git checkout $BRANCH
 clang-format -i $($FILES)
 # Merge the formatting changes into the commit by first making a commit with
 # the formatting changes, then amending the change into it.
-git commit -a -m "TEMP: formatting for cherry-pick"
+git commit -a -m "TEMP: formatting for cherry-pick" --allow-empty
 git cherry-pick -n $NORMALIZED
 git commit --amend -C $SUBJECT
 
