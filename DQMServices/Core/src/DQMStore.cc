@@ -10,11 +10,6 @@ namespace dqm {
     IGetter::IGetter() {}
     IGetter::~IGetter() {}
 
-    bool MonitorElement::checkCompatibility(MonitorElement const& a, MonitorElement const& b) {
-      // TODO
-      return true;
-    }
-
   }  // namespace legacy
 
   namespace implementation {

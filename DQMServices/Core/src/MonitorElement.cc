@@ -1,6 +1,12 @@
 #include "DQMServices/Core/interface/DQMStore.h"
 namespace dqm {
   namespace legacy {
+
+    bool MonitorElement::checkCompatibility(MonitorElement const& a, MonitorElement const& b) {
+      // TODO
+      return true;
+    }
+
     MonitorElement::MonitorElement() { assert(!"NIY"); }
     MonitorElement::MonitorElement(MonitorElement &&) {
       assert(!"NIY");
