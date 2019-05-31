@@ -141,7 +141,7 @@ namespace dqm {
       using MonitorElementData::DQM_KIND_TPROFILE;
       using MonitorElementData::DQM_KIND_TPROFILE2D;
       using MonitorElementData::Kind;
-      ;
+
       using MonitorElementData::DQM_SCOPE_DEFAULT;
       using MonitorElementData::DQM_SCOPE_JOB;
       using MonitorElementData::DQM_SCOPE_LUMI;
@@ -153,8 +153,6 @@ namespace dqm {
       std::vector<QReport> qreports_;  //< QReports associated to this object.
 
     public:
-      MonitorElement();
-      MonitorElement(MonitorElement&&);  // needed to construct object inside container?
       MonitorElement(MonitorElementData const& data) : MonitorElementData(data){};
       MonitorElement& operator=(const MonitorElement&) = delete;
       MonitorElement& operator=(MonitorElement&&) = delete;
@@ -254,9 +252,10 @@ namespace dqm {
       void Fill(double x, double yw) const;
       void Fill(double x, double y, double zw) const;
       void Fill(double x, double y, double z, double w) const;
+      DQM_DEPRECATED
       void ShiftFillLast(double y, double ye = 0., int32_t xscale = 1) const;
 
-      // Not sure what to do with this. Let's make it depracated for the beginning.
+      // Not sure what to do with this. Let's make it deprecated for the beginning.
       DQM_DEPRECATED
       virtual void Reset();
 

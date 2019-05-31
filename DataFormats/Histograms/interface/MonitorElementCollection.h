@@ -90,7 +90,9 @@ struct MonitorElementData {
   // The main ME data. We don't keep references/QTest results, instead we use
   // only the fields stored in DQMIO files.
   Kind kind_;
-  Scalar scalar_;
+  // "mutable" to allow thread-safe "Fill" to change it without a const-cast
+  // const-casting would be more logically correct, but risks UB.
+  mutable Scalar scalar_;
   TH1* object_;
   // ROOT will serialize that correctly, I hope? or do we need to do the
   // template dance as in MEtoEDM?

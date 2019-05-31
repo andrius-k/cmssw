@@ -2,26 +2,124 @@
 namespace dqm {
   namespace legacy {
 
-    bool MonitorElement::checkCompatibility(MonitorElement const& a, MonitorElement const& b) {
+    bool MonitorElement::checkCompatibility(MonitorElement const &a, MonitorElement const &b) {
       // TODO
       return true;
     }
 
-    MonitorElement::MonitorElement() { assert(!"NIY"); }
-    MonitorElement::MonitorElement(MonitorElement &&) {
-      assert(!"NIY");
-    }  // needed to construct object inside container?
-    MonitorElement::~MonitorElement() { assert(!"NIY"); }
+    MonitorElement::~MonitorElement() {
+      // TODO: do we own the ROOT object, if one is set?
+      // We do, if this ME was initialized by booking and not moved into a
+      // product. We'll not delete it here, to prevent unwelcome surprises.
+      // This means special care must be taken when MEs are deleted for good
+      // to not leak the ROOT object. (Note that ROOT object ownership might
+      // also have sth. to say here).
+    }
 
-    void MonitorElement::Fill(double x) const { assert(!"NIY"); }
-    void MonitorElement::Fill(std::string &value) const { assert(!"NIY"); }
+    void MonitorElement::Fill(double x) const {
+      std::scoped_lock lock(lock_);
+      assert(kind_ == DQM_KIND_INT || kind_ == DQM_KIND_REAL || kind_ == DQM_KIND_TH1F || kind_ == DQM_KIND_TH1S ||
+             kind_ == DQM_KIND_TH1D);
+      if (kind_ == DQM_KIND_INT) {
+        scalar_.num = (int64_t)x;
+      } else if (kind_ == DQM_KIND_REAL) {
+        scalar_.real = x;
+      } else {
+        assert(object_ || !"Histogram type but ROOT object not set");
+        object_->Fill(x);
+      }
+    }
 
-    void MonitorElement::Fill(double x, double yw) const { assert(!"NIY"); }
-    void MonitorElement::Fill(double x, double y, double zw) const { assert(!"NIY"); }
-    void MonitorElement::Fill(double x, double y, double z, double w) const { assert(!"NIY"); }
+    void MonitorElement::doFill(int64_t x) const {
+      std::scoped_lock lock(lock_);
+      assert(kind_ == DQM_KIND_INT || kind_ == DQM_KIND_REAL || kind_ == DQM_KIND_TH1F || kind_ == DQM_KIND_TH1S ||
+             kind_ == DQM_KIND_TH1D);
+      if (kind_ == DQM_KIND_INT) {
+        scalar_.num = x;
+      } else if (kind_ == DQM_KIND_REAL) {
+        scalar_.real = (double)x;
+      } else {
+        assert(object_ || !"Histogram type but ROOT object not set");
+        object_->Fill((double)x);
+      }
+    }
+
+    void MonitorElement::Fill(std::string &value) const {
+      std::scoped_lock lock(lock_);
+      assert(kind_ == DQM_KIND_STRING);
+      scalar_.str = value;
+    }
+
+    void MonitorElement::Fill(double x, double yw) const {
+      std::scoped_lock lock(lock_);
+      assert(
+          // 1D histograms, this will be a x, weight fill
+          kind_ == DQM_KIND_TH1F || kind_ == DQM_KIND_TH1S || kind_ == DQM_KIND_TH1D ||
+          // 2D histograms, this will be a x, y fill
+          kind_ == DQM_KIND_TH2D || kind_ == DQM_KIND_TH2F || kind_ == DQM_KIND_TH2S ||
+          // 1D Profile == 2D histo
+          kind_ == DQM_KIND_TPROFILE);
+      assert(object_ || !"Histogram type but ROOT object not set");
+      // rely on ROOT to do the right thing.
+      object_->Fill(x, yw);
+    }
+
+    void MonitorElement::Fill(double x, double y, double zw) const {
+      std::scoped_lock lock(lock_);
+      if (kind_ == DQM_KIND_TH2F || kind_ == DQM_KIND_TH2D || kind_ == DQM_KIND_TH2S) {
+        // 2D histograms, this will be a x, y, weight fill
+        auto th2 = dynamic_cast<TH2 *>(object_);
+        assert(th2 || !"Histogram type but ROOT object not set or wrong type");
+        th2->Fill(x, y, zw);
+      } else if (kind_ == DQM_KIND_TH3F) {
+        // 3D histogram, this will be a x, y, z fill
+        auto th3 = dynamic_cast<TH3 *>(object_);
+        assert(th3 || !"Histogram type but ROOT object not set or wrong type");
+        th3->Fill(x, y, zw);
+      } else if (kind_ == DQM_KIND_TPROFILE) {
+        //  1D Profile == 2D histo, x, y, weight fill
+        auto tprofile = dynamic_cast<TProfile *>(object_);
+        assert(tprofile || !"Histogram type but ROOT object not set or wrong type");
+        tprofile->Fill(x, y, zw);
+      } else if (kind_ == DQM_KIND_TPROFILE2D) {
+        //  2D Profile == 3D histo, x, y, z fill
+        auto tprofile2d = dynamic_cast<TProfile2D *>(object_);
+        assert(tprofile2d || !"Histogram type but ROOT object not set or wrong type");
+        tprofile2d->Fill(x, y, zw);
+      } else {
+        assert(!"Operation not supported on this kind of MonitorElement");
+      }
+    }
+
+    void MonitorElement::Fill(double x, double y, double z, double w) const {
+      std::scoped_lock lock(lock_);
+      if (kind_ == DQM_KIND_TH3F) {
+        // 3D histogram, this will be a x, y, z, weight fill
+        auto th3 = dynamic_cast<TH3 *>(object_);
+        assert(th3 || !"Histogram type but ROOT object not set or wrong type");
+        th3->Fill(x, y, z, w);
+      } else if (kind_ == DQM_KIND_TPROFILE2D) {
+        //  2D Profile == 3D histo, x, y, z, weight fill
+        auto tprofile2d = dynamic_cast<TProfile2D *>(object_);
+        assert(tprofile2d || !"Histogram type but ROOT object not set or wrong type");
+        tprofile2d->Fill(x, y, z, w);
+      } else {
+        assert(!"Operation not supported on this kind of MonitorElement");
+      }
+    }
+
     void MonitorElement::ShiftFillLast(double y, double ye, int32_t xscale) const { assert(!"NIY"); }
 
-    void MonitorElement::Reset() { assert(!"NIY"); }
+    void MonitorElement::Reset() {
+      std::scoped_lock lock(lock_);
+      scalar_.num = 0;
+      scalar_.real = 0;
+      scalar_.str = "";
+      if (kind_ >= DQM_KIND_TH1F) {
+        assert(object_ || !"Histogram type but ROOT object not set");
+        object_->Reset();
+      }
+    }
 
     std::string MonitorElement::valueString() const { assert(!"NIY"); }
     /* almost unused */ std::string MonitorElement::tagString() const { assert(!"NIY"); }
@@ -37,7 +135,6 @@ namespace dqm {
 
     /* almost unused */ void MonitorElement::runQTests() { assert(!"NIY"); }
 
-    void MonitorElement::doFill(int64_t x) const { assert(!"NIY"); }
     TH1 *MonitorElement::accessRootObject(const char *func, int reqdim) const { assert(!"NIY"); }
 
     // const and data-independent -- safe

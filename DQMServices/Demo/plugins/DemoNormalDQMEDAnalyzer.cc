@@ -32,11 +32,8 @@ public:
 
   static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
 
-
 private:
-  void bookHistograms(DQMStore::IBooker &,
-                              edm::Run const&,
-                              edm::EventSetup const&) override;
+  void bookHistograms(DQMStore::IBooker&, edm::Run const&, edm::EventSetup const&) override;
 
   void analyze(const edm::Event&, const edm::EventSetup&) override;
 
@@ -51,20 +48,19 @@ private:
 
 DemoNormalDQMEDAnalyzer::DemoNormalDQMEDAnalyzer(const edm::ParameterSet& iConfig)
     : folder_(iConfig.getParameter<std::string>("folder")) {
-   // now do what ever initialization is needed
+  // now do what ever initialization is needed
 }
-
 
 DemoNormalDQMEDAnalyzer::~DemoNormalDQMEDAnalyzer() {
-   // do anything here that needs to be done at desctruction time
-   // (e.g. close files, deallocate resources etc.)
+  // do anything here that needs to be done at desctruction time
+  // (e.g. close files, deallocate resources etc.)
 }
-
 
 // ------------ method called for each event  ------------
 void DemoNormalDQMEDAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
   using namespace edm;
 
+  // TODO: this is not edm::stream safe...
   eventCount_++;
 
   example_->Fill(5);
@@ -74,19 +70,17 @@ void DemoNormalDQMEDAnalyzer::analyze(const edm::Event& iEvent, const edm::Event
   exampleTProfile2D_->Fill(eventCount_ / 10, eventCount_ / 10, eventCount_ / 10.f);
 }
 
-void DemoNormalDQMEDAnalyzer::bookHistograms(DQMStore::IBooker & ibook,
-                               edm::Run const& run,
-                               edm::EventSetup const & iSetup) {
+void DemoNormalDQMEDAnalyzer::bookHistograms(DQMStore::IBooker& ibook,
+                                             edm::Run const& run,
+                                             edm::EventSetup const& iSetup) {
   ibook.setCurrentFolder(folder_);
 
   example_ = ibook.book1D("EXAMPLE", "Example 1D", 20, 0., 10.);
   example2D_ = ibook.book2D("EXAMPLE_2D", "Example 2D", 20, 0, 20, 15, 0, 15);
   example3D_ = ibook.book3D("EXAMPLE_3D", "Example 3D", 20, 0, 20, 15, 0, 15, 25, 0, 25);
   exampleTProfile_ = ibook.bookProfile("EXAMPLE_TPROFILE", "Example TProfile", 20, 0, 20, 15, 0, 15);
-  exampleTProfile2D_ =ibook.bookProfile2D("EXAMPLE_TPROFILE2D", "Example TProfile 2D", 20, 0, 20, 15, 0, 15, 0, 100);
+  exampleTProfile2D_ = ibook.bookProfile2D("EXAMPLE_TPROFILE2D", "Example TProfile 2D", 20, 0, 20, 15, 0, 15, 0, 100);
 }
-
-
 
 // ------------ method fills 'descriptions' with the allowed parameters for the module  ------------
 void DemoNormalDQMEDAnalyzer::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
