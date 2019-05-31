@@ -40,7 +40,6 @@ namespace dqm {
     void MonitorElement::doFill(int64_t x) const { assert(!"NIY"); }
     TH1 *MonitorElement::accessRootObject(const char *func, int reqdim) const { assert(!"NIY"); }
 
-#if DQM_ROOT_METHODS
     // const and data-independent -- safe
     int MonitorElement::getNbinsX() const { assert(!"NIY"); }
     int MonitorElement::getNbinsY() const { assert(!"NIY"); }
@@ -77,7 +76,6 @@ namespace dqm {
     void MonitorElement::setAxisTimeDisplay(int value, int axis) { assert(!"NIY"); }
     void MonitorElement::setAxisTimeFormat(const char *format, int axis) { assert(!"NIY"); }
     void MonitorElement::setTitle(const std::string &title) { assert(!"NIY"); }
-#endif  // DQM_ROOT_METHODS
 
     void MonitorElement::softReset() { assert(!"NIY"); }
 

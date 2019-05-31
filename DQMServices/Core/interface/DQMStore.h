@@ -1,10 +1,6 @@
 #ifndef DQMServices_Core_DQMStore_h
 #define DQMServices_Core_DQMStore_h
 
-#if __GNUC__ && !defined DQM_DEPRECATED
-#define DQM_DEPRECATED __attribute__((deprecated))
-#endif
-
 #include <cassert>
 #include <cstdio>
 #include <cstdlib>
@@ -44,6 +40,10 @@
 
 #include "DataFormats/Histograms/interface/MonitorElementCollection.h"
 #include <tuple>
+
+#if __GNUC__ && !defined DQM_DEPRECATED
+#define DQM_DEPRECATED __attribute__((deprecated))
+#endif
 
 class TFile;
 class TBufferFile;
@@ -117,10 +117,6 @@ private:
   QCriterion* qcriterion_;               //< Pointer to QCriterion algorithm.
   std::vector<DQMChannel> badChannels_;  //< Bad channels from QCriterion.
 };
-
-#ifndef DQM_ROOT_METHODS
-#define DQM_ROOT_METHODS 1
-#endif
 
 namespace dqm {
   // eventually to be turned into "base", and most functionality removed.
@@ -309,7 +305,6 @@ namespace dqm {
       TH1* accessRootObject(const char* func, int reqdim) const;
 
     public:
-#if DQM_ROOT_METHODS
       // const and data-independent -- safe
       virtual int getNbinsX() const;
       virtual int getNbinsY() const;
@@ -346,7 +341,6 @@ namespace dqm {
       virtual void setAxisTimeDisplay(int value, int axis = 1);
       virtual void setAxisTimeFormat(const char* format = "", int axis = 1);
       virtual void setTitle(const std::string& title);
-#endif  // DQM_ROOT_METHODS
 
       // ------------ Operations for MEs that are normally never reset ---------
       DQM_DEPRECATED
@@ -403,7 +397,6 @@ namespace dqm {
       BAN(TH1* accessRootObject(const char* func, int reqdim) const)
 
     public:
-#if DQM_ROOT_METHODS
       BAN(virtual double getMean(int axis = 1) const)
       BAN(virtual double getMeanError(int axis = 1) const)
       BAN(virtual double getRMS(int axis = 1) const)
@@ -431,7 +424,6 @@ namespace dqm {
       BAN(virtual void setAxisTimeDisplay(int value, int axis = 1))
       BAN(virtual void setAxisTimeFormat(const char* format = "", int axis = 1))
       BAN(virtual void setTitle(const std::string& title))
-#endif  // DQM_ROOT_METHODS
 
       BAN(virtual TObject* getRootObject() const)
       BAN(virtual TH1* getTH1() const)
@@ -448,6 +440,7 @@ namespace dqm {
       BAN(virtual int64_t getIntValue() const)
       BAN(virtual double getFloatValue() const)
       BAN(virtual const std::string& getStringValue() const)
+#undef BAN
     };
 
   }  // namespace reco
@@ -469,7 +462,6 @@ namespace dqm {
       UNBAN(accessRootObject)
 
     public:
-#if DQM_ROOT_METHODS
       UNBAN(getMean)
       UNBAN(getMeanError)
       UNBAN(getRMS)
@@ -489,7 +481,6 @@ namespace dqm {
       UNBAN(setAxisTimeDisplay)
       UNBAN(setAxisTimeFormat)
       UNBAN(setTitle)
-#endif  // DQM_ROOT_METHODS
 
       UNBAN(getRootObject)
       UNBAN(getTH1)
@@ -506,6 +497,7 @@ namespace dqm {
       UNBAN(getIntValue)
       UNBAN(getFloatValue)
       UNBAN(getStringValue)
+#undef UNBAN
     };
 
   }  // namespace harvesting
