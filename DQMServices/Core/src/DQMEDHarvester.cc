@@ -7,7 +7,7 @@
 #include <memory>
 
 DQMEDHarvester::DQMEDHarvester() {
-  usesResource("DQMStore");
+  dqmstore_ = std::make_unique<DQMStore>();
   lumiToken_ = produces<DQMToken, edm::Transition::EndLuminosityBlock>("endLumi");
   runToken_ = produces<DQMToken, edm::Transition::EndRun>("endRun");
 }
