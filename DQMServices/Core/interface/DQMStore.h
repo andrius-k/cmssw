@@ -646,9 +646,13 @@ namespace dqm {
     };
     class IGetter {
     public:
+      // get MEs that are direct children of full path path
       virtual std::vector<dqm::harvesting::MonitorElement*> getContents(std::string const& path) const = 0;
+      DQM_DEPRECATED // for use of tag
       virtual std::vector<dqm::harvesting::MonitorElement*> getContents(std::string const& path,
                                                                         unsigned int tag) const = 0;
+      // not clear what this is good for.
+      DQM_DEPRECATED
       virtual void getContents(std::vector<std::string>& into, bool showContents = true) const = 0;
 
       // We should not need to delete much from the DQMStore; it might not be save
@@ -663,12 +667,14 @@ namespace dqm {
       DQM_DEPRECATED
       virtual void removeElement(std::string const& dir, std::string const& name, bool warning = true) = 0;
 
+      // get all elements below full path path
       // we have to discuss semantics here -- are run/lumi ever used?
       virtual std::vector<dqm::harvesting::MonitorElement*> getAllContents(std::string const& path) const = 0;
       DQM_DEPRECATED
       virtual std::vector<dqm::harvesting::MonitorElement*> getAllContents(std::string const& path,
                                                                            uint32_t runNumber = 0,
                                                                            uint32_t lumi = 0) const = 0;
+      // return ME identified by full path path, or nullptr
       virtual MonitorElement* get(std::string const& path) const = 0;
 
       // same as get, throws an exception if histogram not found
@@ -676,8 +682,11 @@ namespace dqm {
       DQM_DEPRECATED
       virtual MonitorElement* getElement(std::string const& path) const = 0;
 
+      // return sub-directories of current directory
       virtual std::vector<std::string> getSubdirs() const = 0;
+      // return element names of direct children of current directory
       virtual std::vector<std::string> getMEs() const = 0;
+      // returns whether there are objects at full path path
       virtual bool dirExists(std::string const& path) const = 0;
 
       virtual void cd() = 0;
