@@ -135,8 +135,6 @@ namespace dqm {
 
     /* almost unused */ void MonitorElement::runQTests() { assert(!"NIY"); }
 
-    TH1 *MonitorElement::accessRootObject(const char *func, int reqdim) const { assert(!"NIY"); }
-
     // const and data-independent -- safe
     int MonitorElement::getNbinsX() const { assert(!"NIY"); }
     int MonitorElement::getNbinsY() const { assert(!"NIY"); }

@@ -148,10 +148,6 @@ namespace dqm {
       using MonitorElementData::DQM_SCOPE_RUN;
       using MonitorElementData::Scope;
 
-    private:
-      mutable tbb::spin_mutex lock_;
-      std::vector<QReport> qreports_;  //< QReports associated to this object.
-
     public:
       MonitorElement(MonitorElementData const& data) : MonitorElementData(data){};
       MonitorElement& operator=(const MonitorElement&) = delete;
@@ -258,6 +254,9 @@ namespace dqm {
       // Not sure what to do with this. Let's make it deprecated for the beginning.
       DQM_DEPRECATED
       virtual void Reset();
+      DQM_DEPRECATED
+      virtual void softReset();
+
 
       // mostly used for IO, should be private.
       DQM_DEPRECATED
@@ -301,7 +300,6 @@ namespace dqm {
 
     protected:
       void doFill(int64_t x) const;
-      TH1* accessRootObject(const char* func, int reqdim) const;
 
     public:
       // const and data-independent -- safe
@@ -340,11 +338,15 @@ namespace dqm {
       virtual void setAxisTimeDisplay(int value, int axis = 1);
       virtual void setAxisTimeFormat(const char* format = "", int axis = 1);
       virtual void setTitle(const std::string& title);
+      // --- Operations that origianted in ConcurrentME ---
+      virtual void setXTitle(std::string const& title);
+      virtual void setYTitle(std::string const& title);
+      virtual void enableSumw2();
+      virtual void disableAlphanumeric();
+      virtual void setOption(const char* option);
 
-      // ------------ Operations for MEs that are normally never reset ---------
-      DQM_DEPRECATED
-      void softReset();
 
+      // these should be non-const, since they are potentially not thread-safe
       virtual TObject* getRootObject() const;
       virtual TH1* getTH1() const;
       virtual TH1F* getTH1F() const;
@@ -357,22 +359,41 @@ namespace dqm {
       virtual TProfile* getTProfile() const;
       virtual TProfile2D* getTProfile2D() const;
 
-      // probably we will drop references entirely.
-      DQM_DEPRECATED
-      virtual TObject* getRefRootObject() const;
-
       virtual int64_t getIntValue() const;
       virtual double getFloatValue() const;
       virtual const std::string& getStringValue() const;
 
-      // --- Operations that origianted in ConcurrentME ---
-      virtual void setXTitle(std::string const& title);
-      virtual void setYTitle(std::string const& title);
-      virtual void enableSumw2();
-      virtual void disableAlphanumeric();
-      virtual void setOption(const char* option);
+      // probably we will drop references entirely.
+      DQM_DEPRECATED
+      virtual TObject* getRefRootObject() const;
 
+    public:
+      // but internal, maybe figure out how to make them accessible as friends
+
+      // Do a full type/axis/range consistency check.
+      // TODO: figure out what to do with inconsistent MonitorElement::Scope.
       static bool checkCompatibility(MonitorElement const& a, MonitorElement const& b);
+      // Return the backing ROOT object and give up its ownership. This
+      // effectively destroys the ME. Return nullptr if the ME does not own the
+      // ROOT object.
+      virtual TH1* release();
+      // Make sure we own the ROOT object by clone'ing it if needed. Needs to
+      // be called in all non-const and even some const methods (the fill
+      // methods). This is only required for dqm::harvesting and causes some 
+      // overhead in dqm::reco, so maybe move it down in the hierarchy.
+      void makeMutable() const;
+
+    private:
+      // Any potentially mutating access to object_ must hold this lock. We
+      // don't necessarily own object_, but if we don't, modifications are
+      // forbidden either ways.
+      mutable tbb::spin_mutex lock_;
+      // this is set if we don't own the ROOT object. In that case, mutations
+      // are still possible, but will automatically create a copy and reset
+      // this flag.
+      mutable bool is_readonly_;
+      std::vector<QReport> qreports_;  //< QReports associated to this object.
+
     };
 
   }  // namespace legacy
@@ -392,8 +413,6 @@ namespace dqm {
   DQM_DEPRECATED thing { assert(!"Operation not permitted."); }
       BAN(virtual void setEfficiencyFlag())
       BAN(virtual void Reset())
-    protected:
-      BAN(TH1* accessRootObject(const char* func, int reqdim) const)
 
     public:
       BAN(virtual double getMean(int axis = 1) const)
@@ -457,8 +476,6 @@ namespace dqm {
 #define UNBAN(name) using dqm::legacy::MonitorElement::name;
       UNBAN(setEfficiencyFlag)
       UNBAN(Reset)
-    protected:
-      UNBAN(accessRootObject)
 
     public:
       UNBAN(getMean)
@@ -1001,11 +1018,49 @@ namespace dqm {
       }
       std::string const& pwd() { return this->IBooker<ME, DQMStore<ME>>::pwd(); }
 
-      // internal -- figure out better prottection.
+    public:
+      // internal -- figure out better protection.
+      
+      // Make a ME owned by this DQMStore. Will return a pointer to a ME owned
+      // by this DQMStore: either an existing ME matching the key of `data` or
+      // a newly added one.
+      // Will take ownership of the ROOT object in `data`, deleting it if not
+      // needed.
       ME* putME(MonitorElementData const& data);
+      // Turn the MEs associated with t, run, lumi into a read-only product. No
+      // copies happen here, instead, we invalidate (or read-only?) the MEs.
+      // TODO: Maybe we can do the clone/reset dance of run/lumi MEs here?
+      MonitorElementCollection toProduct(edm::Transition t, edm::RunNumber_t run, edm::LuminosityBlockNumber_t lumi);
+      // Register a set of MEs to inputs_. Everything we do here needs to be
+      // lazy, since we will usually register lots of products but read only
+      // few MEs from them.
+      void registerProduct(edm::Handle<MonitorElementCollection>  mes);
+      // Find MEs matching this key in the inputs_ and create MEs for them in
+      // localmes_. Needs to handle priority (we could have e.g. harvesting and
+      // reco versions of the same ME available). Also need to handle updating
+      // MEs read from lumi products.
+      void importFromProduct(MonitorElementData::Key const& key);
 
     private:
+      // MEs owned by us. All book/get interactions will hand out pointers into
+      // this stucture. The MEs are shared over multiple edm::stream copies of
+      // a module, if applicable. They may or may not own a ROOT object: in
+      // harvesting, we also keep read-only versions of foreign MEs here.
+      // Expect 10-10000 entries.
       std::map<MonitorElementData::Key, std::shared_ptr<ME>> localmes_;
+      // DQMStore instnaces of all edm::stream copies of the same module. Needs
+      // to be populated by globalBeginJob/beginJob before booking, so that the
+      // booking code can query all DQMStores for existing MEs.
+      // Not needed after booking, but we may book multiple times in one job.
+      // Expect 10 entries.
+      std::vector<DQMStore const*> siblings_;
+      // edm products that we can read MEs from. On get, we will implicitly
+      // create a read-only ME that does not own a ROOT object in our localmes_
+      // from the data here, if we found the requested ME. If a non-const
+      // method on such a ME is called, it will again implicitly copy the ROOT
+      // object to own it.
+      // Expect 100-1000 entries.
+      std::vector<edm::Handle<MonitorElementCollection>> inputs_;
     };
   }  // namespace implementation
   namespace reco {
