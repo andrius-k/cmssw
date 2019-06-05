@@ -16,6 +16,7 @@
 #include <string>
 #include <thread>
 #include <vector>
+#include <tuple>
 #include <memory>
 #include <cxxabi.h>
 #include <execinfo.h>
@@ -41,8 +42,8 @@
 #include "FWCore/Utilities/interface/Transition.h"
 #include "DataFormats/Common/interface/Handle.h"
 #include "DataFormats/Provenance/interface/LuminosityBlockRange.h"
+
 #include "DataFormats/Histograms/interface/MonitorElementCollection.h"
-#include <tuple>
 
 #if __GNUC__ && !defined DQM_DEPRECATED
 #define DQM_DEPRECATED __attribute__((deprecated))
@@ -1047,6 +1048,10 @@ namespace dqm {
       // reco versions of the same ME available). Also need to handle updating
       // MEs read from lumi products.
       void importFromProduct(MonitorElementData::Key const& key);
+      // to be used only by DQMEDAnalyzer.
+      void setSiblings(std::vector<std::shared_ptr<DQMStore>> const* siblings) {
+        siblings_ = siblings;
+      }
 
     private:
       // MEs owned by us. All book/get interactions will hand out pointers into
@@ -1060,7 +1065,7 @@ namespace dqm {
       // booking code can query all DQMStores for existing MEs.
       // Not needed after booking, but we may book multiple times in one job.
       // Expect 10 entries.
-      std::vector<DQMStore const*> siblings_;
+      std::vector<std::shared_ptr<DQMStore>> const* siblings_;
       // edm products that we can read MEs from. On get, we will implicitly
       // create a read-only ME that does not own a ROOT object in our localmes_
       // from the data here, if we found the requested ME. If a non-const
