@@ -471,6 +471,69 @@ namespace dqm {
       assert(!"NIY");
     }
 
+    template <class ME>
+    MonitorElementCollection DQMStore<ME>::toProduct(edm::Transition t, edm::RunNumber_t run, edm::LuminosityBlockNumber_t lumi) {
+      if(t == edm::Transition::EndRun) {
+        // Take only run into consideration
+        // auto check = [t](auto a, auto&& b) { return a < b; };
+
+        auto it = localmes_.begin();
+        while (it != localmes_.end()) {
+          auto endRun = std::get<5>(it->first);
+
+          if(run == endRun) {
+            auto startRun = std::get<3>(it->first);
+            auto startLuminosityBlock = std::get<4>(it->first);
+            auto endLuminosityBlock = std::get<6>(it->first);
+
+            MonitorElementCollection product;
+            MonitorElementData data;
+            
+            data.dirname_ = std::get<0>(it->first);
+            data.objname_ = std::get<1>(it->first);
+            data.scope_ = std::get<2>(it->first);
+            data.coveredrange_ = LuminosityBlockRange(startRun, startLuminosityBlock, endRun, endLuminosityBlock);
+            data.scalar_ = it->second->getScalar();
+            data.object_ = it->second->getTH1RootObject();
+
+            product.insert(data);
+
+            delete *it;
+            it = localmes_.erase(it);
+
+            return product;
+          }
+        }
+      }
+      else if(t == edm::Transition::EndLuminosityBlock) {
+        // Take run and lumi into consideration
+      }
+
+      assert(!"toProduct called on non end event transition");
+
+
+      // if(t == edm::Transition::EndLuminosityBlock || t == edm::Transition::EndRun) {
+      //   auto it = inputs_.begin();
+      //   while (it != inputs_.end()) {
+      //     MonitorElementData::Key key = it->key();
+      //     auto endRun = std::get<5>(key)
+      //     auto endLumi = std::get<6>(key)
+
+      //     if(endRun == run && endLumi == lumi) {
+      //       MonitorElementCollection product;
+
+      //       delete *it;
+      //       it = v.erase(it);
+      //     }
+      //     else {
+      //       ++it;
+      //     }
+      //   }
+      // }
+
+      // assert(!"toProduct called on non end event transition");
+    }
+
   }  // namespace implementation
 }  // namespace dqm
 

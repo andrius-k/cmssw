@@ -38,6 +38,10 @@
 
 #include <tbb/spin_mutex.h>
 
+#include "FWCore/Utilities/interface/Transition.h"
+#include "DataFormats/Common/interface/Handle.h"
+
+#include "DataFormats/Provenance/interface/LuminosityBlockRange.h"
 #include "DataFormats/Histograms/interface/MonitorElementCollection.h"
 #include <tuple>
 
@@ -359,6 +363,11 @@ namespace dqm {
       virtual TProfile* getTProfile() const;
       virtual TProfile2D* getTProfile2D() const;
 
+      // Used only internally
+    public:
+      virtual TH1* getTH1RootObject() const;
+      virtual MonitorElementData::Scalar getScalar() const;
+
       virtual int64_t getIntValue() const;
       virtual double getFloatValue() const;
       virtual const std::string& getStringValue() const;
@@ -454,6 +463,11 @@ namespace dqm {
       BAN(virtual TH3F* getTH3F() const)
       BAN(virtual TProfile* getTProfile() const)
       BAN(virtual TProfile2D* getTProfile2D() const)
+
+      // Used only internally
+    public:
+      virtual TH1* getTH1RootObject() const;
+      virtual MonitorElementData::Scalar getScalar() const;
 
       BAN(virtual int64_t getIntValue() const)
       BAN(virtual double getFloatValue() const)
