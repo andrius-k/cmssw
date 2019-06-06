@@ -40,7 +40,6 @@
 
 #include "FWCore/Utilities/interface/Transition.h"
 #include "DataFormats/Common/interface/Handle.h"
-
 #include "DataFormats/Provenance/interface/LuminosityBlockRange.h"
 #include "DataFormats/Histograms/interface/MonitorElementCollection.h"
 #include <tuple>
