@@ -362,10 +362,7 @@ namespace dqm {
       virtual TProfile* getTProfile() const;
       virtual TProfile2D* getTProfile2D() const;
 
-      // Used only internally
     public:
-      virtual TH1* getTH1RootObject() const;
-      virtual MonitorElementData::Scalar getScalar() const;
 
       virtual int64_t getIntValue() const;
       virtual double getFloatValue() const;
@@ -390,6 +387,8 @@ namespace dqm {
       // methods). This is only required for dqm::harvesting and causes some 
       // overhead in dqm::reco, so maybe move it down in the hierarchy.
       void makeMutable() const;
+
+      virtual MonitorElementData::Scalar getScalar() const { return scalar_; }
 
     private:
       // Any potentially mutating access to object_ must hold this lock. We
@@ -462,11 +461,6 @@ namespace dqm {
       BAN(virtual TH3F* getTH3F() const)
       BAN(virtual TProfile* getTProfile() const)
       BAN(virtual TProfile2D* getTProfile2D() const)
-
-      // Used only internally
-    public:
-      virtual TH1* getTH1RootObject() const;
-      virtual MonitorElementData::Scalar getScalar() const;
 
       BAN(virtual int64_t getIntValue() const)
       BAN(virtual double getFloatValue() const)

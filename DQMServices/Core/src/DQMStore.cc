@@ -509,7 +509,7 @@ namespace dqm {
           data.scope_ = std::get<2>(it->first);
           data.coveredrange_ = edm::LuminosityBlockRange(startRun, startLuminosityBlock, endRun, endLuminosityBlock);
           data.scalar_ = it->second->getScalar();
-          data.object_ = it->second->getTH1RootObject();
+          data.object_ = it->second->release();
 
           product.push_back(data);
 

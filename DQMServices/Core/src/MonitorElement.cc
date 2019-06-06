@@ -121,6 +121,14 @@ namespace dqm {
       }
     }
 
+    TH1* MonitorElement::release() {
+      std::scoped_lock lock(lock_);
+      kind_ = DQM_KIND_INVALID;
+      auto ptr = object_;
+      object_ = nullptr;
+      return ptr;
+    }
+
     std::string MonitorElement::valueString() const { assert(!"NIY"); }
     /* almost unused */ std::string MonitorElement::tagString() const { assert(!"NIY"); }
     /* almost unused */ std::string MonitorElement::tagLabelString() const { assert(!"NIY"); }
