@@ -1,31 +1,35 @@
 #ifndef DQMServices_Core_DQMEDAnalyzer_h
 #define DQMServices_Core_DQMEDAnalyzer_h
 
-#include "DQMServices/Core/interface/oneDQMEDAnalyzer.h"
 #include "DQMServices/Core/interface/DQMStore.h"
+
+#include "FWCore/Framework/interface/stream/EDProducer.h"
+#include "FWCore/Utilities/interface/EDPutToken.h"
+#include "DataFormats/Histograms/interface/DQMToken.h"
 
 namespace dqm {
   namespace reco {
     class DQMStoreGroup {
-      mutable std::vector<std::shared_ptr<DQMStore>> dqmstores_;
+      // Use the internal type here so DQMstore can easily access it.
+      mutable std::vector<std::shared_ptr<dqm::implementation::DQMStore<MonitorElement>>> dqmstores_;
       mutable std::mutex lock_; 
       public:
       auto forId(int id) const {
         auto lock = std::scoped_lock(lock_);
-        if (dqmstores_.size()-1 < id) {
+        if (dqmstores_.size() < ((unsigned) id+1)) {
           dqmstores_.resize(id+1);
         }
         if (!dqmstores_[id]) {
-          dqmstores[id] = std::make_shared<DQMStore>();
+          dqmstores_[id] = std::make_shared<DQMStore>();
         }
         // we thread-unsafely leak a reference here. This should only be used
         // after intialisation once this structure is no longer modified.
-        dqmstores[id]->setSiblings(&dqmstores_);
-        return dqmstores[id];
+        dqmstores_[id]->setSiblings(&dqmstores_);
+        return std::dynamic_pointer_cast<DQMStore>(dqmstores_[id]);
       }
     };
 
-class DQMEDAnalyzer : edm::stream::EDProducer<
+class DQMEDAnalyzer : public edm::stream::EDProducer<
   // We use a lot of edm features. We need all the caches to get the global 
   // transitions, where we can pull the (shared) MonitorElements out of the 
   // DQMStores.
@@ -37,7 +41,13 @@ class DQMEDAnalyzer : edm::stream::EDProducer<
   // This feature is essentially made for DQM and required to get per-event calls.
   edm::Accumulator
   > {
+protected:
+  std::shared_ptr<DQMStore> dqmstore_;
+
 public:
+  typedef dqm::reco::DQMStore DQMStore;
+  typedef dqm::reco::MonitorElement MonitorElement;
+  
   // The following EDM methods are listed (as much as possible) in the order 
   // that edm calls them in.
 
@@ -46,18 +56,20 @@ public:
   }
 
   // TODO: will the second argument break every single derived module?
-  DQMEDAnalyzer(edm::ParameterSet const& /*, DQMStoreGroup const* */) {
+  DQMEDAnalyzer(edm::ParameterSet const& pset /*, DQMStoreGroup const* */)  {
+  }
+  DQMEDAnalyzer()  {
   }
 
   void beginStream(edm::StreamID id) {
     dqmstore_ = globalCache()->forId(id);
   }
 
-  static std::shared_ptr<MonitorElementCollection> globalBeginRunSumary(edm::Run const&, edm::EventSetup const&, RunContxt const*) {
+  static std::shared_ptr<MonitorElementCollection> globalBeginRunSummary(edm::Run const&, edm::EventSetup const&, RunContext const*) {
     return std::make_shared<MonitorElementCollection>();
   }
 
-  void beginRun(edm::Run const& run, edm::EventSetup const& setup) final {
+  void beginRun(edm::Run const& run, edm::EventSetup const& setup) {
     dqmBeginRun(run, setup);
     // TODO: make sure booking does set the run number for each ME.
     // So if we see two runs, we can re-book without conflicts and can choose
@@ -72,39 +84,39 @@ public:
     return std::make_shared<MonitorElementCollection>();
   }
 
-  void beginLuminosityBlock(edm::LuminosityBlock const& lumi, edm::EventSetup const& setup) override {
+  void beginLuminosityBlock(edm::LuminosityBlock const& lumi, edm::EventSetup const& setup) {
     dqmBeginLuminosityBlock(lumi, setup);
   }
 
-  void accumulate(edm::Event const& ev, edm::EventSetup const& es) final { 
+  void accumulate(edm::Event const& ev, edm::EventSetup const& es) { 
     analyze(ev, es); 
   }
 
-  void endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&) override {};
+  void endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&) {};
 
-  void endLuminosityBlockSummary(edm::LuminosityBlock const& lumi, edm::EventSetup const& setup, LuminosityBlockContext const* context) {};
+  void endLuminosityBlockSummary(edm::LuminosityBlock const& lumi, edm::EventSetup const& setup, MonitorElementCollection* data) const {};
 
-  static void globalEndLuminosityBlockSummary(edm::LuminosityBlock const& lumi, edm::EventSetup const& setup, LuminosityBlockContext const* context) {
+  static void globalEndLuminosityBlockSummary(edm::LuminosityBlock const& lumi, edm::EventSetup const& setup, LuminosityBlockContext const* context, MonitorElementCollection* data) {
     // TODO: all streams are done with the lumi, we can pull the MEs from the
-    // DQMStores. We have a const* here, I hope it is fine to modify that.
+    // DQMStores.
   }
 
-  static void endLuminosityBlockProduce(edm::LuminosityBlock& lumi, edm::EventSetup const& setup, LuminosityBlockContext const* context, MonitorElementCollection const* data) final {
+  static void globalEndLuminosityBlockProduce(edm::LuminosityBlock& lumi, edm::EventSetup const& setup, LuminosityBlockContext const* context, MonitorElementCollection const* data) {
     // TODO: this should be no more than moving the `data` into the `lumi`.
   }
 
-  void endRun(edm::Run const& run, edm::EventSetup const& setup) override {};
+  void endRun(edm::Run const& run, edm::EventSetup const& setup) {};
 
-  void endRunSummary(edm::Run const& run, edm::EventSetup const& setup, MonitorElementCollection* data) override {};
+  void endRunSummary(edm::Run const& run, edm::EventSetup const& setup, MonitorElementCollection* data) const {};
 
-  static void globalEndRunSummary(edm::Run const& run, edm::EventSetup const& setup, RunContxt const* context) override {
+  static void globalEndRunSummary(edm::Run const& run, edm::EventSetup const& setup, RunContext const* context, MonitorElementCollection const* data) {
     // TODO: all streams are done with the run, we can pull the MEs from the
-    // DQMStores. We have a const* here, I hope it is fine to modify that.
+    // DQMStores.
   }
 
-  static void globalEndRunProduce(edm::Run& run, edm::EventSetup const& setup, MonitorElementCollection const* data) override { 
+  static void globalEndRunProduce(edm::Run& run, edm::EventSetup const& setup, RunContext const* context, MonitorElementCollection const* data) { 
     // TODO: this should be no more than moving the `data` into the `run`.
-    run.emplace<DQMToken>(runToken_);
+    //run.emplace<DQMToken>(runToken_);
   }
 
   static void globalEndJob(DQMStoreGroup*) {};
@@ -114,7 +126,7 @@ public:
   virtual void dqmBeginRun(edm::Run const& run, edm::EventSetup const& setup) {};
   virtual void dqmBeginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&) {};
   virtual void analyze(edm::Event const&, edm::EventSetup const&) {};
-}
+};
 
   }
 }
