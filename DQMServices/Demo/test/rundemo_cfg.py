@@ -6,13 +6,15 @@ from DQMServices.Core.DQMEDHarvester import DQMEDHarvester
 process = cms.Process("TEST")
 
 process.options = cms.untracked.PSet()
-process.options.numberOfThreads = cms.untracked.uint32(10)
-process.options.numberOfStreams = cms.untracked.uint32(10)
+process.options.numberOfThreads = cms.untracked.uint32(1)
+process.options.numberOfStreams = cms.untracked.uint32(1)
 
-process.source = cms.Source("EmptySource", numberEventsInRun = cms.untracked.uint32(10000),
+process.source = cms.Source("EmptySource", numberEventsInRun = cms.untracked.uint32(10),
                             firstLuminosityBlock = cms.untracked.uint32(1),
                             firstEvent = cms.untracked.uint32(1),
-                            numberEventsInLuminosityBlock = cms.untracked.uint32(1000))
+                            numberEventsInLuminosityBlock = cms.untracked.uint32(5))
+
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10) )
 
 process.ana1 = DQMEDAnalyzer("DemoNormalDQMEDAnalyzer",
   folder = cms.string("DemoSubsystem1"),
@@ -42,10 +44,11 @@ process.harv3 = DQMEDHarvester("DemoHarvester",
   target = cms.string("DemoSubsystem1_lumisummary"),
 )
 
-process.demo_reco_dqm = cms.Sequence(process.ana1 + process.ana2 + process.ana3 + process.ana4)
-process.demo_harvesting = cms.Sequence(process.harv1 + process.harv2 + process.harv3)
+# process.demo_reco_dqm = cms.Task(process.ana1, process.ana2)
+# process.demo_harvesting = cms.Task(process.harv1, process.harv2, process.harv3)
 
-process.p = cms.Path(process.demo_reco_dqm + process.demo_harvesting)
+# process.p = cms.Path(process.demo_reco_dqm, process.demo_harvesting)
+# process.p = cms.Path()
 
 process.out = cms.OutputModule(
   "DQMRootOutputModule",
@@ -64,6 +67,6 @@ process.o = cms.EndPath(process.out + process.dqmSaver)
 
 process.add_(cms.Service("Tracer"))
 
-from FWCore.ParameterSet.Utilities import convertToUnscheduled
-process = convertToUnscheduled(process)
+# from FWCore.ParameterSet.Utilities import convertToUnscheduled
+# process = convertToUnscheduled(process)
 
