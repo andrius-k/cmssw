@@ -83,4 +83,8 @@
  </class>
  <class name="edm::Wrapper<MonitorElementCollection>"/>
 
+ <class name="vector<MonitorElementData>" ClassVersion="6">
+  <version ClassVersion="6" checksum="2696722729"/>
+ </class>
+
 </lcgdict>
