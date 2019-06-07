@@ -522,6 +522,25 @@ namespace dqm {
       assert(!"toProduct called with run number and/or lumi that are not present in DQMStore");
     }
 
+    template <class ME>
+    void DQMStore<ME>::registerProduct(edm::Handle<MonitorElementCollection>  mes) {
+      if (!mes.isValid()) return;
+
+      for (auto h : inputs_) {
+        if (h.isValid()) {
+          if (h.product() == mes.product()) {
+            // we already know this product.
+            return;
+          } else {
+            // product not valid, we might drop it. (TODO)
+            // Can this happen if e.g. Lumi products go out of scope?
+          }
+        }
+      }
+
+      inputs_.push_back(mes);
+    }
+
   }  // namespace implementation
 }  // namespace dqm
 
