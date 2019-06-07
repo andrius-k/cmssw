@@ -5,6 +5,10 @@ from DQMServices.Core.DQMEDHarvester import DQMEDHarvester
 
 process = cms.Process("TEST")
 
+process.options = cms.untracked.PSet()
+process.options.numberOfThreads = cms.untracked.uint32(10)
+process.options.numberOfStreams = cms.untracked.uint32(10)
+
 process.source = cms.Source("EmptySource", numberEventsInRun = cms.untracked.uint32(10000),
                             firstLuminosityBlock = cms.untracked.uint32(1),
                             firstEvent = cms.untracked.uint32(1),
@@ -59,4 +63,7 @@ process.dqmSaver = cms.EDAnalyzer("DQMFileSaver",
 process.o = cms.EndPath(process.out + process.dqmSaver)
 
 process.add_(cms.Service("Tracer"))
+
+from FWCore.ParameterSet.Utilities import convertToUnscheduled
+process = convertToUnscheduled(process)
 
