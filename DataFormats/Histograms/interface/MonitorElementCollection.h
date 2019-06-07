@@ -111,14 +111,11 @@ struct MonitorElementData {
   edm::LuminosityBlockRange coveredrange_;
   Scope scope_;
 
+  // We don't declare/ban any defualt constructors.
   // Copying with the root object pointer inside is dangerous, but very useful
   // when used as a base class.
-  MonitorElementData() = default;
-  MonitorElementData(MonitorElementData const&) = default;
-  MonitorElementData(MonitorElementData&&) = default;
   // We don't delete the ROOT object at destruction so that it is easier/safer
   // to use this as a base class for the actual, mutable ME classes.
-  ~MonitorElementData() = default;
 
   // Metadata tuple. The range is included here in case we have e.g.
   // multiple per-lumi histograms in one collection. For a logical comparison,

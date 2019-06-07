@@ -12,7 +12,7 @@ namespace edm::stream::impl {
   T* makeStreamModule(edm::ParameterSet const& iPSet, dqm::reco::DQMStoreGroup const*) {
     return new T(iPSet);
   }
-} // namespace edm::stream::impl
+}  // namespace edm::stream::impl
 
 #include "DQMServices/Core/interface/DQMStore.h"
 
@@ -43,17 +43,37 @@ namespace dqm {
       }
     };
 
+    class MonitorElementCollectionHolder {
+      // This mostly exists to provide a const swap().
+      // We swap MonitorElementCollection data a lot, the implementation is
+      // std::vector::swap which is zero-copy and easy to reason about in
+      // terms of ownership.
+      mutable MonitorElementCollection mes;
+      mutable std::mutex lock_;
+
+    public:
+      void swap(MonitorElementCollection& other) const {
+        auto lock = std::scoped_lock(lock_);
+        mes.swap(other);
+      }
+    };
+
     class DQMEDAnalyzer : public edm::stream::EDProducer<
                               // We use a lot of edm features. We need all the caches to get the global
                               // transitions, where we can pull the (shared) MonitorElements out of the
                               // DQMStores.
                               edm::GlobalCache<DQMStoreGroup>,
                               edm::EndLuminosityBlockProducer,
-                              edm::LuminosityBlockSummaryCache<MonitorElementCollection>,
+                              edm::LuminosityBlockSummaryCache<MonitorElementCollectionHolder>,
                               edm::EndRunProducer,
-                              edm::RunSummaryCache<MonitorElementCollection>,
+                              edm::RunSummaryCache<MonitorElementCollectionHolder>,
                               // This feature is essentially made for DQM and required to get per-event calls.
                               edm::Accumulator> {
+      // TODO: seems we cannot use tokens here, since we have to put() from a
+      // static context.
+      //private:
+      //  edm::EDPutTokenT<MonitorElementCollection> lumiToken_;
+      //  edm::EDPutTokenT<MonitorElementCollection> runToken_;
     protected:
       std::shared_ptr<DQMStore> dqmstore_;
 
@@ -68,16 +88,17 @@ namespace dqm {
         return std::make_unique<DQMStoreGroup>();
       }
 
-      // TODO: will the second argument break every single derived module?
-      DQMEDAnalyzer(edm::ParameterSet const& pset /*, DQMStoreGroup const* */) {}
-      DQMEDAnalyzer() {}
+      DQMEDAnalyzer() {
+        produces<MonitorElementCollection, edm::Transition::EndLuminosityBlock>("DQM_GENERATION_RECO");
+        produces<MonitorElementCollection, edm::Transition::EndRun>("DQM_GENERATION_RECO");
+      }
 
       void beginStream(edm::StreamID id) { dqmstore_ = globalCache()->forId(id); }
 
-      static std::shared_ptr<MonitorElementCollection> globalBeginRunSummary(edm::Run const&,
-                                                                             edm::EventSetup const&,
-                                                                             RunContext const*) {
-        return std::make_shared<MonitorElementCollection>();
+      static std::shared_ptr<MonitorElementCollectionHolder> globalBeginRunSummary(edm::Run const&,
+                                                                                   edm::EventSetup const&,
+                                                                                   RunContext const*) {
+        return std::make_shared<MonitorElementCollectionHolder>();
       }
 
       void beginRun(edm::Run const& run, edm::EventSetup const& setup) {
@@ -90,10 +111,10 @@ namespace dqm {
         this->bookHistograms(*dqmstore_, run, setup);
       }
 
-      static std::shared_ptr<MonitorElementCollection> globalBeginLuminosityBlockSummary(
+      static std::shared_ptr<MonitorElementCollectionHolder> globalBeginLuminosityBlockSummary(
           edm::LuminosityBlock const& lumi, edm::EventSetup const& setup, LuminosityBlockContext const* constex) {
         // this is just a placeholder, we swap in the real thing in endLuminosityBlockSummary.
-        return std::make_shared<MonitorElementCollection>();
+        return std::make_shared<MonitorElementCollectionHolder>();
       }
 
       void beginLuminosityBlock(edm::LuminosityBlock const& lumi, edm::EventSetup const& setup) {
@@ -106,12 +127,12 @@ namespace dqm {
 
       void endLuminosityBlockSummary(edm::LuminosityBlock const& lumi,
                                      edm::EventSetup const& setup,
-                                     MonitorElementCollection* data) const {};
+                                     MonitorElementCollectionHolder* data) const {};
 
       static void globalEndLuminosityBlockSummary(edm::LuminosityBlock const& lumi,
                                                   edm::EventSetup const& setup,
                                                   LuminosityBlockContext const* context,
-                                                  MonitorElementCollection* data) {
+                                                  MonitorElementCollectionHolder* data) {
         // TODO: all streams are done with the lumi, we can pull the MEs from the
         // DQMStores.
       }
@@ -119,18 +140,22 @@ namespace dqm {
       static void globalEndLuminosityBlockProduce(edm::LuminosityBlock& lumi,
                                                   edm::EventSetup const& setup,
                                                   LuminosityBlockContext const* context,
-                                                  MonitorElementCollection const* data) {
-        // TODO: this should be no more than moving the `data` into the `lumi`.
+                                                  MonitorElementCollectionHolder const* data) {
+        auto prod = std::make_unique<MonitorElementCollection>();
+        data->swap(*prod);
+        lumi.put(std::move(prod), "DQM_GENERATION_RECO");
       }
 
       void endRun(edm::Run const& run, edm::EventSetup const& setup){};
 
-      void endRunSummary(edm::Run const& run, edm::EventSetup const& setup, MonitorElementCollection* data) const {};
+      void endRunSummary(edm::Run const& run,
+                         edm::EventSetup const& setup,
+                         MonitorElementCollectionHolder* data) const {};
 
       static void globalEndRunSummary(edm::Run const& run,
                                       edm::EventSetup const& setup,
                                       RunContext const* context,
-                                      MonitorElementCollection const* data) {
+                                      MonitorElementCollectionHolder const* data) {
         // TODO: all streams are done with the run, we can pull the MEs from the
         // DQMStores.
       }
@@ -138,9 +163,10 @@ namespace dqm {
       static void globalEndRunProduce(edm::Run& run,
                                       edm::EventSetup const& setup,
                                       RunContext const* context,
-                                      MonitorElementCollection const* data) {
-        // TODO: this should be no more than moving the `data` into the `run`.
-        //run.emplace<DQMToken>(runToken_);
+                                      MonitorElementCollectionHolder const* data) {
+        auto prod = std::make_unique<MonitorElementCollection>();
+        data->swap(*prod);
+        run.put(std::move(prod), "DQM_GENERATION_RECO");
       }
 
       static void globalEndJob(DQMStoreGroup*){};
