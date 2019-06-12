@@ -1049,8 +1049,9 @@ namespace dqm {
       // MEs read from lumi products.
       void importFromProduct(MonitorElementData::Key const& key);
       // to be used only by DQMEDAnalyzer.
-      void setSiblings(std::vector<std::shared_ptr<DQMStore<ME>>> const* siblings) {
-        siblings_ = siblings;
+      void setMaster(std::shared_ptr<DQMStore<ME>> master, std::mutex* lock) {
+        masterlock_ = lock;
+        master_ = master;
       }
 
     private:
@@ -1060,12 +1061,15 @@ namespace dqm {
       // harvesting, we also keep read-only versions of foreign MEs here.
       // Expect 10-10000 entries.
       std::map<MonitorElementData::Key, std::shared_ptr<ME>> localmes_;
-      // DQMStore instnaces of all edm::stream copies of the same module. Needs
-      // to be populated by globalBeginJob/beginJob before booking, so that the
-      // booking code can query all DQMStores for existing MEs.
-      // Not needed after booking, but we may book multiple times in one job.
-      // Expect 10 entries.
-      std::vector<std::shared_ptr<DQMStore<ME>>> const* siblings_;
+      // in case of reco and edm::stream, we keep areference to the master
+      // DQMStore here. All booking calls should be forwarded ther, and no
+      // other operations should be required in reco.
+      // All accesses have to take the lock, there will be multiple threads
+      // accessing this instance!
+      // TODO: use some sort of structure that enforces taking the lock before
+      // using the pointer.
+      std::shared_ptr<DQMStore<ME>> master_;
+      std::mutex* masterlock_;
       // edm products that we can read MEs from. On get, we will implicitly
       // create a read-only ME that does not own a ROOT object in our localmes_
       // from the data here, if we found the requested ME. If a non-const

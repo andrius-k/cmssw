@@ -22,25 +22,10 @@ namespace edm::stream::impl {
 
 namespace dqm {
   namespace reco {
-    class DQMStoreGroup {
+    struct DQMStoreGroup {
       // Use the internal type here so DQMstore can easily access it.
-      mutable std::vector<std::shared_ptr<dqm::implementation::DQMStore<MonitorElement>>> dqmstores_;
+      mutable std::shared_ptr<dqm::implementation::DQMStore<MonitorElement>> master_ = std::make_shared<dqm::implementation::DQMStore<MonitorElement>>();
       mutable std::mutex lock_;
-
-    public:
-      auto forId(int id) const {
-        auto lock = std::scoped_lock(lock_);
-        if (dqmstores_.size() < ((unsigned)id + 1)) {
-          dqmstores_.resize(id + 1);
-        }
-        if (!dqmstores_[id]) {
-          dqmstores_[id] = std::make_shared<DQMStore>();
-        }
-        // we thread-unsafely leak a reference here. This should only be used
-        // after intialisation once this structure is no longer modified.
-        dqmstores_[id]->setSiblings(&dqmstores_);
-        return std::dynamic_pointer_cast<DQMStore>(dqmstores_[id]);
-      }
     };
 
     class MonitorElementCollectionHolder {
@@ -95,7 +80,10 @@ public:
     produces<MonitorElementCollection, edm::Transition::EndRun>("DQMGenerationRecoRun");
   }
 
-  void beginStream(edm::StreamID id) { dqmstore_ = globalCache()->forId(id); }
+      void beginStream(edm::StreamID id) { 
+        dqmstore_ = std::make_unique<DQMStore>();
+        dqmstore_->setMaster(globalCache()->master_, &globalCache()->lock_);
+      }
 
   static std::shared_ptr<dqm::reco::MonitorElementCollectionHolder> globalBeginRunSummary(edm::Run const&,
                                                                                           edm::EventSetup const&,
@@ -135,8 +123,10 @@ public:
                                               edm::EventSetup const& setup,
                                               LuminosityBlockContext const* context,
                                               dqm::reco::MonitorElementCollectionHolder* data) {
-    // TODO: all streams are done with the lumi, we can pull the MEs from the
-    // DQMStores.
+        auto lock = std::scoped_lock(context->global()->lock_);
+        auto master = context->global()->master_;
+        auto out = master->toProduct(edm::Transition::EndLuminosityBlock, lumi.run(), lumi.luminosityBlock());
+        data->swap(out);
   }
 
   static void globalEndLuminosityBlockProduce(edm::LuminosityBlock& lumi,
@@ -158,8 +148,10 @@ public:
                                   edm::EventSetup const& setup,
                                   RunContext const* context,
                                   dqm::reco::MonitorElementCollectionHolder const* data) {
-    // TODO: all streams are done with the run, we can pull the MEs from the
-    // DQMStores.
+        auto lock = std::scoped_lock(context->global()->lock_);
+        auto master = context->global()->master_;
+        auto out = master->toProduct(edm::Transition::EndRun, run.run(), 0);
+        data->swap(out);
   }
 
   static void globalEndRunProduce(edm::Run& run,
