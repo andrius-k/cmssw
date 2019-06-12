@@ -388,8 +388,10 @@ namespace dqm {
       // methods). This is only required for dqm::harvesting and causes some 
       // overhead in dqm::reco, so maybe move it down in the hierarchy.
       void makeMutable() const;
-
-      virtual MonitorElementData::Scalar getScalar() const { return scalar_; }
+      // Provide access to the internal fields.
+      // Be careful with the root pointers. The const is also serious; changing
+      // parts of the key could corrupt the sorted datastructures.
+      MonitorElementData const* internal() { return this; }
 
     private:
       // Any potentially mutating access to object_ must hold this lock. We

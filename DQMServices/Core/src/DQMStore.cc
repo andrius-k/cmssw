@@ -498,31 +498,46 @@ namespace dqm {
         return false;
       };
 
+      MonitorElementCollection product;
+
+      // TODO; use lower_bound here
       auto it = localmes_.begin();
       while (it != localmes_.end()) {
         if(check(it->first)) {
-          auto startRun = std::get<3>(it->first);
-          auto startLuminosityBlock = std::get<4>(it->first);
-          auto endRun = std::get<5>(it->first);
-          auto endLuminosityBlock = std::get<6>(it->first);
-
-          MonitorElementCollection product;
-          MonitorElementData data;
+          MonitorElementData const* medata = it->second->internal();
+          MonitorElementData outdata = *medata;
           
-          data.dirname_ = std::get<0>(it->first);
-          data.objname_ = std::get<1>(it->first);
-          data.scope_ = std::get<2>(it->first);
-          data.coveredrange_ = edm::LuminosityBlockRange(startRun, startLuminosityBlock, endRun, endLuminosityBlock);
-          data.scalar_ = it->second->getScalar();
-          data.object_ = it->second->release();
+          if (t == edm::Transition::EndRun) {
+            // In case of endRun, we remove the ME. In case there is another 
+            // run, we will runn the booking again, which will create new MEs.
+            // All subystem code should be fine with the ME*s changing between
+            // runs.
+            outdata.object_ = it->second->release();
+            it = localmes_.erase(it);
+          } else {
+            // For not-per-run MEs, we cannot rely on re-booking. Instead, we
+            // perform a clone here and reset the original. On the beginning of
+            // the next lumi, we will check for reusable objects and reuse the
+            // MEs.
+            outdata.object_ =  (TH1*) medata->object_->Clone();
+            auto meptr = it->second;
+            it = localmes_.erase(it);
+            // Now recycle the old ME, reset all data, and put it back.
+            MonitorElementData newdata = *meptr->internal();
+            newdata.coveredrange_ = edm::LuminosityBlockRange{};
+            newdata.scalar_ = MonitorElementData::Scalar{};
+            if (newdata.object_) newdata.object_->Reset();
+            auto newme = std::make_shared<ME>(newdata);
+            // TODO: we could have key collisions here, if we have reset two
+            // (concurrent) sets of lumi MEs.
+            // TODO: check that this does not invalidate iterators.
+            localmes_[newdata.key()] = newme;
+          }
 
-          product.push_back(data);
-
-          it = localmes_.erase(it);
-
-          return product;
+          product.push_back(outdata);
         }
       }
+      return product;
 
       assert(!"toProduct called with run number and/or lumi that are not present in DQMStore");
     }
