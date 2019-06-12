@@ -61,6 +61,11 @@ namespace dqm {
 
     template <class ME>
     ME* DQMStore<ME>::putME(MonitorElementData const& data) {
+      if (master_) {
+        // we have a master, so we simply forward the ME to there.
+        auto lock = std::scoped_lock(*masterlock_);
+        return master_->putME(data);
+      }
       auto& existing = localmes_[data.key()];
       auto newme = std::make_shared<ME>(data);
       if (existing) {
