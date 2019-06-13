@@ -91,8 +91,8 @@ public:
   }
 
   DQMEDAnalyzer() {
-          produces<MonitorElementCollection,edm::Transition::EndLuminosityBlock>("DQMGenerationRecoLumi");
-          produces<MonitorElementCollection,edm::Transition::EndRun>("DQMGenerationRecoRun");
+    produces<MonitorElementCollection, edm::Transition::EndLuminosityBlock>("DQMGenerationRecoLumi");
+    produces<MonitorElementCollection, edm::Transition::EndRun>("DQMGenerationRecoRun");
   }
 
   void beginStream(edm::StreamID id) { dqmstore_ = globalCache()->forId(id); }
@@ -145,7 +145,7 @@ public:
                                               dqm::reco::MonitorElementCollectionHolder const* data) {
     auto prod = std::make_unique<MonitorElementCollection>();
     data->swap(*prod);
-        lumi.put(std::move(prod), "DQMGenerationRecoLumi");
+    lumi.put(std::move(prod), "DQMGenerationRecoLumi");
   }
 
   void endRun(edm::Run const& run, edm::EventSetup const& setup){};
@@ -168,7 +168,7 @@ public:
                                   dqm::reco::MonitorElementCollectionHolder const* data) {
     auto prod = std::make_unique<MonitorElementCollection>();
     data->swap(*prod);
-        run.put(std::move(prod), "DQMGenerationRecoRun");
+    run.put(std::move(prod), "DQMGenerationRecoRun");
   }
 
   static void globalEndJob(dqm::reco::DQMStoreGroup*){};
