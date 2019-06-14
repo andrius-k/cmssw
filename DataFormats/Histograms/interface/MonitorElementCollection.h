@@ -61,7 +61,7 @@ struct MonitorElementData {
   // in the future.
   // Maybe this declaration should be moved somewhere else, MonitorElement::Kind
   // is used in a lot of places. Can one `using` an enum?
-  enum Kind {
+  enum class Kind {
     DQM_KIND_INVALID = 0x0,
     DQM_KIND_INT = 0x1,
     DQM_KIND_REAL = 0x2,

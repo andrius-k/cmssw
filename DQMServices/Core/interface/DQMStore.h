@@ -129,28 +129,9 @@ namespace dqm {
     /** The base class for all MonitorElements (ME) */
     class MonitorElement {
     public:
-      // we need to make this visible here since it is private-inherited.
-      // TODO: can we get the entire enum at once?
-      using MonitorElementData::DQM_KIND_INT;
-      using MonitorElementData::DQM_KIND_INVALID;
-      using MonitorElementData::DQM_KIND_REAL;
-      using MonitorElementData::DQM_KIND_STRING;
-      using MonitorElementData::DQM_KIND_TH1D;
-      using MonitorElementData::DQM_KIND_TH1F;
-      using MonitorElementData::DQM_KIND_TH1S;
-      using MonitorElementData::DQM_KIND_TH2D;
-      using MonitorElementData::DQM_KIND_TH2F;
-      using MonitorElementData::DQM_KIND_TH2S;
-      using MonitorElementData::DQM_KIND_TH3F;
-      using MonitorElementData::DQM_KIND_TPROFILE;
-      using MonitorElementData::DQM_KIND_TPROFILE2D;
-      using MonitorElementData::Kind;
-
-      using MonitorElementData::DQM_SCOPE_DEFAULT;
-      using MonitorElementData::DQM_SCOPE_JOB;
-      using MonitorElementData::DQM_SCOPE_LUMI;
-      using MonitorElementData::DQM_SCOPE_RUN;
-      using MonitorElementData::Scope;
+      // TODO Change every usage from MonitorElement::DQM_KIND_* to MonitorElement::Kind::DQM_KIND_*
+      typedef MonitorElementData::Kind Kind;
+      Kind kind;
 
     public:
       MonitorElement(MonitorElementData const& data) : MonitorElementData(data){};
