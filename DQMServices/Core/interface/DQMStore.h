@@ -127,7 +127,7 @@ namespace dqm {
   namespace legacy {
 
     /** The base class for all MonitorElements (ME) */
-    class MonitorElement : protected MonitorElementData {
+    class MonitorElement {
     public:
       // we need to make this visible here since it is private-inherited.
       // TODO: can we get the entire enum at once?
@@ -391,17 +391,24 @@ namespace dqm {
       // Provide access to the internal fields.
       // Be careful with the root pointers. The const is also serious; changing
       // parts of the key could corrupt the sorted datastructures.
-      MonitorElementData const* internal() { return this; }
+      MonitorElementData const* internal() { return internal_; }
 
     private:
-      // Any potentially mutating access to object_ must hold this lock. We
-      // don't necessarily own object_, but if we don't, modifications are
-      // forbidden either ways.
-      mutable tbb::spin_mutex lock_;
-      // this is set if we don't own the ROOT object. In that case, mutations
+      // The actual object holding ME state, including a potential ROOT object.
+      // We typically don't own this object, it might be shared with a product
+      // and therefore immutable or shared with other DQMStore but still
+      // Fill()'able.
+      // TODO: this should be shared_ptr, but we need to be able to move the
+      // last ("master") ref to a unique_ptr in the end.
+      MonitorElementData const* internal_;
+      // set if it is our duty to destroy/move the internal_ data. This can be
+      // either if this is the "master" instance or we did a copy-on-write.
+      mutable bool is_owned_;
+      // this is set if we borrowed the ROOT object. In that case, mutations
       // are still possible, but will automatically create a copy and reset
       // this flag.
       mutable bool is_readonly_;
+
       std::vector<QReport> qreports_;  //< QReports associated to this object.
 
     };

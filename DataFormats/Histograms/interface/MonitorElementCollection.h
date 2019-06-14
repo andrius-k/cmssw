@@ -20,6 +20,8 @@
  (DQMRootOutputModule and DQMRootSource), so persistent=false would be ok for
  this class. However, if we can get EDM IO cheaply, it could be useful to 
  handle corner cases like MEtoEDM more cleanly.
+ TODO: We use persistent=false now, since ROOT really wants to be able to copy
+ things (which is not compatible with unique_ptr and mutex).
 
  Usage: This product should only be handled by the DQMStore, which provides 
  access to the MEs inside. The DQMStore will wrap the MonitorElementData in
@@ -27,6 +29,9 @@
  histograms, depending on the current stage of processing: In the RECO step,
  only filling is allowed, while in HARVESTING, the same data will be wrapped in
  a MonitorElement that also allows access to the ROOT objects.
+ We only use pointers to MonitorElementData, to allow replacing it with a
+ variable-size templated version later. That could eliminate one level of 
+ indirection in accessing histograms.
 
 */
 //
@@ -40,6 +45,7 @@
 #include <cassert>
 #include <vector>
 #include <string>
+#include <mutex>
 
 #include "TH1.h"
 
@@ -92,10 +98,17 @@ struct MonitorElementData {
   Kind kind_;
   // "mutable" to allow thread-safe "Fill" to change it without a const-cast
   // const-casting would be more logically correct, but risks UB.
+  // The lock protects the data while filling. There is no point in having it
+  // here except for convenience.
+  // TODO: It should be ok to use a TH1 value here, but we'd have to template
+  // TODO: ConcurrentME used a tbb::spin_lock, check if we can do that here as
+  // well (dependencies!)
+  // TODO: This really, really, should be unique_ptr. But ROOT wants to copy it
+  // for serialization.
+  // TODO: The lock_ should of course not be serialized.
   mutable Scalar scalar_;
-  TH1* object_;
-  // ROOT will serialize that correctly, I hope? or do we need to do the
-  // template dance as in MEtoEDM?
+  mutable std::unique_ptr<TH1> object_;
+  mutable std::mutex lock_;
 
   // Metadata about the ME.
   // We could use pointers to interned strings here to save some space.
@@ -142,24 +155,13 @@ struct MonitorElementData {
 // For now, no additional (meta-)data is needed apart from the MEs themselves.
 // The framework will take care of tracking the plugin and LS/run that the MEs
 // belong to.
-// TODO: would it be legal/better to use MonitorElementData* here?
-// The ROOT objects hang on pointers anyways. And the MonitorElementCollection
-// owns these objects, once they are put in here. We also need to agree with
-// ROOT on that topic.
 // TODO: we could use a set or map keyed by the (dirname, objname), but that
 // seems to be not really required here. We use a more advanced structure in
 // the DQMStore, while this type is only exported/imported there.
-class MonitorElementCollection : public std::vector<MonitorElementData> {
+// TODO: This really, really, should be unique_ptr. But ROOT wants to copy it
+// for serialization.
+class MonitorElementCollection : public std::vector<std::unique_ptr<MonitorElementData>> {
 public:
-  MonitorElementCollection() {}
-  ~MonitorElementCollection() {
-    for (auto& me : *this) {
-      if (me.object_) {
-        delete me.object_;
-        me.object_ = nullptr;
-      }
-    }
-  }
 
   bool mergeProduct(MonitorElementCollection const& product) {
     assert(!"Not implemented yet.");
