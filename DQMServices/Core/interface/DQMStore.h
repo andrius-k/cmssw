@@ -134,7 +134,8 @@ namespace dqm {
 
     public:
       MonitorElement(MonitorElementData const* data);
-      MonitorElement& operator=(const MonitorElement&) = delete;
+      MonitorElement(MonitorElement const& me);
+      MonitorElement& operator=(MonitorElement const&) = delete;
       MonitorElement& operator=(MonitorElement&&) = delete;
       virtual ~MonitorElement();
 
@@ -358,7 +359,7 @@ namespace dqm {
 
       // Do a full type/axis/range consistency check.
       // TODO: figure out what to do with inconsistent MonitorElement::Scope.
-      static bool checkCompatibility(MonitorElement const& a, MonitorElement const& b);
+      static bool checkCompatibility(MonitorElement* a, MonitorElement* b);
       // Return the backing ROOT object and give up its ownership. This
       // effectively destroys the ME. Return nullptr if the ME does not own the
       // ROOT object.
@@ -400,6 +401,7 @@ namespace dqm {
     public:
       MonitorElement() = default;
       MonitorElement(MonitorElement&&) = default;
+      MonitorElement(MonitorElement const& me) : dqm::legacy::MonitorElement(me) {};
       MonitorElement(MonitorElementData const* data) : dqm::legacy::MonitorElement(data){};
       ~MonitorElement() = default;
 
@@ -465,6 +467,7 @@ namespace dqm {
     public:
       MonitorElement() = default;
       MonitorElement(MonitorElement&&) = default;
+      MonitorElement(MonitorElement const& me) : dqm::reco::MonitorElement(me) {};
       MonitorElement(MonitorElementData const* data) : dqm::reco::MonitorElement(data){};
       ~MonitorElement() = default;
 
@@ -1023,7 +1026,7 @@ namespace dqm {
       // a newly added one.
       // Will take ownership of the ROOT object in `data`, deleting it if not
       // needed.
-      ME* putME(MonitorElementData const& data);
+      ME* putME(std::unique_ptr<ME> && me);
       // Turn the MEs associated with t, run, lumi into a read-only product. No
       // copies happen here, instead, we invalidate (or read-only?) the MEs.
       // TODO: Maybe we can do the clone/reset dance of run/lumi MEs here?
@@ -1045,11 +1048,12 @@ namespace dqm {
 
     private:
       // MEs owned by us. All book/get interactions will hand out pointers into
-      // this stucture. The MEs are shared over multiple edm::stream copies of
-      // a module, if applicable. They may or may not own a ROOT object: in
+      // this stucture. They may or may not own a ROOT object: in
       // harvesting, we also keep read-only versions of foreign MEs here.
+      // MonitorElementDatas in this map can potentially be shared across 
+      // multiple DQMStores.
       // Expect 10-10000 entries.
-      std::map<MonitorElementData::Key, std::shared_ptr<ME>> localmes_;
+      std::map<MonitorElementData::Key, std::unique_ptr<ME>> localmes_;
       // in case of reco and edm::stream, we keep areference to the master
       // DQMStore here. All booking calls should be forwarded ther, and no
       // other operations should be required in reco.

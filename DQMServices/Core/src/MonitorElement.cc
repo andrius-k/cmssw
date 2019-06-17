@@ -4,9 +4,17 @@ namespace dqm {
 
     MonitorElement::MonitorElement(MonitorElementData const* data) {
       internal_ = data;
+      this->is_owned_ = true;
+      this->is_readonly_ = false;
     }
 
-    bool MonitorElement::checkCompatibility(MonitorElement const &a, MonitorElement const &b) {
+    MonitorElement::MonitorElement(MonitorElement const& me) {
+      this->internal_ = me.internal_;
+      this->is_owned_ = false;
+      this->is_readonly_ = false;
+    }
+
+    bool MonitorElement::checkCompatibility(MonitorElement* a, MonitorElement* b) {
       // TODO
       return true;
     }

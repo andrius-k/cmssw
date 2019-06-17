@@ -48,44 +48,49 @@ namespace dqm {
 
     template <class ME, class STORE>
     ME* IBooker<ME, STORE>::bookME(TString const& name, MonitorElementData::Kind kind, TH1* object) {
-      MonitorElementData data;
-      data.kind_ = kind;
-      data.object_ = std::unique_ptr<TH1>(object);
-      data.objname_ = std::string(name.View());
-      data.dirname_ = pwd();
-      data.scope_ = MonitorElementData::Scope::DEFAULT;
+      MonitorElementData* data = new MonitorElementData();
+      data->kind_ = kind;
+      data->object_ = std::unique_ptr<TH1>(object);
+      data->objname_ = std::string(name.View());
+      data->dirname_ = pwd();
+      data->scope_ = MonitorElementData::Scope::DEFAULT;
 
-      ME* me = store_->putME(data);
-      return me;
+      std::unique_ptr<ME> me = std::make_unique<ME>(data);
+      ME* me_ptr = store_->putME(std::move(me));
+      return me_ptr;
     }
 
     template <class ME>
-    ME* DQMStore<ME>::putME(MonitorElementData const& data) {
-      if (master_) {
-        // we have a master, so we simply forward the ME to there.
+    ME* DQMStore<ME>::putME(std::unique_ptr<ME> && me) {
+      if(master_ != nullptr) {
+        // We have a master, so we simply forward the ME to there.
         auto lock = std::scoped_lock(*masterlock_);
-        return master_->putME(data);
+        ME* me_ptr = master_->putME(std::move(me));
+
+        // Make a copy of ME sharing the underlying MonitorElementData and root TH1 object
+        localmes_[me_ptr->internal()->key()] = std::make_unique<ME>(*me_ptr);
+
+        return localmes_[me_ptr->internal()->key()].get();
       }
-      auto& existing = localmes_[data.key()];
-      // TODO: Check ownership
-      auto newme = std::make_shared<ME>(&data);
-      if (existing) {
-        bool ok = ME::checkCompatibility(*existing, *newme);
-        if (!ok) {
-          assert(!"Incompatible re-booking.");
-          // in case we want to allow that, we probably want to replace the existing.
-          existing = newme;
-        } else {
-          newme = existing;
-        }
-      } else {
-        existing = newme;
+
+      auto& existing = localmes_[me->internal()->key()];
+
+      // existing = nullptr;
+      // existing.asdasdasd();
+
+      if(existing != nullptr) {
+        // TODO: Check monitor element compatibility
+        ME::checkCompatibility(me.get(), existing.get());
+
+        // Delete previously created ME because we have to use the existing one
+        me = nullptr;
+
+        return existing.get();
       }
-      // existing and newme are always the same now.
-      // return a bare pointer, the object is owned by localmes in the end. We use
-      // a shared pointer since other DQMStores (in case of edm::stream) might
-      // co-own it. Also makes it easier to handle.
-      return &*newme;
+      else {
+        localmes_[me->internal()->key()] = std::move(me);
+        return me.get();
+      }
     }
 
     template <class ME, class STORE>
