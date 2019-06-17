@@ -59,22 +59,20 @@ struct MonitorElementData {
 
   // These values are compatible to DQMNet, but DQMNet is not likely to exist
   // in the future.
-  // Maybe this declaration should be moved somewhere else, MonitorElement::Kind
-  // is used in a lot of places. Can one `using` an enum?
   enum class Kind {
-    DQM_KIND_INVALID = 0x0,
-    DQM_KIND_INT = 0x1,
-    DQM_KIND_REAL = 0x2,
-    DQM_KIND_STRING = 0x3,
-    DQM_KIND_TH1F = 0x10,
-    DQM_KIND_TH1S = 0x11,
-    DQM_KIND_TH1D = 0x12,
-    DQM_KIND_TH2F = 0x20,
-    DQM_KIND_TH2S = 0x21,
-    DQM_KIND_TH2D = 0x22,
-    DQM_KIND_TH3F = 0x30,
-    DQM_KIND_TPROFILE = 0x40,
-    DQM_KIND_TPROFILE2D = 0x41
+    INVALID = 0x0,
+    INT = 0x1,
+    REAL = 0x2,
+    STRING = 0x3,
+    TH1F = 0x10,
+    TH1S = 0x11,
+    TH1D = 0x12,
+    TH2F = 0x20,
+    TH2S = 0x21,
+    TH2D = 0x22,
+    TH3F = 0x30,
+    TPROFILE = 0x40,
+    TPROFILE2D = 0x41
   };
 
   // Which window of time the ME is supposed to cover. How much data is actually
@@ -87,10 +85,10 @@ struct MonitorElementData {
   // be used unless some specific granularity is really required.
   // We'll also need to switch the DEFAULT to JOB for multi-run harvesting.
   enum Scope {
-    DQM_SCOPE_JOB = 1,
-    DQM_SCOPE_RUN = 2,
-    DQM_SCOPE_LUMI = 3,
-    DQM_SCOPE_DEFAULT = 4 /* = DQM_SCOPE_RUN? */
+    JOB = 1,
+    RUN = 2,
+    LUMI = 3,
+    DEFAULT = 4 /* = RUN? */
   };
 
   // The main ME data. We don't keep references/QTest results, instead we use

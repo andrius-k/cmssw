@@ -50,10 +50,10 @@ namespace dqm {
     ME* IBooker<ME, STORE>::bookME(TString const& name, MonitorElementData::Kind kind, TH1* object) {
       MonitorElementData data;
       data.kind_ = kind;
-      data.object_ = object;
+      data.object_ = std::unique_ptr<TH1>(object);
       data.objname_ = std::string(name.View());
       data.dirname_ = pwd();
-      data.scope_ = MonitorElementData::DQM_SCOPE_DEFAULT;
+      data.scope_ = MonitorElementData::Scope::DEFAULT;
 
       ME* me = store_->putME(data);
       return me;
@@ -67,7 +67,8 @@ namespace dqm {
         return master_->putME(data);
       }
       auto& existing = localmes_[data.key()];
-      auto newme = std::make_shared<ME>(data);
+      // TODO: Check ownership
+      auto newme = std::make_shared<ME>(&data);
       if (existing) {
         bool ok = ME::checkCompatibility(*existing, *newme);
         if (!ok) {
@@ -89,51 +90,51 @@ namespace dqm {
 
     template <class ME, class STORE>
     ME* IBooker<ME, STORE>::bookInt(TString const& name) {
-      return bookME(name, MonitorElementData::DQM_KIND_INT, nullptr);
+      return bookME(name, MonitorElementData::Kind::INT, nullptr);
     }
     template <class ME, class STORE>
     ME* IBooker<ME, STORE>::bookFloat(TString const& name) {
-      return bookME(name, MonitorElementData::DQM_KIND_INT, nullptr);
+      return bookME(name, MonitorElementData::Kind::INT, nullptr);
     }
     template <class ME, class STORE>
     ME* IBooker<ME, STORE>::bookString(TString const& name, TString const& value) {
-      return bookME(name, MonitorElementData::DQM_KIND_INT, nullptr);
+      return bookME(name, MonitorElementData::Kind::INT, nullptr);
     }
     template <class ME, class STORE>
     ME* IBooker<ME, STORE>::book1D(
         TString const& name, TString const& title, int const nchX, double const lowX, double const highX) {
       auto th1 = new TH1F(name, title, nchX, lowX, highX);
-      return bookME(name, MonitorElementData::DQM_KIND_TH1F, th1);
+      return bookME(name, MonitorElementData::Kind::TH1F, th1);
     }
     template <class ME, class STORE>
     ME* IBooker<ME, STORE>::book1D(TString const& name, TString const& title, int nchX, float const* xbinsize) {
       auto th1 = new TH1F(name, title, nchX, xbinsize);
-      return bookME(name, MonitorElementData::DQM_KIND_TH1F, th1);
+      return bookME(name, MonitorElementData::Kind::TH1F, th1);
     }
     template <class ME, class STORE>
     ME* IBooker<ME, STORE>::book1D(TString const& name, TH1F* object) {
       auto th1 = static_cast<TH1*>(object->Clone(name));
-      return bookME(name, MonitorElementData::DQM_KIND_TH1F, th1);
+      return bookME(name, MonitorElementData::Kind::TH1F, th1);
     }
     template <class ME, class STORE>
     ME* IBooker<ME, STORE>::book1S(TString const& name, TString const& title, int nchX, double lowX, double highX) {
       auto th1 = new TH1S(name, title, nchX, lowX, highX);
-      return bookME(name, MonitorElementData::DQM_KIND_TH1S, th1);
+      return bookME(name, MonitorElementData::Kind::TH1S, th1);
     }
     template <class ME, class STORE>
     ME* IBooker<ME, STORE>::book1S(TString const& name, TH1S* object) {
       auto th1 = static_cast<TH1*>(object->Clone(name));
-      return bookME(name, MonitorElementData::DQM_KIND_TH1S, th1);
+      return bookME(name, MonitorElementData::Kind::TH1S, th1);
     }
     template <class ME, class STORE>
     ME* IBooker<ME, STORE>::book1DD(TString const& name, TString const& title, int nchX, double lowX, double highX) {
       auto th1 = new TH1D(name, title, nchX, lowX, highX);
-      return bookME(name, MonitorElementData::DQM_KIND_TH1D, th1);
+      return bookME(name, MonitorElementData::Kind::TH1D, th1);
     }
     template <class ME, class STORE>
     ME* IBooker<ME, STORE>::book1DD(TString const& name, TH1D* object) {
       auto th1 = static_cast<TH1*>(object->Clone(name));
-      return bookME(name, MonitorElementData::DQM_KIND_TH1D, th1);
+      return bookME(name, MonitorElementData::Kind::TH1D, th1);
     }
     template <class ME, class STORE>
     ME* IBooker<ME, STORE>::book2D(TString const& name,
@@ -145,18 +146,18 @@ namespace dqm {
                                    double lowY,
                                    double highY) {
       auto th2 = new TH2F(name, title, nchX, lowX, highX, nchY, lowY, highY);
-      return bookME(name, MonitorElementData::DQM_KIND_TH2F, th2);
+      return bookME(name, MonitorElementData::Kind::TH2F, th2);
     }
     template <class ME, class STORE>
     ME* IBooker<ME, STORE>::book2D(
         TString const& name, TString const& title, int nchX, float const* xbinsize, int nchY, float const* ybinsize) {
       auto th2 = new TH2F(name, title, nchX, xbinsize, nchY, ybinsize);
-      return bookME(name, MonitorElementData::DQM_KIND_TH2F, th2);
+      return bookME(name, MonitorElementData::Kind::TH2F, th2);
     }
     template <class ME, class STORE>
     ME* IBooker<ME, STORE>::book2D(TString const& name, TH2F* object) {
       auto th2 = static_cast<TH1*>(object->Clone(name));
-      return bookME(name, MonitorElementData::DQM_KIND_TH2F, th2);
+      return bookME(name, MonitorElementData::Kind::TH2F, th2);
     }
     template <class ME, class STORE>
     ME* IBooker<ME, STORE>::book2S(TString const& name,
@@ -168,18 +169,18 @@ namespace dqm {
                                    double lowY,
                                    double highY) {
       auto th2 = new TH2S(name, title, nchX, lowX, highX, nchY, lowY, highY);
-      return bookME(name, MonitorElementData::DQM_KIND_TH2S, th2);
+      return bookME(name, MonitorElementData::Kind::TH2S, th2);
     }
     template <class ME, class STORE>
     ME* IBooker<ME, STORE>::book2S(
         TString const& name, TString const& title, int nchX, float const* xbinsize, int nchY, float const* ybinsize) {
       auto th2 = new TH2S(name, title, nchX, xbinsize, nchY, ybinsize);
-      return bookME(name, MonitorElementData::DQM_KIND_TH2S, th2);
+      return bookME(name, MonitorElementData::Kind::TH2S, th2);
     }
     template <class ME, class STORE>
     ME* IBooker<ME, STORE>::book2S(TString const& name, TH2S* object) {
       auto th2 = static_cast<TH1*>(object->Clone(name));
-      return bookME(name, MonitorElementData::DQM_KIND_TH2S, th2);
+      return bookME(name, MonitorElementData::Kind::TH2S, th2);
     }
     template <class ME, class STORE>
     ME* IBooker<ME, STORE>::book2DD(TString const& name,
@@ -191,12 +192,12 @@ namespace dqm {
                                     double lowY,
                                     double highY) {
       auto th2 = new TH2D(name, title, nchX, lowX, highX, nchY, lowY, highY);
-      return bookME(name, MonitorElementData::DQM_KIND_TH2D, th2);
+      return bookME(name, MonitorElementData::Kind::TH2D, th2);
     }
     template <class ME, class STORE>
     ME* IBooker<ME, STORE>::book2DD(TString const& name, TH2D* object) {
       auto th2 = static_cast<TH1*>(object->Clone(name));
-      return bookME(name, MonitorElementData::DQM_KIND_TH2D, th2);
+      return bookME(name, MonitorElementData::Kind::TH2D, th2);
     }
     template <class ME, class STORE>
     ME* IBooker<ME, STORE>::book3D(TString const& name,
@@ -211,12 +212,12 @@ namespace dqm {
                                    double lowZ,
                                    double highZ) {
       auto th3 = new TH3F(name, title, nchX, lowX, highX, nchY, lowY, highY, nchZ, lowZ, highZ);
-      return bookME(name, MonitorElementData::DQM_KIND_TH3F, th3);
+      return bookME(name, MonitorElementData::Kind::TH3F, th3);
     }
     template <class ME, class STORE>
     ME* IBooker<ME, STORE>::book3D(TString const& name, TH3F* object) {
       auto th3 = static_cast<TH1*>(object->Clone(name));
-      return bookME(name, MonitorElementData::DQM_KIND_TH3F, th3);
+      return bookME(name, MonitorElementData::Kind::TH3F, th3);
     }
     template <class ME, class STORE>
     ME* IBooker<ME, STORE>::bookProfile(TString const& name,
@@ -229,7 +230,7 @@ namespace dqm {
                                         double highY,
                                         char const* option) {
       auto tprofile = new TProfile(name, title, nchX, lowX, highX, lowY, highY, option);
-      return bookME(name, MonitorElementData::DQM_KIND_TPROFILE, tprofile);
+      return bookME(name, MonitorElementData::Kind::TPROFILE, tprofile);
     }
     template <class ME, class STORE>
     ME* IBooker<ME, STORE>::bookProfile(TString const& name,
@@ -241,7 +242,7 @@ namespace dqm {
                                         double highY,
                                         char const* option) {
       auto tprofile = new TProfile(name, title, nchX, lowX, highX, lowY, highY, option);
-      return bookME(name, MonitorElementData::DQM_KIND_TPROFILE, tprofile);
+      return bookME(name, MonitorElementData::Kind::TPROFILE, tprofile);
     }
     template <class ME, class STORE>
     ME* IBooker<ME, STORE>::bookProfile(TString const& name,
@@ -253,7 +254,7 @@ namespace dqm {
                                         double highY,
                                         char const* option) {
       auto tprofile = new TProfile(name, title, nchX, xbinsize, lowY, highY, option);
-      return bookME(name, MonitorElementData::DQM_KIND_TPROFILE, tprofile);
+      return bookME(name, MonitorElementData::Kind::TPROFILE, tprofile);
     }
     template <class ME, class STORE>
     ME* IBooker<ME, STORE>::bookProfile(TString const& name,
@@ -264,12 +265,12 @@ namespace dqm {
                                         double highY,
                                         char const* option) {
       auto tprofile = new TProfile(name, title, nchX, xbinsize, lowY, highY, option);
-      return bookME(name, MonitorElementData::DQM_KIND_TPROFILE, tprofile);
+      return bookME(name, MonitorElementData::Kind::TPROFILE, tprofile);
     }
     template <class ME, class STORE>
     ME* IBooker<ME, STORE>::bookProfile(TString const& name, TProfile* object) {
       auto tprofile = static_cast<TH1*>(object->Clone(name));
-      return bookME(name, MonitorElementData::DQM_KIND_TPROFILE, tprofile);
+      return bookME(name, MonitorElementData::Kind::TPROFILE, tprofile);
     }
     template <class ME, class STORE>
     ME* IBooker<ME, STORE>::bookProfile2D(TString const& name,
@@ -284,7 +285,7 @@ namespace dqm {
                                           double highZ,
                                           char const* option) {
       auto tprofile = new TProfile2D(name, title, nchX, lowX, highX, nchY, lowY, highY, lowZ, highZ, option);
-      return bookME(name, MonitorElementData::DQM_KIND_TPROFILE2D, tprofile);
+      return bookME(name, MonitorElementData::Kind::TPROFILE2D, tprofile);
     }
     template <class ME, class STORE>
     ME* IBooker<ME, STORE>::bookProfile2D(TString const& name,
@@ -300,12 +301,12 @@ namespace dqm {
                                           double highZ,
                                           char const* option) {
       auto tprofile = new TProfile2D(name, title, nchX, lowX, highX, nchY, lowY, highY, lowZ, highZ, option);
-      return bookME(name, MonitorElementData::DQM_KIND_TPROFILE2D, tprofile);
+      return bookME(name, MonitorElementData::Kind::TPROFILE2D, tprofile);
     }
     template <class ME, class STORE>
     ME* IBooker<ME, STORE>::bookProfile2D(TString const& name, TProfile2D* object) {
       auto tprofile = static_cast<TH1*>(object->Clone(name));
-      return bookME(name, MonitorElementData::DQM_KIND_TPROFILE2D, tprofile);
+      return bookME(name, MonitorElementData::Kind::TPROFILE2D, tprofile);
     }
 
     template <class ME, class STORE>
@@ -478,66 +479,68 @@ namespace dqm {
 
     template <class ME>
     MonitorElementCollection DQMStore<ME>::toProduct(edm::Transition t, edm::RunNumber_t run, edm::LuminosityBlockNumber_t lumi) {
-      if(t != edm::Transition::EndRun && t != edm::Transition::EndLuminosityBlock) {
-        assert(!"toProduct called on non end event transition");
-      }
+      // TODO: removed only to make things compile.
+      // The logic will have to be addressed
+      // if(t != edm::Transition::EndRun && t != edm::Transition::EndLuminosityBlock) {
+      //   assert(!"toProduct called on non end event transition");
+      // }
 
-      auto check = [t, run, lumi](MonitorElementData::Key key) {
-        if(t == edm::Transition::EndRun) {
-          // Take only run into consideration
-          auto endRun = std::get<5>(key);
-          return run == endRun;
-        }
-        else if(t == edm::Transition::EndLuminosityBlock) {
-          // Take run and lumi into consideration
-          auto endRun = std::get<5>(key);
-          auto endLuminosityBlock = std::get<6>(key);
-          return run == endRun && lumi == endLuminosityBlock;
-        }
+      // auto check = [t, run, lumi](MonitorElementData::Key key) {
+      //   if(t == edm::Transition::EndRun) {
+      //     // Take only run into consideration
+      //     auto endRun = std::get<5>(key);
+      //     return run == endRun;
+      //   }
+      //   else if(t == edm::Transition::EndLuminosityBlock) {
+      //     // Take run and lumi into consideration
+      //     auto endRun = std::get<5>(key);
+      //     auto endLuminosityBlock = std::get<6>(key);
+      //     return run == endRun && lumi == endLuminosityBlock;
+      //   }
 
-        return false;
-      };
+      //   return false;
+      // };
 
-      MonitorElementCollection product;
+      // MonitorElementCollection product;
 
-      // TODO; use lower_bound here
-      auto it = localmes_.begin();
-      while (it != localmes_.end()) {
-        if(check(it->first)) {
-          MonitorElementData const* medata = it->second->internal();
-          MonitorElementData outdata = *medata;
+      // // TODO; use lower_bound here
+      // auto it = localmes_.begin();
+      // while (it != localmes_.end()) {
+      //   if(check(it->first)) {
+      //     MonitorElementData const* medata = it->second->internal();
+      //     MonitorElementData outdata = *medata;
           
-          if (t == edm::Transition::EndRun) {
-            // In case of endRun, we remove the ME. In case there is another 
-            // run, we will runn the booking again, which will create new MEs.
-            // All subystem code should be fine with the ME*s changing between
-            // runs.
-            outdata.object_ = it->second->release();
-            it = localmes_.erase(it);
-          } else {
-            // For not-per-run MEs, we cannot rely on re-booking. Instead, we
-            // perform a clone here and reset the original. On the beginning of
-            // the next lumi, we will check for reusable objects and reuse the
-            // MEs.
-            outdata.object_ =  (TH1*) medata->object_->Clone();
-            auto meptr = it->second;
-            it = localmes_.erase(it);
-            // Now recycle the old ME, reset all data, and put it back.
-            MonitorElementData newdata = *meptr->internal();
-            newdata.coveredrange_ = edm::LuminosityBlockRange{};
-            newdata.scalar_ = MonitorElementData::Scalar{};
-            if (newdata.object_) newdata.object_->Reset();
-            auto newme = std::make_shared<ME>(newdata);
-            // TODO: we could have key collisions here, if we have reset two
-            // (concurrent) sets of lumi MEs.
-            // TODO: check that this does not invalidate iterators.
-            localmes_[newdata.key()] = newme;
-          }
+      //     if (t == edm::Transition::EndRun) {
+      //       // In case of endRun, we remove the ME. In case there is another 
+      //       // run, we will runn the booking again, which will create new MEs.
+      //       // All subystem code should be fine with the ME*s changing between
+      //       // runs.
+      //       outdata.object_ = it->second->release();
+      //       it = localmes_.erase(it);
+      //     } else {
+      //       // For not-per-run MEs, we cannot rely on re-booking. Instead, we
+      //       // perform a clone here and reset the original. On the beginning of
+      //       // the next lumi, we will check for reusable objects and reuse the
+      //       // MEs.
+      //       outdata.object_ =  (TH1*) medata->object_->Clone();
+      //       auto meptr = it->second;
+      //       it = localmes_.erase(it);
+      //       // Now recycle the old ME, reset all data, and put it back.
+      //       MonitorElementData newdata = *meptr->internal();
+      //       newdata.coveredrange_ = edm::LuminosityBlockRange{};
+      //       newdata.scalar_ = MonitorElementData::Scalar{};
+      //       if (newdata.object_) newdata.object_->Reset();
+      //       auto newme = std::make_shared<ME>(newdata);
+      //       // TODO: we could have key collisions here, if we have reset two
+      //       // (concurrent) sets of lumi MEs.
+      //       // TODO: check that this does not invalidate iterators.
+      //       localmes_[newdata.key()] = newme;
+      //     }
 
-          product.push_back(outdata);
-        }
-      }
-      return product;
+      //     product.push_back(outdata);
+      //   }
+      // }
+      // return product;
 
       assert(!"toProduct called with run number and/or lumi that are not present in DQMStore");
     }

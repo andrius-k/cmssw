@@ -129,27 +129,26 @@ namespace dqm {
     /** The base class for all MonitorElements (ME) */
     class MonitorElement {
     public:
-      // TODO Change every usage from MonitorElement::DQM_KIND_* to MonitorElement::Kind::DQM_KIND_*
       typedef MonitorElementData::Kind Kind;
-      Kind kind;
+      typedef MonitorElementData::Scope Scope;
 
     public:
-      MonitorElement(MonitorElementData const& data) : MonitorElementData(data){};
+      MonitorElement(MonitorElementData const* data);
       MonitorElement& operator=(const MonitorElement&) = delete;
       MonitorElement& operator=(MonitorElement&&) = delete;
       virtual ~MonitorElement();
 
       /// Get the type of the monitor element.
-      Kind kind() const { return kind_; }
+      Kind kind() const { return internal_->kind_; }
 
       /// get name of ME
-      const std::string& getName() const { return objname_; }
+      const std::string& getName() const { return internal_->objname_; }
 
       /// get pathname of parent folder
-      const std::string& getPathname() const { return dirname_; }
+      const std::string& getPathname() const { return internal_->dirname_; }
 
       /// get full name of ME including Pathname
-      const std::string getFullname() const { return dirname_ + objname_; }
+      const std::string getFullname() const { return internal_->dirname_ + internal_->objname_; }
 
       /// specify whether ME should be reset at end of monitoring cycle (default:false);
       /// (typically called by Sources that control the original ME)
@@ -163,7 +162,7 @@ namespace dqm {
       DQM_DEPRECATED  // used only internally
           virtual bool
           getLumiFlag() const {
-        return scope_ == MonitorElement::DQM_SCOPE_LUMI;
+        return internal_->scope_ == MonitorElement::Scope::LUMI;
       }
 
       /// this ME is meant to be stored for each luminosity section
@@ -401,7 +400,7 @@ namespace dqm {
     public:
       MonitorElement() = default;
       MonitorElement(MonitorElement&&) = default;
-      MonitorElement(MonitorElementData const& data) : dqm::legacy::MonitorElement(data){};
+      MonitorElement(MonitorElementData const* data) : dqm::legacy::MonitorElement(data){};
       ~MonitorElement() = default;
 
       // now, we deprecate and assert things that are not allowed on reco MEs.
@@ -466,7 +465,7 @@ namespace dqm {
     public:
       MonitorElement() = default;
       MonitorElement(MonitorElement&&) = default;
-      MonitorElement(MonitorElementData const& data) : dqm::reco::MonitorElement(data){};
+      MonitorElement(MonitorElementData const* data) : dqm::reco::MonitorElement(data){};
       ~MonitorElement() = default;
 
       // In harvesting, we un-ban some of the operations banned before. Eventually,
