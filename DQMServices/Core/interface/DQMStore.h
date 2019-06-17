@@ -140,16 +140,16 @@ namespace dqm {
       virtual ~MonitorElement();
 
       /// Get the type of the monitor element.
-      Kind kind() const { return internal_->kind_; }
+      Kind kind() const { return internal_->key_.kind_; }
 
       /// get name of ME
-      const std::string& getName() const { return internal_->objname_; }
+      const std::string& getName() const { return internal_->key_.objname_; }
 
       /// get pathname of parent folder
-      const std::string& getPathname() const { return internal_->dirname_; }
+      const std::string& getPathname() const { return internal_->key_.dirname_; }
 
       /// get full name of ME including Pathname
-      const std::string getFullname() const { return internal_->dirname_ + internal_->objname_; }
+      const std::string getFullname() const { return internal_->key_.dirname_ + internal_->key_.objname_; }
 
       /// specify whether ME should be reset at end of monitoring cycle (default:false);
       /// (typically called by Sources that control the original ME)
@@ -163,7 +163,7 @@ namespace dqm {
       DQM_DEPRECATED  // used only internally
           virtual bool
           getLumiFlag() const {
-        return internal_->scope_ == MonitorElement::Scope::LUMI;
+        return internal_->key_.scope_ == MonitorElement::Scope::LUMI;
       }
 
       /// this ME is meant to be stored for each luminosity section

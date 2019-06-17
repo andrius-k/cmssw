@@ -30,11 +30,11 @@ namespace dqm {
 
     void MonitorElement::Fill(double x) const {
       std::scoped_lock lock(internal_->lock_);
-      assert(internal_->kind_ == MonitorElement::Kind::INT || internal_->kind_ == MonitorElement::Kind::REAL || internal_->kind_ == MonitorElement::Kind::TH1F || internal_->kind_ == MonitorElement::Kind::TH1S ||
-             internal_->kind_ == MonitorElement::Kind::TH1D);
-      if (internal_->kind_ == MonitorElement::Kind::INT) {
+      assert(internal_->key_.kind_ == MonitorElement::Kind::INT || internal_->key_.kind_ == MonitorElement::Kind::REAL || internal_->key_.kind_ == MonitorElement::Kind::TH1F || internal_->key_.kind_ == MonitorElement::Kind::TH1S ||
+             internal_->key_.kind_ == MonitorElement::Kind::TH1D);
+      if (internal_->key_.kind_ == MonitorElement::Kind::INT) {
         internal_->scalar_.num = (int64_t)x;
-      } else if (internal_->kind_ == MonitorElement::Kind::REAL) {
+      } else if (internal_->key_.kind_ == MonitorElement::Kind::REAL) {
         internal_->scalar_.real = x;
       } else {
         assert(internal_->object_ || !"Histogram type but ROOT object not set");
@@ -44,11 +44,11 @@ namespace dqm {
 
     void MonitorElement::doFill(int64_t x) const {
       std::scoped_lock lock(internal_->lock_);
-      assert(internal_->kind_ == MonitorElement::Kind::INT || internal_->kind_ == MonitorElement::Kind::REAL || internal_->kind_ == MonitorElement::Kind::TH1F || internal_->kind_ == MonitorElement::Kind::TH1S ||
-             internal_->kind_ == MonitorElement::Kind::TH1D);
-      if (internal_->kind_ == MonitorElement::Kind::INT) {
+      assert(internal_->key_.kind_ == MonitorElement::Kind::INT || internal_->key_.kind_ == MonitorElement::Kind::REAL || internal_->key_.kind_ == MonitorElement::Kind::TH1F || internal_->key_.kind_ == MonitorElement::Kind::TH1S ||
+             internal_->key_.kind_ == MonitorElement::Kind::TH1D);
+      if (internal_->key_.kind_ == MonitorElement::Kind::INT) {
         internal_->scalar_.num = x;
-      } else if (internal_->kind_ == MonitorElement::Kind::REAL) {
+      } else if (internal_->key_.kind_ == MonitorElement::Kind::REAL) {
         internal_->scalar_.real = (double)x;
       } else {
         assert(internal_->object_ || !"Histogram type but ROOT object not set");
@@ -58,7 +58,7 @@ namespace dqm {
 
     void MonitorElement::Fill(std::string &value) const {
       std::scoped_lock lock(internal_->lock_);
-      assert(internal_->kind_ == MonitorElement::Kind::STRING);
+      assert(internal_->key_.kind_ == MonitorElement::Kind::STRING);
       internal_->scalar_.str = value;
     }
 
@@ -66,11 +66,11 @@ namespace dqm {
       std::scoped_lock lock(internal_->lock_);
       assert(
           // 1D histograms, this will be a x, weight fill
-          internal_->kind_ == MonitorElement::Kind::TH1F || internal_->kind_ == MonitorElement::Kind::TH1S || internal_->kind_ == MonitorElement::Kind::TH1D ||
+          internal_->key_.kind_ == MonitorElement::Kind::TH1F || internal_->key_.kind_ == MonitorElement::Kind::TH1S || internal_->key_.kind_ == MonitorElement::Kind::TH1D ||
           // 2D histograms, this will be a x, y fill
-          internal_->kind_ == MonitorElement::Kind::TH2D || internal_->kind_ == MonitorElement::Kind::TH2F || internal_->kind_ == MonitorElement::Kind::TH2S ||
+          internal_->key_.kind_ == MonitorElement::Kind::TH2D || internal_->key_.kind_ == MonitorElement::Kind::TH2F || internal_->key_.kind_ == MonitorElement::Kind::TH2S ||
           // 1D Profile == 2D histo
-          internal_->kind_ == MonitorElement::Kind::TPROFILE);
+          internal_->key_.kind_ == MonitorElement::Kind::TPROFILE);
       assert(internal_->object_ || !"Histogram type but ROOT object not set");
       // rely on ROOT to do the right thing.
       internal_->object_->Fill(x, yw);
@@ -78,22 +78,22 @@ namespace dqm {
 
     void MonitorElement::Fill(double x, double y, double zw) const {
       std::scoped_lock lock(internal_->lock_);
-      if (internal_->kind_ == MonitorElement::Kind::TH2F || internal_->kind_ == MonitorElement::Kind::TH2D || internal_->kind_ == MonitorElement::Kind::TH2S) {
+      if (internal_->key_.kind_ == MonitorElement::Kind::TH2F || internal_->key_.kind_ == MonitorElement::Kind::TH2D || internal_->key_.kind_ == MonitorElement::Kind::TH2S) {
         // 2D histograms, this will be a x, y, weight fill
         auto th2 = dynamic_cast<TH2 *>(internal_->object_.get());
         assert(th2 || !"Histogram type but ROOT object not set or wrong type");
         th2->Fill(x, y, zw);
-      } else if (internal_->kind_ == MonitorElement::Kind::TH3F) {
+      } else if (internal_->key_.kind_ == MonitorElement::Kind::TH3F) {
         // 3D histogram, this will be a x, y, z fill
         auto th3 = dynamic_cast<TH3 *>(internal_->object_.get());
         assert(th3 || !"Histogram type but ROOT object not set or wrong type");
         th3->Fill(x, y, zw);
-      } else if (internal_->kind_ == MonitorElement::Kind::TPROFILE) {
+      } else if (internal_->key_.kind_ == MonitorElement::Kind::TPROFILE) {
         //  1D Profile == 2D histo, x, y, weight fill
         auto tprofile = dynamic_cast<TProfile *>(internal_->object_.get());
         assert(tprofile || !"Histogram type but ROOT object not set or wrong type");
         tprofile->Fill(x, y, zw);
-      } else if (internal_->kind_ == MonitorElement::Kind::TPROFILE2D) {
+      } else if (internal_->key_.kind_ == MonitorElement::Kind::TPROFILE2D) {
         //  2D Profile == 3D histo, x, y, z fill
         auto tprofile2d = dynamic_cast<TProfile2D *>(internal_->object_.get());
         assert(tprofile2d || !"Histogram type but ROOT object not set or wrong type");
@@ -105,12 +105,12 @@ namespace dqm {
 
     void MonitorElement::Fill(double x, double y, double z, double w) const {
       std::scoped_lock lock(internal_->lock_);
-      if (internal_->kind_ == MonitorElement::Kind::TH3F) {
+      if (internal_->key_.kind_ == MonitorElement::Kind::TH3F) {
         // 3D histogram, this will be a x, y, z, weight fill
         auto th3 = dynamic_cast<TH3 *>(internal_->object_.get());
         assert(th3 || !"Histogram type but ROOT object not set or wrong type");
         th3->Fill(x, y, z, w);
-      } else if (internal_->kind_ == MonitorElement::Kind::TPROFILE2D) {
+      } else if (internal_->key_.kind_ == MonitorElement::Kind::TPROFILE2D) {
         //  2D Profile == 3D histo, x, y, z, weight fill
         auto tprofile2d = dynamic_cast<TProfile2D *>(internal_->object_.get());
         assert(tprofile2d || !"Histogram type but ROOT object not set or wrong type");
@@ -127,7 +127,7 @@ namespace dqm {
       internal_->scalar_.num = 0;
       internal_->scalar_.real = 0;
       internal_->scalar_.str = "";
-      if (internal_->kind_ >= MonitorElement::Kind::TH1F) {
+      if (internal_->key_.kind_ >= MonitorElement::Kind::TH1F) {
         assert(internal_->object_ || !"Histogram type but ROOT object not set");
         internal_->object_->Reset();
       }

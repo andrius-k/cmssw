@@ -93,7 +93,6 @@ struct MonitorElementData {
 
   // The main ME data. We don't keep references/QTest results, instead we use
   // only the fields stored in DQMIO files.
-  Kind kind_;
   // "mutable" to allow thread-safe "Fill" to change it without a const-cast
   // const-casting would be more logically correct, but risks UB.
   // The lock protects the data while filling. There is no point in having it
@@ -108,46 +107,45 @@ struct MonitorElementData {
   mutable std::unique_ptr<TH1> object_;
   mutable std::mutex lock_;
 
-  // Metadata about the ME.
-  // We could use pointers to interned strings here to save some space.
-  std::string dirname_;
-  std::string objname_;
-
-  // The range from the first to the last event that actually went into this
-  // histogram. When merging, we extend this range; merging overlapping but not
-  // identical ranges should probably be an error, see the Mergable Products
-  // discussion: https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuidePerRunAndPerLumiBlockData#Merging_Run_and_Luminosity_Block
-  // We could also keep event numbers, to make it easier to see if there is
-  // double counting for debugging.
-  edm::LuminosityBlockRange coveredrange_;
-  Scope scope_;
-
-  // We don't declare/ban any defualt constructors.
-  // Copying with the root object pointer inside is dangerous, but very useful
-  // when used as a base class.
-  // We don't delete the ROOT object at destruction so that it is easier/safer
-  // to use this as a base class for the actual, mutable ME classes.
-
-  // Metadata tuple. The range is included here in case we have e.g.
+  // Metadata about the ME. The range is included here in case we have e.g.
   // multiple per-lumi histograms in one collection. For a logical comparison,
   // one should look only at the name.
-  // The tuple in there should be inlined and rarely actually created.
-  typedef decltype(std::make_tuple(dirname_,
-                                   objname_,
-                                   scope_,
-                                   coveredrange_.startRun(),
-                                   coveredrange_.startLumi(),
-                                   coveredrange_.endRun(),
-                                   coveredrange_.endLumi())) Key;
-  Key key() const {
-    return std::make_tuple(dirname_,
-                           objname_,
-                           scope_,
-                           coveredrange_.startRun(),
-                           coveredrange_.startLumi(),
-                           coveredrange_.endRun(),
-                           coveredrange_.endLumi());
-  }
+  struct Key {
+    Kind kind_;
+
+    // We could use pointers to interned strings here to save some space.
+    std::string dirname_;
+    std::string objname_;
+
+    // The range from the first to the last event that actually went into this
+    // histogram. When merging, we extend this range; merging overlapping but not
+    // identical ranges should probably be an error, see the Mergable Products
+    // discussion: https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuidePerRunAndPerLumiBlockData#Merging_Run_and_Luminosity_Block
+    // We could also keep event numbers, to make it easier to see if there is
+    // double counting for debugging.
+    edm::LuminosityBlockRange coveredrange_;
+    Scope scope_;
+
+    bool operator<(Key const& other)  const {
+      return std::make_tuple(dirname_,
+                             objname_,
+                             scope_,
+                             coveredrange_.startRun(),
+                             coveredrange_.startLumi(),
+                             coveredrange_.endRun(),
+                             coveredrange_.endLumi()) < std::make_tuple(other.dirname_,
+                                                                        other.objname_,
+                                                                        other.scope_,
+                                                                        other.coveredrange_.startRun(),
+                                                                        other.coveredrange_.startLumi(),
+                                                                        other.coveredrange_.endRun(),
+                                                                        other.coveredrange_.endLumi());
+    }
+  };
+
+  Key key_;
+
+  // We don't declare/ban any default constructors.
 };
 
 // For now, no additional (meta-)data is needed apart from the MEs themselves.
@@ -160,7 +158,6 @@ struct MonitorElementData {
 // for serialization.
 class MonitorElementCollection : public std::vector<std::unique_ptr<MonitorElementData>> {
 public:
-
   bool mergeProduct(MonitorElementCollection const& product) {
     assert(!"Not implemented yet.");
     return false;

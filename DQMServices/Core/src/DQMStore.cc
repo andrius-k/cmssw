@@ -49,11 +49,13 @@ namespace dqm {
     template <class ME, class STORE>
     ME* IBooker<ME, STORE>::bookME(TString const& name, MonitorElementData::Kind kind, TH1* object) {
       MonitorElementData* data = new MonitorElementData();
-      data->kind_ = kind;
+      MonitorElementData::Key key;
+      key.kind_ = kind;
+      key.objname_ = std::string(name.View());
+      key.dirname_ = pwd();
+      key.scope_ = MonitorElementData::Scope::DEFAULT;
+      data->key_ = key;
       data->object_ = std::unique_ptr<TH1>(object);
-      data->objname_ = std::string(name.View());
-      data->dirname_ = pwd();
-      data->scope_ = MonitorElementData::Scope::DEFAULT;
 
       std::unique_ptr<ME> me = std::make_unique<ME>(data);
       ME* me_ptr = store_->putME(std::move(me));
@@ -68,12 +70,12 @@ namespace dqm {
         ME* me_ptr = master_->putME(std::move(me));
 
         // Make a copy of ME sharing the underlying MonitorElementData and root TH1 object
-        localmes_[me_ptr->internal()->key()] = std::make_unique<ME>(*me_ptr);
+        localmes_[me_ptr->internal()->key_] = std::make_unique<ME>(*me_ptr);
 
-        return localmes_[me_ptr->internal()->key()].get();
+        return localmes_[me_ptr->internal()->key_].get();
       }
 
-      auto& existing = localmes_[me->internal()->key()];
+      auto& existing = localmes_[me->internal()->key_];
 
       // existing = nullptr;
       // existing.asdasdasd();
@@ -88,7 +90,7 @@ namespace dqm {
         return existing.get();
       }
       else {
-        localmes_[me->internal()->key()] = std::move(me);
+        localmes_[me->internal()->key_] = std::move(me);
         return me.get();
       }
     }
