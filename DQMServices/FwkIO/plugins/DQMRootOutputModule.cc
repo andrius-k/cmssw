@@ -361,18 +361,18 @@ void DQMRootOutputModule::openFile(edm::FileBlock const&) {
     tree->SetDirectory(m_file.get());  //TFile takes ownership
   }
 
-  m_dqmKindToTypeIndex[(int)MonitorElement::Kind::INT] = kIntIndex;
-  m_dqmKindToTypeIndex[(int)MonitorElement::Kind::REAL] = kFloatIndex;
-  m_dqmKindToTypeIndex[(int)MonitorElement::Kind::STRING] = kStringIndex;
-  m_dqmKindToTypeIndex[(int)MonitorElement::Kind::TH1F] = kTH1FIndex;
-  m_dqmKindToTypeIndex[(int)MonitorElement::Kind::TH1S] = kTH1SIndex;
-  m_dqmKindToTypeIndex[(int)MonitorElement::Kind::TH1D] = kTH1DIndex;
-  m_dqmKindToTypeIndex[(int)MonitorElement::Kind::TH2F] = kTH2FIndex;
-  m_dqmKindToTypeIndex[(int)MonitorElement::Kind::TH2S] = kTH2SIndex;
-  m_dqmKindToTypeIndex[(int)MonitorElement::Kind::TH2D] = kTH2DIndex;
-  m_dqmKindToTypeIndex[(int)MonitorElement::Kind::TH3F] = kTH3FIndex;
-  m_dqmKindToTypeIndex[(int)MonitorElement::Kind::TPROFILE] = kTProfileIndex;
-  m_dqmKindToTypeIndex[(int)MonitorElement::Kind::TPROFILE2D] = kTProfile2DIndex;
+  m_dqmKindToTypeIndex[MonitorElement::Kind::INT] = kIntIndex;
+  m_dqmKindToTypeIndex[MonitorElement::Kind::REAL] = kFloatIndex;
+  m_dqmKindToTypeIndex[MonitorElement::Kind::STRING] = kStringIndex;
+  m_dqmKindToTypeIndex[MonitorElement::Kind::TH1F] = kTH1FIndex;
+  m_dqmKindToTypeIndex[MonitorElement::Kind::TH1S] = kTH1SIndex;
+  m_dqmKindToTypeIndex[MonitorElement::Kind::TH1D] = kTH1DIndex;
+  m_dqmKindToTypeIndex[MonitorElement::Kind::TH2F] = kTH2FIndex;
+  m_dqmKindToTypeIndex[MonitorElement::Kind::TH2S] = kTH2SIndex;
+  m_dqmKindToTypeIndex[MonitorElement::Kind::TH2D] = kTH2DIndex;
+  m_dqmKindToTypeIndex[MonitorElement::Kind::TH3F] = kTH3FIndex;
+  m_dqmKindToTypeIndex[MonitorElement::Kind::TPROFILE] = kTProfileIndex;
+  m_dqmKindToTypeIndex[MonitorElement::Kind::TPROFILE2D] = kTProfile2DIndex;
 }
 
 void DQMRootOutputModule::write(edm::EventForOutput const&) {}

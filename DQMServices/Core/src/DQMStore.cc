@@ -1277,6 +1277,8 @@ MonitorElement* DQMStore::book_(
     }
     return book_(dir, name, "bookInt")->initialise(MonitorElement::Kind::INT);
   }
+  return book_(dir, name, "bookInt")->initialise(MonitorElement::Kind::INT);
+}
 
   /// Book int.
   MonitorElement* DQMStore::bookInt(char_string const& name) { return bookInt_(pwd_, name); }
@@ -1292,6 +1294,8 @@ MonitorElement* DQMStore::book_(
     }
     return book_(dir, name, "bookFloat")->initialise(MonitorElement::Kind::REAL);
   }
+  return book_(dir, name, "bookFloat")->initialise(MonitorElement::Kind::REAL);
+}
 
   /// Book float.
   MonitorElement* DQMStore::bookFloat(char_string const& name) { return bookFloat_(pwd_, name); }
@@ -1305,27 +1309,29 @@ MonitorElement* DQMStore::book_(
     }
     return book_(dir, name, "bookString")->initialise(MonitorElement::Kind::STRING, value);
   }
+  return book_(dir, name, "bookString")->initialise(MonitorElement::Kind::STRING, value);
+}
 
   /// Book string.
   MonitorElement* DQMStore::bookString(char_string const& name, char_string const& value) {
     return bookString_(pwd_, name, value);
   }
 
-  // -------------------------------------------------------------------
-  /// Book 1D histogram based on TH1F.
-  MonitorElement* DQMStore::book1D_(std::string const& dir, std::string const& name, TH1F* h) {
-    return book_(dir, name, "book1D", MonitorElement::Kind::TH1F, h, collate1D);
-  }
+// -------------------------------------------------------------------
+/// Book 1D histogram based on TH1F.
+MonitorElement* DQMStore::book1D_(std::string const& dir, std::string const& name, TH1F* h) {
+  return book_(dir, name, "book1D", MonitorElement::Kind::TH1F, h, collate1D);
+}
 
-  /// Book 1D histogram based on TH1S.
-  MonitorElement* DQMStore::book1S_(std::string const& dir, std::string const& name, TH1S* h) {
-    return book_(dir, name, "book1S", MonitorElement::Kind::TH1S, h, collate1S);
-  }
+/// Book 1D histogram based on TH1S.
+MonitorElement* DQMStore::book1S_(std::string const& dir, std::string const& name, TH1S* h) {
+  return book_(dir, name, "book1S", MonitorElement::Kind::TH1S, h, collate1S);
+}
 
-  /// Book 1D histogram based on TH1D.
-  MonitorElement* DQMStore::book1DD_(std::string const& dir, std::string const& name, TH1D* h) {
-    return book_(dir, name, "book1DD", MonitorElement::Kind::TH1D, h, collate1DD);
-  }
+/// Book 1D histogram based on TH1D.
+MonitorElement* DQMStore::book1DD_(std::string const& dir, std::string const& name, TH1D* h) {
+  return book_(dir, name, "book1DD", MonitorElement::Kind::TH1D, h, collate1DD);
+}
 
   /// Book 1D histogram.
   MonitorElement* DQMStore::book1D(
@@ -1339,11 +1345,74 @@ MonitorElement* DQMStore::book_(
     return book1S_(pwd_, name, new TH1S(name, title, nchX, lowX, highX));
   }
 
-  /// Book 1S histogram.
-  MonitorElement* DQMStore::book1DD(
-      char_string const& name, char_string const& title, int const nchX, double const lowX, double const highX) {
-    return book1DD_(pwd_, name, new TH1D(name, title, nchX, lowX, highX));
-  }
+/// Book 1S histogram.
+MonitorElement* DQMStore::book1DD(
+    char_string const& name, char_string const& title, int const nchX, double const lowX, double const highX) {
+  return book1DD_(pwd_, name, new TH1D(name, title, nchX, lowX, highX));
+}
+
+/// Book 1D variable bin histogram.
+MonitorElement* DQMStore::book1D(char_string const& name,
+                                 char_string const& title,
+                                 int const nchX,
+                                 const float* xbinsize) {
+  return book1D_(pwd_, name, new TH1F(name, title, nchX, xbinsize));
+}
+
+/// Book 1D histogram by cloning an existing histogram.
+MonitorElement* DQMStore::book1D(char_string const& name, TH1F* source) {
+  return book1D_(pwd_, name, static_cast<TH1F*>(source->Clone(name)));
+}
+
+/// Book 1S histogram by cloning an existing histogram.
+MonitorElement* DQMStore::book1S(char_string const& name, TH1S* source) {
+  return book1S_(pwd_, name, static_cast<TH1S*>(source->Clone(name)));
+}
+
+/// Book 1D double histogram by cloning an existing histogram.
+MonitorElement* DQMStore::book1DD(char_string const& name, TH1D* source) {
+  return book1DD_(pwd_, name, static_cast<TH1D*>(source->Clone(name)));
+}
+
+// -------------------------------------------------------------------
+/// Book 2D histogram based on TH2F.
+MonitorElement* DQMStore::book2D_(std::string const& dir, std::string const& name, TH2F* h) {
+  return book_(dir, name, "book2D", MonitorElement::Kind::TH2F, h, collate2D);
+}
+
+/// Book 2D histogram based on TH2S.
+MonitorElement* DQMStore::book2S_(std::string const& dir, std::string const& name, TH2S* h) {
+  return book_(dir, name, "book2S", MonitorElement::Kind::TH2S, h, collate2S);
+}
+
+/// Book 2D histogram based on TH2D.
+MonitorElement* DQMStore::book2DD_(std::string const& dir, std::string const& name, TH2D* h) {
+  return book_(dir, name, "book2DD", MonitorElement::Kind::TH2D, h, collate2DD);
+}
+
+/// Book 2D histogram.
+MonitorElement* DQMStore::book2D(char_string const& name,
+                                 char_string const& title,
+                                 int const nchX,
+                                 double const lowX,
+                                 double const highX,
+                                 int const nchY,
+                                 double const lowY,
+                                 double const highY) {
+  return book2D_(pwd_, name, new TH2F(name, title, nchX, lowX, highX, nchY, lowY, highY));
+}
+
+/// Book 2S histogram.
+MonitorElement* DQMStore::book2S(char_string const& name,
+                                 char_string const& title,
+                                 int const nchX,
+                                 double const lowX,
+                                 double const highX,
+                                 int const nchY,
+                                 double const lowY,
+                                 double const highY) {
+  return book2S_(pwd_, name, new TH2S(name, title, nchX, lowX, highX, nchY, lowY, highY));
+}
 
   /// Book 1D variable bin histogram.
   MonitorElement* DQMStore::book1D(char_string const& name,
@@ -1379,10 +1448,11 @@ MonitorElement* DQMStore::book_(
     return book_(dir, name, "book2S", MonitorElement::Kind::TH2S, h, collate2S);
   }
 
-  /// Book 2D histogram based on TH2D.
-  MonitorElement* DQMStore::book2DD_(std::string const& dir, std::string const& name, TH2D* h) {
-    return book_(dir, name, "book2DD", MonitorElement::Kind::TH2D, h, collate2DD);
-  }
+// -------------------------------------------------------------------
+/// Book 3D histogram based on TH3F.
+MonitorElement* DQMStore::book3D_(std::string const& dir, std::string const& name, TH3F* h) {
+  return book_(dir, name, "book3D", MonitorElement::Kind::TH3F, h, collate3D);
+}
 
   /// Book 2D histogram.
   MonitorElement* DQMStore::book2D(char_string const& name,
@@ -1408,17 +1478,11 @@ MonitorElement* DQMStore::book_(
     return book2S_(pwd_, name, new TH2S(name, title, nchX, lowX, highX, nchY, lowY, highY));
   }
 
-  /// Book 2D histogram.
-  MonitorElement* DQMStore::book2DD(char_string const& name,
-                                    char_string const& title,
-                                    int const nchX,
-                                    double const lowX,
-                                    double const highX,
-                                    int const nchY,
-                                    double const lowY,
-                                    double const highY) {
-    return book2DD_(pwd_, name, new TH2D(name, title, nchX, lowX, highX, nchY, lowY, highY));
-  }
+// -------------------------------------------------------------------
+/// Book profile histogram based on TProfile.
+MonitorElement* DQMStore::bookProfile_(std::string const& dir, std::string const& name, TProfile* h) {
+  return book_(dir, name, "bookProfile", MonitorElement::Kind::TPROFILE, h, collateProfile);
+}
 
   /// Book 2D variable bin histogram.
   MonitorElement* DQMStore::book2D(char_string const& name,
@@ -1455,11 +1519,11 @@ MonitorElement* DQMStore::book_(
     return book2DD_(pwd_, name, static_cast<TH2D*>(source->Clone(name)));
   }
 
-  // -------------------------------------------------------------------
-  /// Book 3D histogram based on TH3F.
-  MonitorElement* DQMStore::book3D_(std::string const& dir, std::string const& name, TH3F* h) {
-    return book_(dir, name, "book3D", MonitorElement::Kind::TH3F, h, collate3D);
-  }
+// -------------------------------------------------------------------
+/// Book 2D profile histogram based on TProfile2D.
+MonitorElement* DQMStore::bookProfile2D_(std::string const& dir, std::string const& name, TProfile2D* h) {
+  return book_(dir, name, "bookProfile2D", MonitorElement::Kind::TPROFILE2D, h, collateProfile2D);
+}
 
   /// Book 3D histogram.
   MonitorElement* DQMStore::book3D(char_string const& name,
@@ -2453,7 +2517,12 @@ MonitorElement* DQMStore::book_(
         end = path.size();
     }
 
-    return true;
+void DQMStore::saveMonitorElementToROOT(MonitorElement const& me, TFile& file) {
+  // Save the object.
+  if (me.kind() < MonitorElement::Kind::TH1F) {
+    TObjString(me.tagString().c_str()).Write();
+  } else {
+    me.object_->Write();
   }
 
   void DQMStore::saveMonitorElementToROOT(MonitorElement const& me, TFile& file) {
@@ -2684,15 +2753,30 @@ MonitorElement* DQMStore::book_(
     // XXX not supported by protobuf files.
   }
 
-  void DQMStore::saveMonitorElementRangeToPB(std::string const& dir,
-                                             unsigned int const run,
-                                             MEMap::const_iterator const begin,
-                                             MEMap::const_iterator const end,
-                                             dqmstorepb::ROOTFilePB& file,
-                                             unsigned int& counter) {
-    for (auto const& me : boost::make_iterator_range(begin, end)) {
-      if (not isSubdirectory(dir, *me.data_.dirname))
-        break;
+void DQMStore::saveMonitorElementToPB(MonitorElement const& me, dqmstorepb::ROOTFilePB& file) {
+  // Save the object.
+  TBufferFile buffer(TBufferFile::kWrite);
+  if (me.kind() < MonitorElement::Kind::TH1F) {
+    TObjString object(me.tagString().c_str());
+    buffer.WriteObject(&object);
+  } else {
+    buffer.WriteObject(me.object_);
+  }
+  dqmstorepb::ROOTFilePB::Histo& histo = *file.add_histo();
+  histo.set_full_pathname(*me.data_.dirname + '/' + me.data_.objname);
+  histo.set_flags(me.data_.flags);
+  histo.set_size(buffer.Length());
+  histo.set_streamed_histo((void const*)buffer.Buffer(), buffer.Length());
+
+  // Save quality reports if this is not in reference section.
+  // XXX not supported by protobuf files.
+
+  // Save efficiency tag, if any.
+  // XXX not supported by protobuf files.
+
+  // Save tag if any.
+  // XXX not supported by protobuf files.
+}
 
       if (verbose_ > 1)
         std::cout << "DQMStore::savePB:"
@@ -3345,69 +3429,64 @@ MonitorElement* DQMStore::book_(
   //////////////////////////////////////////////////////////////////////
   /** Invoke this method after flushing all recently changed monitoring.
     Clears updated flag on all MEs and calls their Reset() method. */
-  void DQMStore::scaleElements() {
-    if (scaleFlag_ == 0.0)
-      return;
-    if (verbose_ > 0)
-      std::cout << " =========== "
-                << " ScaleFlag " << scaleFlag_ << std::endl;
-    double factor = scaleFlag_;
-    int events = 1;
-    if (dirExists("Info/EventInfo")) {
-      if (scaleFlag_ == -1.0) {
-        MonitorElement* scale_me = get("Info/EventInfo/ScaleFactor");
-        if (scale_me && scale_me->kind() == MonitorElement::Kind::REAL)
-          factor = scale_me->getFloatValue();
-      }
-      MonitorElement* event_me = get("Info/EventInfo/processedEvents");
-      if (event_me && event_me->kind() == MonitorElement::Kind::INT)
-        events = event_me->getIntValue();
+void DQMStore::scaleElements() {
+  if (scaleFlag_ == 0.0)
+    return;
+  if (verbose_ > 0)
+    std::cout << " =========== "
+              << " ScaleFlag " << scaleFlag_ << std::endl;
+  double factor = scaleFlag_;
+  int events = 1;
+  if (dirExists("Info/EventInfo")) {
+    if (scaleFlag_ == -1.0) {
+      MonitorElement* scale_me = get("Info/EventInfo/ScaleFactor");
+      if (scale_me && scale_me->kind() == MonitorElement::Kind::REAL)
+        factor = scale_me->getFloatValue();
     }
-    factor = factor / (events * 1.0);
+    MonitorElement* event_me = get("Info/EventInfo/processedEvents");
+    if (event_me && event_me->kind() == MonitorElement::Kind::INT)
+      events = event_me->getIntValue();
+  }
+  factor = factor / (events * 1.0);
 
-    for (auto const& m : data_) {
-      auto& me = const_cast<MonitorElement&>(m);
-      switch (me.kind()) {
-        case MonitorElement::Kind::TH1F: {
-          me.getTH1F()->Scale(factor);
-          break;
-        }
-        case MonitorElement::Kind::TH1S: {
-          me.getTH1S()->Scale(factor);
-          break;
-        }
-        case MonitorElement::Kind::TH1D: {
-          me.getTH1D()->Scale(factor);
-          break;
-        }
-        case MonitorElement::Kind::TH2F: {
-          me.getTH2F()->Scale(factor);
-          break;
-        }
-        case MonitorElement::Kind::TH2S: {
-          me.getTH2S()->Scale(factor);
-          break;
-        }
-        case MonitorElement::Kind::TH2D: {
-          me.getTH2D()->Scale(factor);
-          break;
-        }
-        case MonitorElement::Kind::TH3F: {
-          me.getTH3F()->Scale(factor);
-          break;
-        }
-        case MonitorElement::Kind::TPROFILE: {
-          me.getTProfile()->Scale(factor);
-          break;
-        }
-        case MonitorElement::Kind::TPROFILE2D: {
-          me.getTProfile2D()->Scale(factor);
-          break;
-        }
-        default:
-          if (verbose_ > 0)
-            std::cout << " The DQM object '" << me.getFullname() << "' is not scalable object " << std::endl;
-          continue;
+  for (auto const& m : data_) {
+    auto& me = const_cast<MonitorElement&>(m);
+    switch (me.kind()) {
+      case MonitorElement::Kind::TH1F: {
+        me.getTH1F()->Scale(factor);
+        break;
+      }
+      case MonitorElement::Kind::TH1S: {
+        me.getTH1S()->Scale(factor);
+        break;
+      }
+      case MonitorElement::Kind::TH1D: {
+        me.getTH1D()->Scale(factor);
+        break;
+      }
+      case MonitorElement::Kind::TH2F: {
+        me.getTH2F()->Scale(factor);
+        break;
+      }
+      case MonitorElement::Kind::TH2S: {
+        me.getTH2S()->Scale(factor);
+        break;
+      }
+      case MonitorElement::Kind::TH2D: {
+        me.getTH2D()->Scale(factor);
+        break;
+      }
+      case MonitorElement::Kind::TH3F: {
+        me.getTH3F()->Scale(factor);
+        break;
+      }
+      case MonitorElement::Kind::TPROFILE: {
+        me.getTProfile()->Scale(factor);
+        break;
+      }
+      case MonitorElement::Kind::TPROFILE2D: {
+        me.getTProfile2D()->Scale(factor);
+        break;
       }
     }
   }

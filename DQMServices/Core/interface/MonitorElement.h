@@ -286,104 +286,97 @@ public:
     void setTitle(const std::string &title);
 #endif  // DQM_ROOT_METHODS
 
-  private:
-    /// whether soft-reset is enabled; default is false
-    bool isSoftResetEnabled() const { return refvalue_ != nullptr; }
+private:
+  /// whether soft-reset is enabled; default is false
+  bool isSoftResetEnabled() const { return refvalue_ != nullptr; }
 
-    /// whether ME contents should be accumulated over multiple monitoring periods; default: false
-    bool isAccumulateEnabled() const { return data_.flags & DQMNet::DQM_PROP_ACCUMULATE; }
+  /// whether ME contents should be accumulated over multiple monitoring periods; default: false
+  bool isAccumulateEnabled() const { return data_.flags & DQMNet::DQM_PROP_ACCUMULATE; }
 
-    /// true if ME is marked for deletion
-    bool markedToDelete() const { return data_.flags & DQMNet::DQM_PROP_MARKTODELETE; }
+  /// true if ME is marked for deletion
+  bool markedToDelete() const { return data_.flags & DQMNet::DQM_PROP_MARKTODELETE; }
 
-    /// Mark the object for deletion.
-    /// NB: make sure that the following method is not called simultaneously for the same ME
-    void markToDelete() { data_.flags |= DQMNet::DQM_PROP_MARKTODELETE; }
+  /// Mark the object for deletion.
+  /// NB: make sure that the following method is not called simultaneously for the same ME
+  void markToDelete() { data_.flags |= DQMNet::DQM_PROP_MARKTODELETE; }
 
-  private:
-    /// reset "was updated" flag
-    void resetUpdate() { data_.flags &= ~DQMNet::DQM_PROP_NEW; }
+private:
+  /// reset "was updated" flag
+  void resetUpdate() { data_.flags &= ~DQMNet::DQM_PROP_NEW; }
 
-    /// true if ME should be reset at end of monitoring cycle
-    bool resetMe() const { return data_.flags & DQMNet::DQM_PROP_RESET; }
+  /// true if ME should be reset at end of monitoring cycle
+  bool resetMe() const { return data_.flags & DQMNet::DQM_PROP_RESET; }
 
-    /// if true, will accumulate ME contents (over many periods)
-    /// until method is called with flag = false again
-    void setAccumulate(bool /* flag */) { data_.flags |= DQMNet::DQM_PROP_ACCUMULATE; }
+  /// if true, will accumulate ME contents (over many periods)
+  /// until method is called with flag = false again
+  void setAccumulate(bool /* flag */) { data_.flags |= DQMNet::DQM_PROP_ACCUMULATE; }
 
-    TAxis *getAxis(const char *func, int axis) const;
+  TAxis *getAxis(const char *func, int axis) const;
 
-    // ------------ Operations for MEs that are normally never reset ---------
-  public:
-    void softReset();
+  // ------------ Operations for MEs that are normally never reset ---------
+public:
+  void softReset();
 
-  private:
-    void disableSoftReset();
-    void addProfiles(TProfile *h1, TProfile *h2, TProfile *sum, float c1, float c2);
-    void addProfiles(TProfile2D *h1, TProfile2D *h2, TProfile2D *sum, float c1, float c2);
-    void copyFunctions(TH1 *from, TH1 *to);
-    void copyFrom(TH1 *from);
+private:
+  void disableSoftReset();
+  void addProfiles(TProfile *h1, TProfile *h2, TProfile *sum, float c1, float c2);
+  void addProfiles(TProfile2D *h1, TProfile2D *h2, TProfile2D *sum, float c1, float c2);
+  void copyFunctions(TH1 *from, TH1 *to);
+  void copyFrom(TH1 *from);
 
-    // --- Operations on MEs that are normally reset at end of monitoring cycle ---
-    void getQReport(bool create, const std::string &qtname, QReport *&qr, DQMNet::QValue *&qv);
-    void addQReport(const DQMNet::QValue &desc, QCriterion *qc);
-    void addQReport(QCriterion *qc);
-    void updateQReportStats();
+  // --- Operations on MEs that are normally reset at end of monitoring cycle ---
+  void getQReport(bool create, const std::string &qtname, QReport *&qr, DQMNet::QValue *&qv);
+  void addQReport(const DQMNet::QValue &desc, QCriterion *qc);
+  void addQReport(QCriterion *qc);
+  void updateQReportStats();
 
-  public:
-    TObject *getRootObject() const;
-    TH1 *getTH1() const;
-    TH1F *getTH1F() const;
-    TH1S *getTH1S() const;
-    TH1D *getTH1D() const;
-    TH2F *getTH2F() const;
-    TH2S *getTH2S() const;
-    TH2D *getTH2D() const;
-    TH3F *getTH3F() const;
-    TProfile *getTProfile() const;
-    TProfile2D *getTProfile2D() const;
+public:
+  TObject *getRootObject() const;
+  TH1 *getTH1() const;
+  TH1F *getTH1F() const;
+  TH1S *getTH1S() const;
+  TH1D *getTH1D() const;
+  TH2F *getTH2F() const;
+  TH2S *getTH2S() const;
+  TH2D *getTH2D() const;
+  TH3F *getTH3F() const;
+  TProfile *getTProfile() const;
+  TProfile2D *getTProfile2D() const;
 
-    TObject *getRefRootObject() const;
-    TH1 *getRefTH1() const;
-    TH1F *getRefTH1F() const;
-    TH1S *getRefTH1S() const;
-    TH1D *getRefTH1D() const;
-    TH2F *getRefTH2F() const;
-    TH2S *getRefTH2S() const;
-    TH2D *getRefTH2D() const;
-    TH3F *getRefTH3F() const;
-    TProfile *getRefTProfile() const;
-    TProfile2D *getRefTProfile2D() const;
+  TObject *getRefRootObject() const;
+  TH1 *getRefTH1() const;
+  TH1F *getRefTH1F() const;
+  TH1S *getRefTH1S() const;
+  TH1D *getRefTH1D() const;
+  TH2F *getRefTH2F() const;
+  TH2S *getRefTH2S() const;
+  TH2D *getRefTH2D() const;
+  TH3F *getRefTH3F() const;
+  TProfile *getRefTProfile() const;
+  TProfile2D *getRefTProfile2D() const;
 
-    int64_t getIntValue() const {
-      assert(kind() == Kind::INT);
-      return scalar_.num;
-    }
+  int64_t getIntValue() const {
+    assert(kind() == Kind::INT);
+    return scalar_.num;
+  }
 
-    double getFloatValue() const {
-      assert(kind() == Kind::REAL);
-      return scalar_.real;
-    }
+  double getFloatValue() const {
+    assert(kind() == Kind::REAL);
+    return scalar_.real;
+  }
 
-    const std::string &getStringValue() const {
-      assert(kind() == Kind::STRING);
-      return scalar_.str;
-    }
+  const std::string &getStringValue() const {
+    assert(kind() == Kind::STRING);
+    return scalar_.str;
+  }
 
-    DQMNet::TagList getTags() const  // DEPRECATED
-    {
-      DQMNet::TagList tags;
-      if (data_.flags & DQMNet::DQM_PROP_TAGGED)
-        tags.push_back(data_.tag);
-      return tags;
-    }
-
-    const uint32_t getTag() const { return data_.tag; }
-
-    const uint32_t run() const { return data_.run; }
-    const uint32_t lumi() const { return data_.lumi; }
-    const uint32_t moduleId() const { return data_.moduleId; }
-  };
+  DQMNet::TagList getTags() const  // DEPRECATED
+  {
+    DQMNet::TagList tags;
+    if (data_.flags & DQMNet::DQM_PROP_TAGGED)
+      tags.push_back(data_.tag);
+    return tags;
+  }
 
 }  // namespace dqm::impl
 
