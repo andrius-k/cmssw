@@ -242,7 +242,6 @@ namespace dqm {
       DQM_DEPRECATED
       virtual void softReset();
 
-
       // mostly used for IO, should be private.
       DQM_DEPRECATED
       std::string valueString() const;
@@ -330,7 +329,6 @@ namespace dqm {
       virtual void disableAlphanumeric();
       virtual void setOption(const char* option);
 
-
       // these should be non-const, since they are potentially not thread-safe
       virtual TObject* getRootObject() const;
       virtual TH1* getTH1() const;
@@ -345,7 +343,6 @@ namespace dqm {
       virtual TProfile2D* getTProfile2D() const;
 
     public:
-
       virtual int64_t getIntValue() const;
       virtual double getFloatValue() const;
       virtual const std::string& getStringValue() const;
@@ -366,7 +363,7 @@ namespace dqm {
       virtual TH1* release();
       // Make sure we own the ROOT object by clone'ing it if needed. Needs to
       // be called in all non-const and even some const methods (the fill
-      // methods). This is only required for dqm::harvesting and causes some 
+      // methods). This is only required for dqm::harvesting and causes some
       // overhead in dqm::reco, so maybe move it down in the hierarchy.
       void makeMutable() const;
       // Provide access to the internal fields.
@@ -391,7 +388,6 @@ namespace dqm {
       mutable bool is_readonly_;
 
       std::vector<QReport> qreports_;  //< QReports associated to this object.
-
     };
 
   }  // namespace legacy
@@ -401,7 +397,7 @@ namespace dqm {
     public:
       MonitorElement() = default;
       MonitorElement(MonitorElement&&) = default;
-      MonitorElement(MonitorElement const& me) : dqm::legacy::MonitorElement(me) {};
+      MonitorElement(MonitorElement const& me) : dqm::legacy::MonitorElement(me){};
       MonitorElement(MonitorElementData const* data) : dqm::legacy::MonitorElement(data){};
       ~MonitorElement() = default;
 
@@ -467,7 +463,7 @@ namespace dqm {
     public:
       MonitorElement() = default;
       MonitorElement(MonitorElement&&) = default;
-      MonitorElement(MonitorElement const& me) : dqm::reco::MonitorElement(me) {};
+      MonitorElement(MonitorElement const& me) : dqm::reco::MonitorElement(me){};
       MonitorElement(MonitorElementData const* data) : dqm::reco::MonitorElement(data){};
       ~MonitorElement() = default;
 
@@ -665,9 +661,9 @@ namespace dqm {
     public:
       // get MEs that are direct children of full path path
       virtual std::vector<dqm::harvesting::MonitorElement*> getContents(std::string const& path) const = 0;
-      DQM_DEPRECATED // for use of tag
-      virtual std::vector<dqm::harvesting::MonitorElement*> getContents(std::string const& path,
-                                                                        unsigned int tag) const = 0;
+      DQM_DEPRECATED  // for use of tag
+          virtual std::vector<dqm::harvesting::MonitorElement*>
+          getContents(std::string const& path, unsigned int tag) const = 0;
       // not clear what this is good for.
       DQM_DEPRECATED
       virtual void getContents(std::vector<std::string>& into, bool showContents = true) const = 0;
@@ -1020,13 +1016,13 @@ namespace dqm {
 
     public:
       // internal -- figure out better protection.
-      
+
       // Make a ME owned by this DQMStore. Will return a pointer to a ME owned
       // by this DQMStore: either an existing ME matching the key of `data` or
       // a newly added one.
       // Will take ownership of the ROOT object in `data`, deleting it if not
       // needed.
-      ME* putME(std::unique_ptr<ME> && me);
+      ME* putME(std::unique_ptr<ME>&& me);
       // Turn the MEs associated with t, run, lumi into a read-only product. No
       // copies happen here, instead, we invalidate (or read-only?) the MEs.
       // TODO: Maybe we can do the clone/reset dance of run/lumi MEs here?
@@ -1034,7 +1030,7 @@ namespace dqm {
       // Register a set of MEs to inputs_. Everything we do here needs to be
       // lazy, since we will usually register lots of products but read only
       // few MEs from them.
-      void registerProduct(edm::Handle<MonitorElementCollection>  mes);
+      void registerProduct(edm::Handle<MonitorElementCollection> mes);
       // Find MEs matching this key in the inputs_ and create MEs for them in
       // localmes_. Needs to handle priority (we could have e.g. harvesting and
       // reco versions of the same ME available). Also need to handle updating
@@ -1050,7 +1046,7 @@ namespace dqm {
       // MEs owned by us. All book/get interactions will hand out pointers into
       // this stucture. They may or may not own a ROOT object: in
       // harvesting, we also keep read-only versions of foreign MEs here.
-      // MonitorElementDatas in this map can potentially be shared across 
+      // MonitorElementDatas in this map can potentially be shared across
       // multiple DQMStores.
       // Expect 10-10000 entries.
       std::map<MonitorElementData::Key, std::unique_ptr<ME>> localmes_;

@@ -2,19 +2,19 @@
 namespace dqm {
   namespace legacy {
 
-    MonitorElement::MonitorElement(MonitorElementData const* data) {
+    MonitorElement::MonitorElement(MonitorElementData const *data) {
       internal_ = data;
       this->is_owned_ = true;
       this->is_readonly_ = false;
     }
 
-    MonitorElement::MonitorElement(MonitorElement const& me) {
+    MonitorElement::MonitorElement(MonitorElement const &me) {
       this->internal_ = me.internal_;
       this->is_owned_ = false;
       this->is_readonly_ = false;
     }
 
-    bool MonitorElement::checkCompatibility(MonitorElement* a, MonitorElement* b) {
+    bool MonitorElement::checkCompatibility(MonitorElement *a, MonitorElement *b) {
       // TODO
       return true;
     }
@@ -30,8 +30,10 @@ namespace dqm {
 
     void MonitorElement::Fill(double x) const {
       MonitorElementData::Value::Access access(internal_->value_);
-      assert(internal_->key_.kind_ == MonitorElement::Kind::INT || internal_->key_.kind_ == MonitorElement::Kind::REAL || internal_->key_.kind_ == MonitorElement::Kind::TH1F || internal_->key_.kind_ == MonitorElement::Kind::TH1S ||
-             internal_->key_.kind_ == MonitorElement::Kind::TH1D);
+      assert(
+          internal_->key_.kind_ == MonitorElement::Kind::INT || internal_->key_.kind_ == MonitorElement::Kind::REAL ||
+          internal_->key_.kind_ == MonitorElement::Kind::TH1F || internal_->key_.kind_ == MonitorElement::Kind::TH1S ||
+          internal_->key_.kind_ == MonitorElement::Kind::TH1D);
       if (internal_->key_.kind_ == MonitorElement::Kind::INT) {
         access.scalar.num = (int64_t)x;
       } else if (internal_->key_.kind_ == MonitorElement::Kind::REAL) {
@@ -44,8 +46,10 @@ namespace dqm {
 
     void MonitorElement::doFill(int64_t x) const {
       MonitorElementData::Value::Access access(internal_->value_);
-      assert(internal_->key_.kind_ == MonitorElement::Kind::INT || internal_->key_.kind_ == MonitorElement::Kind::REAL || internal_->key_.kind_ == MonitorElement::Kind::TH1F || internal_->key_.kind_ == MonitorElement::Kind::TH1S ||
-             internal_->key_.kind_ == MonitorElement::Kind::TH1D);
+      assert(
+          internal_->key_.kind_ == MonitorElement::Kind::INT || internal_->key_.kind_ == MonitorElement::Kind::REAL ||
+          internal_->key_.kind_ == MonitorElement::Kind::TH1F || internal_->key_.kind_ == MonitorElement::Kind::TH1S ||
+          internal_->key_.kind_ == MonitorElement::Kind::TH1D);
       if (internal_->key_.kind_ == MonitorElement::Kind::INT) {
         access.scalar.num = x;
       } else if (internal_->key_.kind_ == MonitorElement::Kind::REAL) {
@@ -66,9 +70,11 @@ namespace dqm {
       MonitorElementData::Value::Access access(internal_->value_);
       assert(
           // 1D histograms, this will be a x, weight fill
-          internal_->key_.kind_ == MonitorElement::Kind::TH1F || internal_->key_.kind_ == MonitorElement::Kind::TH1S || internal_->key_.kind_ == MonitorElement::Kind::TH1D ||
+          internal_->key_.kind_ == MonitorElement::Kind::TH1F || internal_->key_.kind_ == MonitorElement::Kind::TH1S ||
+          internal_->key_.kind_ == MonitorElement::Kind::TH1D ||
           // 2D histograms, this will be a x, y fill
-          internal_->key_.kind_ == MonitorElement::Kind::TH2D || internal_->key_.kind_ == MonitorElement::Kind::TH2F || internal_->key_.kind_ == MonitorElement::Kind::TH2S ||
+          internal_->key_.kind_ == MonitorElement::Kind::TH2D || internal_->key_.kind_ == MonitorElement::Kind::TH2F ||
+          internal_->key_.kind_ == MonitorElement::Kind::TH2S ||
           // 1D Profile == 2D histo
           internal_->key_.kind_ == MonitorElement::Kind::TPROFILE);
       assert(access.object || !"Histogram type but ROOT object not set");
@@ -78,7 +84,8 @@ namespace dqm {
 
     void MonitorElement::Fill(double x, double y, double zw) const {
       MonitorElementData::Value::Access access(internal_->value_);
-      if (internal_->key_.kind_ == MonitorElement::Kind::TH2F || internal_->key_.kind_ == MonitorElement::Kind::TH2D || internal_->key_.kind_ == MonitorElement::Kind::TH2S) {
+      if (internal_->key_.kind_ == MonitorElement::Kind::TH2F || internal_->key_.kind_ == MonitorElement::Kind::TH2D ||
+          internal_->key_.kind_ == MonitorElement::Kind::TH2S) {
         // 2D histograms, this will be a x, y, weight fill
         auto th2 = dynamic_cast<TH2 *>(access.object.get());
         assert(th2 || !"Histogram type but ROOT object not set or wrong type");
@@ -133,7 +140,7 @@ namespace dqm {
       }
     }
 
-    TH1* MonitorElement::release() {
+    TH1 *MonitorElement::release() {
       MonitorElementData::Value::Access access(internal_->value_);
       auto ptr = access.object.release();
       return ptr;

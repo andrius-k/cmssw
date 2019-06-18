@@ -104,20 +104,21 @@ struct MonitorElementData {
     // TODO: This really, really, should be unique_ptr. But ROOT wants to copy it
     // for serialization.
     // TODO: The lock_ should of course not be serialized.
-    private:
+  private:
     mutable Scalar scalar_;
     mutable std::unique_ptr<TH1> object_;
     mutable std::mutex lock_;
-    public:
-    // To access the data, including for initializing it, make a 
+
+  public:
+    // To access the data, including for initializing it, make a
     // MonitorElementData::Value::Access instance and use its fields. It should
     // hold the lock as long as it exists.
     struct Access {
       std::scoped_lock<std::mutex> lock;
       Scalar& scalar;
       std::unique_ptr<TH1>& object;
-      Access(MonitorElementData::Value const& value) : 
-        lock(value.lock_), scalar(value.scalar_), object(value.object_) {};
+      Access(MonitorElementData::Value const& value)
+          : lock(value.lock_), scalar(value.scalar_), object(value.object_){};
     };
   };
 

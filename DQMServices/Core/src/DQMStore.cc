@@ -64,8 +64,8 @@ namespace dqm {
     }
 
     template <class ME>
-    ME* DQMStore<ME>::putME(std::unique_ptr<ME> && me) {
-      if(master_ != nullptr) {
+    ME* DQMStore<ME>::putME(std::unique_ptr<ME>&& me) {
+      if (master_ != nullptr) {
         // We have a master, so we simply forward the ME to there.
         auto lock = std::scoped_lock(*masterlock_);
         ME* me_ptr = master_->putME(std::move(me));
@@ -78,7 +78,7 @@ namespace dqm {
 
       auto& existing = localmes_[me->internal()->key_];
 
-      if(existing != nullptr) {
+      if (existing != nullptr) {
         // TODO: Check monitor element compatibility
         ME::checkCompatibility(me.get(), existing.get());
 
@@ -86,8 +86,7 @@ namespace dqm {
         me = nullptr;
 
         return existing.get();
-      }
-      else {
+      } else {
         localmes_[me->internal()->key_] = std::move(me);
         return me.get();
       }
@@ -483,7 +482,9 @@ namespace dqm {
     }
 
     template <class ME>
-    MonitorElementCollection DQMStore<ME>::toProduct(edm::Transition t, edm::RunNumber_t run, edm::LuminosityBlockNumber_t lumi) {
+    MonitorElementCollection DQMStore<ME>::toProduct(edm::Transition t,
+                                                     edm::RunNumber_t run,
+                                                     edm::LuminosityBlockNumber_t lumi) {
       // TODO: removed only to make things compile.
       // The logic will have to be addressed
       // if(t != edm::Transition::EndRun && t != edm::Transition::EndLuminosityBlock) {
@@ -514,9 +515,9 @@ namespace dqm {
       //   if(check(it->first)) {
       //     MonitorElementData const* medata = it->second->internal();
       //     MonitorElementData outdata = *medata;
-          
+
       //     if (t == edm::Transition::EndRun) {
-      //       // In case of endRun, we remove the ME. In case there is another 
+      //       // In case of endRun, we remove the ME. In case there is another
       //       // run, we will runn the booking again, which will create new MEs.
       //       // All subystem code should be fine with the ME*s changing between
       //       // runs.
@@ -551,8 +552,9 @@ namespace dqm {
     }
 
     template <class ME>
-    void DQMStore<ME>::registerProduct(edm::Handle<MonitorElementCollection>  mes) {
-      if (!mes.isValid()) return;
+    void DQMStore<ME>::registerProduct(edm::Handle<MonitorElementCollection> mes) {
+      if (!mes.isValid())
+        return;
 
       for (auto h : inputs_) {
         if (h.isValid()) {
