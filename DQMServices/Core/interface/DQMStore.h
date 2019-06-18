@@ -366,6 +366,10 @@ namespace dqm {
       // Be careful with the root pointers. The const is also serious; changing
       // parts of the key could corrupt the sorted datastructures.
       MonitorElementData const* internal() { return internal_; }
+      void setInternal(MonitorElementData const* data) {
+        assert(!is_owned_); // could be handled but not needed for now 
+        internal_ = data;
+      }
 
     private:
       // The actual object holding ME state, including a potential ROOT object.

@@ -315,7 +315,126 @@ namespace dqm {
 
     template <class ME>
     void DQMStore<ME>::enterLumi(edm::RunNumber_t run, edm::LuminosityBlockNumber_t lumi) {
+      auto updaterange = [run, lumi](MonitorElementData::Key& key, bool& is_full) {
+        // Check scope and extend covered range as needed.
+        // Set is_full if the ME needs to be cloned.
+        // Check run/lumi range is unset, as created by booking or
+        // when cloned in toProduct(). Then, is_full = false.
+        auto& range = key.coveredrange_;
+        auto beginrun = range.startRun();
+        auto endrun = range.endRun();
+        auto beginlumi = range.startLumi();
+        auto endlumi = range.endLumi();
 
+        if (beginrun == edm::invalidRunNumber && endrun == edm::invalidRunNumber
+          && beginlumi == edm::invalidLuminosityBlockNumber 
+          && endlumi == edm::invalidLuminosityBlockNumber) {
+          // this is a prototype, we can simply use it.
+          key.coveredrange_ = edm::LuminosityBlockRange(run, lumi, run, lumi);
+          is_full = false;
+          return;
+        } 
+        if (key.scope_ == MonitorElementData::Scope::RUN) {
+          if (beginrun == run && endrun == run) {
+            key.coveredrange_ = edm::LuminosityBlockRange(run, std::min(lumi, beginlumi), run, std::max(lumi, endlumi));
+            is_full = false;
+            return;
+          } else {
+            key.coveredrange_ = edm::LuminosityBlockRange(run, lumi, run, lumi);
+            is_full = true;
+            return;
+          }
+        } else if (key.scope_ == MonitorElementData::Scope::LUMI) {
+          if (beginrun == run && endrun == run) {
+            if (beginlumi == lumi && endlumi == lumi) {
+              is_full = false;
+              return;
+            }
+          } 
+          key.coveredrange_ = edm::LuminosityBlockRange(run, lumi, run, lumi);
+          is_full = true;
+          return;
+        } else {
+          assert(!"NIY");
+        }
+      };
+
+      if (master_ != nullptr) {
+        // We have a master, so we forward the call there first.
+        auto lock = std::scoped_lock(*masterlock_);
+        master_->enterLumi(run, lumi);
+
+        // Now, for each local ME we look into the master to get the matching
+        // MEData. This should always give us a good ME to use.
+        std::map<MonitorElementData::Key, std::unique_ptr<ME>> newmes;
+        for (auto& it : localmes_) {
+          // take ME out of localmes
+          std::unique_ptr<ME> me;
+          me.swap(it.second);
+
+          // create updated key
+          MonitorElementData::Key key = it.first;
+          bool unused_isfull;
+          updaterange(key, unused_isfull);
+          
+          // find matching data
+          auto& masterme = master_->localmes_[key];
+          assert(masterme || !"Master does not have the ME we need.");
+
+          // update ME and store it
+          me->setInternal(masterme->internal());
+          assert(!(key < me->internal()->key_) && !(me->internal()->key_ < key));
+          newmes[key].swap(me);
+        }
+        // use newmes, localmes should be only nullptrs now and will be destroyed.
+        localmes_.swap(newmes);
+        return;
+      }
+
+      // Update and clone MEs that we own.
+      // The rules are:
+      // - There is at least one ME for each path/name
+      // - If no ME for a given path/name is in use, there is one with run/lumi=0
+      // - All MEs with run/lumi set are currently being filled.
+      std::map<MonitorElementData::Key, std::unique_ptr<ME>> newmes;
+      for (auto& it : localmes_) {
+        // take ME out of localmes
+        std::unique_ptr<ME> me;
+        me.swap(it.second);
+
+        // create updated key
+        MonitorElementData::Key key = it.first;
+        bool is_full;
+        updaterange(key, is_full);
+
+        // clone if needed
+        if (is_full) {
+          // TODO: make this a method/function somewhere.
+          MonitorElementData* clone = new MonitorElementData();
+          clone->key_ = key;
+          MonitorElementData::Value::Access newvalue(clone->value_);
+          MonitorElementData::Value::Access oldvalue(me->internal()->value_);
+          newvalue.scalar = oldvalue.scalar;
+          if (oldvalue.object) {
+            newvalue.object = std::unique_ptr<TH1>((TH1*) oldvalue.object->Clone());
+          } else {
+            newvalue.object = nullptr;
+          }
+          // put back the old ME, we still need it
+          newmes[key].swap(me);
+          // ... and use the clone.
+          auto cloneme = std::make_unique<ME>(clone);
+          me.swap(cloneme);
+        }
+
+        // update the key. This is not save in general, so const_cast is almost
+        // appropriate.
+        const_cast<MonitorElementData*>(me->internal())->key_ = key;
+        // ... and save into the new map.
+        newmes[key].swap(me);
+      }
+
+      localmes_.swap(newmes);
     }
 
     template <class ME>
