@@ -429,6 +429,7 @@ namespace dqm {
           newmes[key].swap(me);
           // ... and use the clone.
           auto cloneme = std::make_unique<ME>(clone);
+          cloneme->Reset();
           me.swap(cloneme);
         }
 
@@ -446,6 +447,12 @@ namespace dqm {
     MonitorElementCollection DQMStore<ME>::toProduct(edm::Transition t,
                                                      edm::RunNumber_t run,
                                                      edm::LuminosityBlockNumber_t lumi) {
+      if(t == edm::Transition::EndRun) {
+
+      } else if(t == edm::Transition::EndLuminosityBlock) {
+
+      }
+
       // TODO: removed only to make things compile.
       // The logic will have to be addressed
       // if(t != edm::Transition::EndRun && t != edm::Transition::EndLuminosityBlock) {

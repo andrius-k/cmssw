@@ -136,8 +136,7 @@ namespace dqm {
       access.scalar.num = 0;
       access.scalar.real = 0;
       access.scalar.str = "";
-      if (internal_->key_.kind_ >= MonitorElement::Kind::TH1F) {
-        assert(access.object || !"Histogram type but ROOT object not set");
+      if (access.object != nullptr) {
         access.object->Reset();
       }
     }
