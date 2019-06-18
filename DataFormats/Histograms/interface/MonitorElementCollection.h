@@ -93,19 +93,35 @@ struct MonitorElementData {
 
   // The main ME data. We don't keep references/QTest results, instead we use
   // only the fields stored in DQMIO files.
-  // "mutable" to allow thread-safe "Fill" to change it without a const-cast
-  // const-casting would be more logically correct, but risks UB.
-  // The lock protects the data while filling. There is no point in having it
-  // here except for convenience.
-  // TODO: It should be ok to use a TH1 value here, but we'd have to template
-  // TODO: ConcurrentME used a tbb::spin_lock, check if we can do that here as
-  // well (dependencies!)
-  // TODO: This really, really, should be unique_ptr. But ROOT wants to copy it
-  // for serialization.
-  // TODO: The lock_ should of course not be serialized.
-  mutable Scalar scalar_;
-  mutable std::unique_ptr<TH1> object_;
-  mutable std::mutex lock_;
+  struct Value {
+    // The lock protects the data while filling. There is no point in having it
+    // here except for convenience.
+    // "mutable" to allow thread-safe "Fill" to change it without a const-cast
+    // const-casting would be more logically correct, but risks UB.
+    // TODO: It should be ok to use a TH1 value here, but we'd have to template
+    // TODO: ConcurrentME used a tbb::spin_lock, check if we can do that here as
+    // well (dependencies!)
+    // TODO: This really, really, should be unique_ptr. But ROOT wants to copy it
+    // for serialization.
+    // TODO: The lock_ should of course not be serialized.
+    private:
+    mutable Scalar scalar_;
+    mutable std::unique_ptr<TH1> object_;
+    mutable std::mutex lock_;
+    public:
+    // To access the data, including for initializing it, make a 
+    // MonitorElementData::Value::Access instance and use its fields. It should
+    // hold the lock as long as it exists.
+    struct Access {
+      std::scoped_lock<std::mutex> lock;
+      Scalar& scalar;
+      std::unique_ptr<TH1>& object;
+      Access(MonitorElementData::Value const& value) : 
+        lock(value.lock_), scalar(value.scalar_), object(value.object_) {};
+    };
+  };
+
+  Value value_;
 
   // Metadata about the ME. The range is included here in case we have e.g.
   // multiple per-lumi histograms in one collection. For a logical comparison,

@@ -50,12 +50,13 @@ namespace dqm {
     ME* IBooker<ME, STORE>::bookME(TString const& name, MonitorElementData::Kind kind, TH1* object) {
       MonitorElementData* data = new MonitorElementData();
       MonitorElementData::Key key;
+      MonitorElementData::Value::Access value(data->value_);
       key.kind_ = kind;
       key.objname_ = std::string(name.View());
       key.dirname_ = pwd();
       key.scope_ = MonitorElementData::Scope::DEFAULT;
+      value.object = std::unique_ptr<TH1>(object);
       data->key_ = key;
-      data->object_ = std::unique_ptr<TH1>(object);
 
       std::unique_ptr<ME> me = std::make_unique<ME>(data);
       ME* me_ptr = store_->putME(std::move(me));
