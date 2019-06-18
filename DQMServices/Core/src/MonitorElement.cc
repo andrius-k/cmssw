@@ -140,12 +140,6 @@ namespace dqm {
       }
     }
 
-    TH1 *MonitorElement::release() {
-      MonitorElementData::Value::Access access(internal_->value_);
-      auto ptr = access.object.release();
-      return ptr;
-    }
-
     std::string MonitorElement::valueString() const { assert(!"NIY"); }
     /* almost unused */ std::string MonitorElement::tagString() const { assert(!"NIY"); }
     /* almost unused */ std::string MonitorElement::tagLabelString() const { assert(!"NIY"); }

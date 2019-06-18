@@ -357,10 +357,6 @@ namespace dqm {
       // Do a full type/axis/range consistency check.
       // TODO: figure out what to do with inconsistent MonitorElement::Scope.
       static bool checkCompatibility(MonitorElement* a, MonitorElement* b);
-      // Return the backing ROOT object and give up its ownership. This
-      // effectively destroys the ME. Return nullptr if the ME does not own the
-      // ROOT object.
-      virtual TH1* release();
       // Make sure we own the ROOT object by clone'ing it if needed. Needs to
       // be called in all non-const and even some const methods (the fill
       // methods). This is only required for dqm::harvesting and causes some
