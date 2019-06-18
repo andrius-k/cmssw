@@ -313,6 +313,11 @@ namespace dqm {
       return bookME(name, MonitorElementData::Kind::TPROFILE2D, tprofile);
     }
 
+    template <class ME, class STORE>
+    void IBooker<ME, STORE>::tag(dqm::legacy::MonitorElement*, unsigned int) { assert(!"No longer supported."); }
+    template <class ME, class STORE>
+    void IBooker<ME, STORE>::tagContents(std::string const&, unsigned int) { assert(!"No longer supported."); }
+
     template <class ME>
     void DQMStore<ME>::enterLumi(edm::RunNumber_t run, edm::LuminosityBlockNumber_t lumi) {
       auto updaterange = [run, lumi](MonitorElementData::Key& key, bool& is_full) {

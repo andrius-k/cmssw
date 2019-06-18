@@ -859,9 +859,9 @@ namespace dqm {
       virtual ME* bookProfile2D(TString const& name, TProfile2D* object);
 
       DQM_DEPRECATED
-      virtual void tag(dqm::legacy::MonitorElement*, unsigned int) { assert(!"No longer supported."); }
+      virtual void tag(dqm::legacy::MonitorElement*, unsigned int);
       DQM_DEPRECATED
-      virtual void tagContents(std::string const&, unsigned int) { assert(!"No longer supported."); }
+      virtual void tagContents(std::string const&, unsigned int);
 
       virtual ~IBooker(){};
 
