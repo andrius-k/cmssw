@@ -93,9 +93,6 @@ public:
 
   void beginRun(edm::Run const& run, edm::EventSetup const& setup) {
     dqmBeginRun(run, setup);
-    // TODO: make sure booking does set the run number for each ME.
-    // So if we see two runs, we can re-book without conflicts and can choose
-    // to keep or drop the MEs from the previous run.
     // For multi-run harvesting, we should have a job-level granularity which
     // can also be used by default. Maybe we can make that a per-plugin option?
     this->bookHistograms(*dqmstore_, run, setup);
@@ -108,6 +105,7 @@ public:
   }
 
   void beginLuminosityBlock(edm::LuminosityBlock const& lumi, edm::EventSetup const& setup) {
+    dqmstore_->enterLumi(lumi.luminosityBlock(), lumi.run());
     dqmBeginLuminosityBlock(lumi, setup);
   }
 
