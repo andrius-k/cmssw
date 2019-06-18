@@ -148,7 +148,7 @@ public:
                                   dqm::reco::MonitorElementCollectionHolder const* data) {
         auto lock = std::scoped_lock(context->global()->lock_);
         auto master = context->global()->master_;
-        auto out = master->toProduct(edm::Transition::EndRun, run.run(), 0);
+        auto out = master->toProduct(edm::Transition::EndRun, run.run(), edm::invalidLuminosityBlockNumber);
         data->swap(out);
   }
 
