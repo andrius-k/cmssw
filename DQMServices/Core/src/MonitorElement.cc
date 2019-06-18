@@ -20,12 +20,14 @@ namespace dqm {
     }
 
     MonitorElement::~MonitorElement() {
-      // TODO: do we own the ROOT object, if one is set?
-      // We do, if this ME was initialized by booking and not moved into a
-      // product. We'll not delete it here, to prevent unwelcome surprises.
-      // This means special care must be taken when MEs are deleted for good
-      // to not leak the ROOT object. (Note that ROOT object ownership might
-      // also have sth. to say here).
+      if (is_owned_) {
+        // This should raraly be hit for normal MEs (the MEData should be
+        // handed over to a product in the common case), but it might happen
+        // for temporaries during booking.
+        if (internal_) {
+          delete internal_;
+        }
+      }
     }
 
     void MonitorElement::Fill(double x) const {
