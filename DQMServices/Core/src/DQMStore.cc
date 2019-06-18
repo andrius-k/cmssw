@@ -313,6 +313,102 @@ namespace dqm {
       return bookME(name, MonitorElementData::Kind::TPROFILE2D, tprofile);
     }
 
+    template <class ME>
+    void DQMStore<ME>::enterLumi(edm::RunNumber_t run, edm::LuminosityBlockNumber_t lumi) {
+
+    }
+
+    template <class ME>
+    MonitorElementCollection DQMStore<ME>::toProduct(edm::Transition t,
+                                                     edm::RunNumber_t run,
+                                                     edm::LuminosityBlockNumber_t lumi) {
+      // TODO: removed only to make things compile.
+      // The logic will have to be addressed
+      // if(t != edm::Transition::EndRun && t != edm::Transition::EndLuminosityBlock) {
+      //   assert(!"toProduct called on non end event transition");
+      // }
+
+      // auto check = [t, run, lumi](MonitorElementData::Key key) {
+      //   if(t == edm::Transition::EndRun) {
+      //     // Take only run into consideration
+      //     auto endRun = std::get<5>(key);
+      //     return run == endRun;
+      //   }
+      //   else if(t == edm::Transition::EndLuminosityBlock) {
+      //     // Take run and lumi into consideration
+      //     auto endRun = std::get<5>(key);
+      //     auto endLuminosityBlock = std::get<6>(key);
+      //     return run == endRun && lumi == endLuminosityBlock;
+      //   }
+
+      //   return false;
+      // };
+
+      // MonitorElementCollection product;
+
+      // // TODO; use lower_bound here
+      // auto it = localmes_.begin();
+      // while (it != localmes_.end()) {
+      //   if(check(it->first)) {
+      //     MonitorElementData const* medata = it->second->internal();
+      //     MonitorElementData outdata = *medata;
+
+      //     if (t == edm::Transition::EndRun) {
+      //       // In case of endRun, we remove the ME. In case there is another
+      //       // run, we will runn the booking again, which will create new MEs.
+      //       // All subystem code should be fine with the ME*s changing between
+      //       // runs.
+      //       outdata.object_ = it->second->release();
+      //       it = localmes_.erase(it);
+      //     } else {
+      //       // For not-per-run MEs, we cannot rely on re-booking. Instead, we
+      //       // perform a clone here and reset the original. On the beginning of
+      //       // the next lumi, we will check for reusable objects and reuse the
+      //       // MEs.
+      //       outdata.object_ =  (TH1*) medata->object_->Clone();
+      //       auto meptr = it->second;
+      //       it = localmes_.erase(it);
+      //       // Now recycle the old ME, reset all data, and put it back.
+      //       MonitorElementData newdata = *meptr->internal();
+      //       newdata.coveredrange_ = edm::LuminosityBlockRange{};
+      //       newdata.scalar_ = MonitorElementData::Scalar{};
+      //       if (newdata.object_) newdata.object_->Reset();
+      //       auto newme = std::make_shared<ME>(newdata);
+      //       // TODO: we could have key collisions here, if we have reset two
+      //       // (concurrent) sets of lumi MEs.
+      //       // TODO: check that this does not invalidate iterators.
+      //       localmes_[newdata.key()] = newme;
+      //     }
+
+      //     product.push_back(outdata);
+      //   }
+      // }
+      // return product;
+
+      assert(!"toProduct called with run number and/or lumi that are not present in DQMStore");
+    }
+
+    template <class ME>
+    void DQMStore<ME>::registerProduct(edm::Handle<MonitorElementCollection> mes) {
+      if (!mes.isValid())
+        return;
+
+      for (auto h : inputs_) {
+        if (h.isValid()) {
+          if (h.product() == mes.product()) {
+            // we already know this product.
+            return;
+          } else {
+            // product not valid, we might drop it. (TODO)
+            // Can this happen if e.g. Lumi products go out of scope?
+          }
+        }
+      }
+
+      inputs_.push_back(mes);
+    }
+
+
     template <class ME, class STORE>
     IBooker<ME, STORE>::IBooker(STORE* store) {
       store_ = store;
@@ -481,95 +577,6 @@ namespace dqm {
       assert(!"NIY");
     }
 
-    template <class ME>
-    MonitorElementCollection DQMStore<ME>::toProduct(edm::Transition t,
-                                                     edm::RunNumber_t run,
-                                                     edm::LuminosityBlockNumber_t lumi) {
-      // TODO: removed only to make things compile.
-      // The logic will have to be addressed
-      // if(t != edm::Transition::EndRun && t != edm::Transition::EndLuminosityBlock) {
-      //   assert(!"toProduct called on non end event transition");
-      // }
-
-      // auto check = [t, run, lumi](MonitorElementData::Key key) {
-      //   if(t == edm::Transition::EndRun) {
-      //     // Take only run into consideration
-      //     auto endRun = std::get<5>(key);
-      //     return run == endRun;
-      //   }
-      //   else if(t == edm::Transition::EndLuminosityBlock) {
-      //     // Take run and lumi into consideration
-      //     auto endRun = std::get<5>(key);
-      //     auto endLuminosityBlock = std::get<6>(key);
-      //     return run == endRun && lumi == endLuminosityBlock;
-      //   }
-
-      //   return false;
-      // };
-
-      // MonitorElementCollection product;
-
-      // // TODO; use lower_bound here
-      // auto it = localmes_.begin();
-      // while (it != localmes_.end()) {
-      //   if(check(it->first)) {
-      //     MonitorElementData const* medata = it->second->internal();
-      //     MonitorElementData outdata = *medata;
-
-      //     if (t == edm::Transition::EndRun) {
-      //       // In case of endRun, we remove the ME. In case there is another
-      //       // run, we will runn the booking again, which will create new MEs.
-      //       // All subystem code should be fine with the ME*s changing between
-      //       // runs.
-      //       outdata.object_ = it->second->release();
-      //       it = localmes_.erase(it);
-      //     } else {
-      //       // For not-per-run MEs, we cannot rely on re-booking. Instead, we
-      //       // perform a clone here and reset the original. On the beginning of
-      //       // the next lumi, we will check for reusable objects and reuse the
-      //       // MEs.
-      //       outdata.object_ =  (TH1*) medata->object_->Clone();
-      //       auto meptr = it->second;
-      //       it = localmes_.erase(it);
-      //       // Now recycle the old ME, reset all data, and put it back.
-      //       MonitorElementData newdata = *meptr->internal();
-      //       newdata.coveredrange_ = edm::LuminosityBlockRange{};
-      //       newdata.scalar_ = MonitorElementData::Scalar{};
-      //       if (newdata.object_) newdata.object_->Reset();
-      //       auto newme = std::make_shared<ME>(newdata);
-      //       // TODO: we could have key collisions here, if we have reset two
-      //       // (concurrent) sets of lumi MEs.
-      //       // TODO: check that this does not invalidate iterators.
-      //       localmes_[newdata.key()] = newme;
-      //     }
-
-      //     product.push_back(outdata);
-      //   }
-      // }
-      // return product;
-
-      assert(!"toProduct called with run number and/or lumi that are not present in DQMStore");
-    }
-
-    template <class ME>
-    void DQMStore<ME>::registerProduct(edm::Handle<MonitorElementCollection> mes) {
-      if (!mes.isValid())
-        return;
-
-      for (auto h : inputs_) {
-        if (h.isValid()) {
-          if (h.product() == mes.product()) {
-            // we already know this product.
-            return;
-          } else {
-            // product not valid, we might drop it. (TODO)
-            // Can this happen if e.g. Lumi products go out of scope?
-          }
-        }
-      }
-
-      inputs_.push_back(mes);
-    }
 
   }  // namespace implementation
 }  // namespace dqm

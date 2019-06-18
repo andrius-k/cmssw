@@ -1014,14 +1014,19 @@ namespace dqm {
       // internal -- figure out better protection.
 
       // Make a ME owned by this DQMStore. Will return a pointer to a ME owned
-      // by this DQMStore: either an existing ME matching the key of `data` or
+      // by this DQMStore: either an existing ME matching the key of `me` or
       // a newly added one.
-      // Will take ownership of the ROOT object in `data`, deleting it if not
+      // Will take ownership of the ROOT object in `me`, deleting it if not
       // needed.
       ME* putME(std::unique_ptr<ME>&& me);
-      // Turn the MEs associated with t, run, lumi into a read-only product. No
-      // copies happen here, instead, we invalidate (or read-only?) the MEs.
-      // TODO: Maybe we can do the clone/reset dance of run/lumi MEs here?
+      // Prepare MEs for the next lumisection. This will create per-lumi copies
+      // if ther previous lumi has not yet finished and recycle reusable MEs if
+      // booking/toProduct() left any.
+      void enterLumi(edm::RunNumber_t run, edm::LuminosityBlockNumber_t lumi);
+      // Turn the MEs associated with t, run, lumi into a read-only product and
+      // remove it from the DQMStore. If no copy of a ME would remain in the
+      // DQMStore, this will create a clone and keep it for recycling with run/
+      // lumi 0.
       MonitorElementCollection toProduct(edm::Transition t, edm::RunNumber_t run, edm::LuminosityBlockNumber_t lumi);
       // Register a set of MEs to inputs_. Everything we do here needs to be
       // lazy, since we will usually register lots of products but read only
