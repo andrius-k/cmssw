@@ -126,20 +126,18 @@ struct MonitorElementData {
     edm::LuminosityBlockRange coveredrange_;
     Scope scope_;
 
-    bool operator<(Key const& other)  const {
-      return std::make_tuple(dirname_,
-                             objname_,
-                             scope_,
-                             coveredrange_.startRun(),
-                             coveredrange_.startLumi(),
-                             coveredrange_.endRun(),
-                             coveredrange_.endLumi()) < std::make_tuple(other.dirname_,
-                                                                        other.objname_,
-                                                                        other.scope_,
-                                                                        other.coveredrange_.startRun(),
-                                                                        other.coveredrange_.startLumi(),
-                                                                        other.coveredrange_.endRun(),
-                                                                        other.coveredrange_.endLumi());
+    bool operator<(Key const& other) const {
+      auto makeKeyTuple = [](Key const& k) {
+        return std::make_tuple(k.dirname_,
+                               k.objname_,
+                               k.scope_,
+                               k.coveredrange_.startRun(),
+                               k.coveredrange_.startLumi(),
+                               k.coveredrange_.endRun(),
+                               k.coveredrange_.endLumi());
+      };
+
+      return makeKeyTuple(*this) < makeKeyTuple(other);
     }
   };
 

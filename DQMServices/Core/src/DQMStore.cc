@@ -77,9 +77,6 @@ namespace dqm {
 
       auto& existing = localmes_[me->internal()->key_];
 
-      // existing = nullptr;
-      // existing.asdasdasd();
-
       if(existing != nullptr) {
         // TODO: Check monitor element compatibility
         ME::checkCompatibility(me.get(), existing.get());
