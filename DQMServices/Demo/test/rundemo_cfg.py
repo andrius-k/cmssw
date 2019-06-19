@@ -44,11 +44,12 @@ process.harv3 = DQMEDHarvester("DemoHarvester",
   target = cms.string("DemoSubsystem1_lumisummary"),
 )
 
-# process.demo_reco_dqm = cms.Task(process.ana1, process.ana2)
-# process.demo_harvesting = cms.Task(process.harv1, process.harv2, process.harv3)
+process.demo_reco_dqm = cms.Task(process.ana1, process.ana2)
+process.demo_harvesting = cms.Task(process.harv1, process.harv2)
 
 # process.p = cms.Path(process.demo_reco_dqm, process.demo_harvesting)
 # process.p = cms.Path()
+process.e = cms.EndPath(process.harv3);
 
 process.out = cms.OutputModule(
   "DQMRootOutputModule",
@@ -63,7 +64,7 @@ process.dqmSaver = cms.EDAnalyzer("DQMFileSaver",
     dirName = cms.untracked.string('.'),
 )
 
-process.o = cms.EndPath(process.out + process.dqmSaver)
+#process.o = cms.EndPath(process.out + process.dqmSaver)
 
 process.add_(cms.Service("Tracer"))
 
