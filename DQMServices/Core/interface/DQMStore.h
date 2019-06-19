@@ -367,7 +367,7 @@ namespace dqm {
       // parts of the key could corrupt the sorted datastructures.
       MonitorElementData const* internal() { return internal_; }
       void setInternal(MonitorElementData const* data) {
-        assert(!is_owned_); // could be handled but not needed for now 
+        assert(!is_owned_);  // could be handled but not needed for now
         internal_ = data;
       }
 
@@ -378,6 +378,9 @@ namespace dqm {
       // Fill()'able.
       // TODO: this should be shared_ptr, but we need to be able to move the
       // last ("master") ref to a unique_ptr in the end.
+      // The idea is to make this a shared_ptr with no op deleter.
+      // Then we have to check if ref count is indeed 1 inside toProduct()
+      // If not assert.
       MonitorElementData const* internal_;
       // set if it is our duty to destroy/move the internal_ data. This can be
       // either if this is the "master" instance or we did a copy-on-write.
@@ -1031,6 +1034,8 @@ namespace dqm {
       // remove it from the DQMStore. If no copy of a ME would remain in the
       // DQMStore, this will create a clone and keep it for recycling with run/
       // lumi 0.
+      // TODO: Add a leaveLumi method to null out MonitorElementData pointers for logical sense.
+      // void leaveLumi(edm::RunNumber_t run, edm::LuminosityBlockNumber_t lumi);
       MonitorElementCollection toProduct(edm::Transition t, edm::RunNumber_t run, edm::LuminosityBlockNumber_t lumi);
       // Register a set of MEs to inputs_. Everything we do here needs to be
       // lazy, since we will usually register lots of products but read only
@@ -1045,6 +1050,21 @@ namespace dqm {
       void setMaster(std::shared_ptr<DQMStore<ME>> master, std::mutex* lock) {
         masterlock_ = lock;
         master_ = master;
+      }
+
+    private:
+      static MonitorElementData* cloneMonitorElementData(MonitorElementData const* input) {
+        MonitorElementData* clone = new MonitorElementData();
+        clone->key_ = input->key_;
+        MonitorElementData::Value::Access newvalue(clone->value_);
+        MonitorElementData::Value::Access oldvalue(input->value_);
+        newvalue.scalar = oldvalue.scalar;
+        if (oldvalue.object) {
+          newvalue.object = std::unique_ptr<TH1>((TH1*)oldvalue.object->Clone());
+        } else {
+          newvalue.object = nullptr;
+        }
+        return clone;
       }
 
     private:

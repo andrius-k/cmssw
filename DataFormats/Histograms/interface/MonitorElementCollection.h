@@ -171,7 +171,7 @@ struct MonitorElementData {
 // the DQMStore, while this type is only exported/imported there.
 // TODO: This really, really, should be unique_ptr. But ROOT wants to copy it
 // for serialization.
-class MonitorElementCollection : public std::vector<std::unique_ptr<MonitorElementData>> {
+class MonitorElementCollection : public std::vector<std::unique_ptr<const MonitorElementData>> {
 public:
   bool mergeProduct(MonitorElementCollection const& product) {
     assert(!"Not implemented yet.");

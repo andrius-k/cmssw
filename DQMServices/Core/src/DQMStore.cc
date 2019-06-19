@@ -314,9 +314,13 @@ namespace dqm {
     }
 
     template <class ME, class STORE>
-    void IBooker<ME, STORE>::tag(dqm::legacy::MonitorElement*, unsigned int) { assert(!"No longer supported."); }
+    void IBooker<ME, STORE>::tag(dqm::legacy::MonitorElement*, unsigned int) {
+      assert(!"No longer supported.");
+    }
     template <class ME, class STORE>
-    void IBooker<ME, STORE>::tagContents(std::string const&, unsigned int) { assert(!"No longer supported."); }
+    void IBooker<ME, STORE>::tagContents(std::string const&, unsigned int) {
+      assert(!"No longer supported.");
+    }
 
     template <class ME>
     void DQMStore<ME>::enterLumi(edm::RunNumber_t run, edm::LuminosityBlockNumber_t lumi) {
@@ -331,14 +335,13 @@ namespace dqm {
         auto beginlumi = range.startLumi();
         auto endlumi = range.endLumi();
 
-        if (beginrun == edm::invalidRunNumber && endrun == edm::invalidRunNumber
-          && beginlumi == edm::invalidLuminosityBlockNumber 
-          && endlumi == edm::invalidLuminosityBlockNumber) {
+        if (beginrun == edm::invalidRunNumber && endrun == edm::invalidRunNumber &&
+            beginlumi == edm::invalidLuminosityBlockNumber && endlumi == edm::invalidLuminosityBlockNumber) {
           // this is a prototype, we can simply use it.
           key.coveredrange_ = edm::LuminosityBlockRange(run, lumi, run, lumi);
           is_full = false;
           return;
-        } 
+        }
         if (key.scope_ == MonitorElementData::Scope::RUN) {
           if (beginrun == run && endrun == run) {
             key.coveredrange_ = edm::LuminosityBlockRange(run, std::min(lumi, beginlumi), run, std::max(lumi, endlumi));
@@ -355,7 +358,7 @@ namespace dqm {
               is_full = false;
               return;
             }
-          } 
+          }
           key.coveredrange_ = edm::LuminosityBlockRange(run, lumi, run, lumi);
           is_full = true;
           return;
@@ -381,7 +384,7 @@ namespace dqm {
           MonitorElementData::Key key = it.first;
           bool unused_isfull;
           updaterange(key, unused_isfull);
-          
+
           // find matching data
           auto& masterme = master_->localmes_[key];
           assert(masterme || !"Master does not have the ME we need.");
@@ -414,17 +417,7 @@ namespace dqm {
 
         // clone if needed
         if (is_full) {
-          // TODO: make this a method/function somewhere.
-          MonitorElementData* clone = new MonitorElementData();
-          clone->key_ = key;
-          MonitorElementData::Value::Access newvalue(clone->value_);
-          MonitorElementData::Value::Access oldvalue(me->internal()->value_);
-          newvalue.scalar = oldvalue.scalar;
-          if (oldvalue.object) {
-            newvalue.object = std::unique_ptr<TH1>((TH1*) oldvalue.object->Clone());
-          } else {
-            newvalue.object = nullptr;
-          }
+          MonitorElementData* clone = cloneMonitorElementData(me->internal());
           // put back the old ME, we still need it
           newmes[key].swap(me);
           // ... and use the clone.
@@ -447,76 +440,71 @@ namespace dqm {
     MonitorElementCollection DQMStore<ME>::toProduct(edm::Transition t,
                                                      edm::RunNumber_t run,
                                                      edm::LuminosityBlockNumber_t lumi) {
-      if(t == edm::Transition::EndRun) {
+      MonitorElementCollection product;  // A product to return
 
-      } else if(t == edm::Transition::EndLuminosityBlock) {
+      for (auto it = localmes_.begin(); it != localmes_.end(); it++) {
+        // Sanity checks
+        if (t == edm::Transition::EndRun) {
+          if (it->first.coveredrange_.startRun() != it->first.coveredrange_.endRun()) {
+            assert(!"toProduct(): Found per run ME with non matching startRun and endRun");
+          }
+        } else if (t == edm::Transition::EndLuminosityBlock) {
+          if (it->first.coveredrange_.startRun() != it->first.coveredrange_.endRun()) {
+            assert(!"toProduct(): Found per lumi ME with non matching startRun and endRun");
+          } else if (it->first.coveredrange_.startLumi() != it->first.coveredrange_.endLumi()) {
+            assert(!"toProduct(): Found per lumi ME with non matching startLumi and endLumi");
+          }
+        } else {
+          assert(!"toProduct(): Called on non event/lumi end transition");
+        }
 
+        // During Transition::EndRun we only care about Scope::RUN
+        // During Transition::EndLumi we only care about Scope::LUMI
+        // During Transition::EndRun we ignore lumisection numbers
+        bool scopeCorrespondsToTransition = false;
+        bool runNumbersMatch = false;
+        bool lumiNumbersMatch = false;
+        if (t == edm::Transition::EndRun) {
+          scopeCorrespondsToTransition = (it->first.scope_ == ME::Scope::RUN);
+          runNumbersMatch = (it->first.coveredrange_.endRun() == run);
+          lumiNumbersMatch = true;
+        } else if (t == edm::Transition::EndLuminosityBlock) {
+          scopeCorrespondsToTransition = (it->first.scope_ == ME::Scope::LUMI);
+          runNumbersMatch = (it->first.coveredrange_.endRun() == run);
+          lumiNumbersMatch = (it->first.coveredrange_.endLumi() == lumi);
+        }
+
+        if (scopeCorrespondsToTransition && runNumbersMatch && lumiNumbersMatch) {
+          std::unique_ptr<ME> localMe = nullptr;
+          // After a swap the map contains a null pointer
+          it->second.swap(localMe);
+
+          // Erase null pointer from the map
+          it = localmes_.erase(it);
+
+          product.push_back(std::unique_ptr<const MonitorElementData>(localMe->internal()));
+
+          // We have to create a prototype MonitorElementData for potential
+          // upcoming lumisection only if there is no other (currently being filled)
+          // ME. If there is, it will be turned into a prototype once it's done.
+          // Since map is an ordered container and key starts with the path/name of the plot,
+          // we only have to look into consecutive elements to determine if there is another
+          // ME with the same path/name. Next element is returned by the erase() call so we
+          // check that as well as `it - 1`.
+          bool existsAbove = it != localmes_.end() && it->second->getFullname() == localMe->getFullname();
+          bool existsBelow = it != localmes_.begin() && std::prev(it)->second->getFullname() == localMe->getFullname();
+          if (existsAbove || existsBelow) {
+            // Clone and reset for potential reuse in the next lumi
+            MonitorElementData* clone = cloneMonitorElementData(localMe->internal());
+            clone->key_.coveredrange_ = edm::LuminosityBlockRange();
+
+            localMe->setInternal(clone);
+            localmes_[localMe->internal()->key_].swap(localMe);
+          }
+        }
       }
 
-      // TODO: removed only to make things compile.
-      // The logic will have to be addressed
-      // if(t != edm::Transition::EndRun && t != edm::Transition::EndLuminosityBlock) {
-      //   assert(!"toProduct called on non end event transition");
-      // }
-
-      // auto check = [t, run, lumi](MonitorElementData::Key key) {
-      //   if(t == edm::Transition::EndRun) {
-      //     // Take only run into consideration
-      //     auto endRun = std::get<5>(key);
-      //     return run == endRun;
-      //   }
-      //   else if(t == edm::Transition::EndLuminosityBlock) {
-      //     // Take run and lumi into consideration
-      //     auto endRun = std::get<5>(key);
-      //     auto endLuminosityBlock = std::get<6>(key);
-      //     return run == endRun && lumi == endLuminosityBlock;
-      //   }
-
-      //   return false;
-      // };
-
-      // MonitorElementCollection product;
-
-      // // TODO; use lower_bound here
-      // auto it = localmes_.begin();
-      // while (it != localmes_.end()) {
-      //   if(check(it->first)) {
-      //     MonitorElementData const* medata = it->second->internal();
-      //     MonitorElementData outdata = *medata;
-
-      //     if (t == edm::Transition::EndRun) {
-      //       // In case of endRun, we remove the ME. In case there is another
-      //       // run, we will runn the booking again, which will create new MEs.
-      //       // All subystem code should be fine with the ME*s changing between
-      //       // runs.
-      //       outdata.object_ = it->second->release();
-      //       it = localmes_.erase(it);
-      //     } else {
-      //       // For not-per-run MEs, we cannot rely on re-booking. Instead, we
-      //       // perform a clone here and reset the original. On the beginning of
-      //       // the next lumi, we will check for reusable objects and reuse the
-      //       // MEs.
-      //       outdata.object_ =  (TH1*) medata->object_->Clone();
-      //       auto meptr = it->second;
-      //       it = localmes_.erase(it);
-      //       // Now recycle the old ME, reset all data, and put it back.
-      //       MonitorElementData newdata = *meptr->internal();
-      //       newdata.coveredrange_ = edm::LuminosityBlockRange{};
-      //       newdata.scalar_ = MonitorElementData::Scalar{};
-      //       if (newdata.object_) newdata.object_->Reset();
-      //       auto newme = std::make_shared<ME>(newdata);
-      //       // TODO: we could have key collisions here, if we have reset two
-      //       // (concurrent) sets of lumi MEs.
-      //       // TODO: check that this does not invalidate iterators.
-      //       localmes_[newdata.key()] = newme;
-      //     }
-
-      //     product.push_back(outdata);
-      //   }
-      // }
-      // return product;
-
-      assert(!"toProduct called with run number and/or lumi that are not present in DQMStore");
+      return product;
     }
 
     template <class ME>
@@ -538,7 +526,6 @@ namespace dqm {
 
       inputs_.push_back(mes);
     }
-
 
     template <class ME, class STORE>
     IBooker<ME, STORE>::IBooker(STORE* store) {
@@ -707,7 +694,6 @@ namespace dqm {
     std::vector<ME*> DQMStore<ME>::getMatchingContents(std::string const& pattern) const {
       assert(!"NIY");
     }
-
 
   }  // namespace implementation
 }  // namespace dqm
