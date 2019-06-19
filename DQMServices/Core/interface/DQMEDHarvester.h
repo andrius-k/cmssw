@@ -9,6 +9,34 @@
 #include "FWCore/Framework/interface/one/EDProducer.h"
 
 #include "FWCore/Utilities/interface/EDPutToken.h"
+#include "FWCore/Framework/interface/InputTagMatch.h"
+#include "FWCore/Framework/interface/GetterOfProducts.h"
+
+
+
+namespace edm {
+ class VInputTagMatch {
+  public:
+    VInputTagMatch(std::vector<edm::InputTag> const& inputTags) {
+      for (auto& tag : inputTags) {
+        matchers_.emplace_back(InputTagMatch(tag));
+      }
+    }
+
+    bool operator()(edm::BranchDescription const& branchDescription) {
+      for (auto& m : matchers_) {
+        if (m(branchDescription)) {
+          return true;
+        }
+      }
+      return false;
+    }
+
+  private:
+    std::vector<InputTagMatch> matchers_;
+  };
+}  // namespace edm
+
 
 class DQMEDHarvester : public edm::one::EDProducer<
                                                    edm::EndLuminosityBlockProducer,
@@ -23,36 +51,46 @@ public:
   typedef dqm::harvesting::MonitorElement MonitorElement;
 protected:
   std::unique_ptr<DQMStore> dqmstore_;
+  edm::GetterOfProducts<MonitorElementCollection> runmegetter_;
+  edm::GetterOfProducts<MonitorElementCollection> lumimegetter_;
 public:
-  DQMEDHarvester () {
+  DQMEDHarvester (edm::ParameterSet const& iConfig) {
+    // TODO: Run/Lumi suffix should not be needed, complain to CMSSW core in case.
     produces<MonitorElementCollection,edm::Transition::EndLuminosityBlock>("DQMGenerationHarvestingLumi");
     produces<MonitorElementCollection,edm::Transition::EndRun>("DQMGenerationHarvestingRun");
-    // should specify DQMGenerationReco, but how?
-    consumesMany<MonitorElementCollection, edm::InLumi>();
-    consumesMany<MonitorElementCollection, edm::InRun>();
+
+    // Use explicitly specified inputs, but if there are none...
+    auto inputtags = iConfig.getUntrackedParameter<std::vector<edm::InputTag>>("inputMEs", std::vector<edm::InputTag>());
+    if (inputtags.empty()) {
+      // ... use all RECO MEs.
+      inputtags.push_back(edm::InputTag("DQMGenerationRecoRun", ""));
+      inputtags.push_back(edm::InputTag("DQMGenerationRecoLumi", ""));
+    }
+    runmegetter_ = edm::GetterOfProducts<MonitorElementCollection>(edm::VInputTagMatch(inputtags), this, edm::InRun);
+    lumimegetter_ = edm::GetterOfProducts<MonitorElementCollection>(edm::VInputTagMatch(inputtags), this, edm::InLumi);
+    callWhenNewProductsRegistered( [this](edm::BranchDescription const& bd ) {
+      runmegetter_(bd);
+      lumimegetter_(bd);
+    });
   };
+
+  DQMEDHarvester () : DQMEDHarvester(edm::ParameterSet()) {};
 
   void beginJob() override {};
 
   void beginRun(edm::Run const & run, edm::EventSetup const &) override{
-    auto refs = std::vector<edm::Handle<MonitorElementCollection>>();
-    run.getManyByType(refs);
-    for (auto h : refs) {
-      dqmstore_->registerProduct(h);
-    }
+    // According to edm experts, it is never save to look at run products
+    // in beginRun, since they might be merged as new input files how up.
   }
 
   void beginLuminosityBlock(edm::LuminosityBlock const & lumi, edm::EventSetup const &) final{
-    auto refs = std::vector<edm::Handle<MonitorElementCollection>>();
-    lumi.getManyByType(refs);
-    for (auto h : refs) {
-      dqmstore_->registerProduct(h);
-    }
+    // According to edm experts, it is never save to look at run products
+    // in beginRun, since they might be merged as new input files how up.
   }
 
   void endLuminosityBlockProduce(edm::LuminosityBlock & lumi, edm::EventSetup const & es) final {
     auto refs = std::vector<edm::Handle<MonitorElementCollection>>();
-    lumi.getManyByType(refs);
+    lumimegetter_.fillHandles(lumi, refs);
     for (auto h : refs) {
       dqmstore_->registerProduct(h);
     }
@@ -71,8 +109,10 @@ public:
   void accumulate(edm::Event const &ev, edm::EventSetup const &es) override {};
 
   void endRunProduce(edm::Run &run, edm::EventSetup const &setup) final {
+    // TODO: if we could somehow know that this is the last run to be processed,
+    // we could keep the lod semantics and put job products 
     auto refs = std::vector<edm::Handle<MonitorElementCollection>>();
-    run.getManyByType(refs);
+    runmegetter_.fillHandles(run, refs);
     for (auto h : refs) {
       dqmstore_->registerProduct(h);
     }
