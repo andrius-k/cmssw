@@ -24,26 +24,15 @@ namespace dqm {
   namespace reco {
     struct DQMStoreGroup {
       // Use the internal type here so DQMstore can easily access it.
-      mutable std::shared_ptr<dqm::implementation::DQMStore<MonitorElement>> master_ = std::make_shared<dqm::implementation::DQMStore<MonitorElement>>();
+      mutable std::shared_ptr<dqm::implementation::DQMStore<MonitorElement>> master_ =
+          std::make_shared<dqm::implementation::DQMStore<MonitorElement>>();
       mutable std::mutex lock_;
     };
 
     class MonitorElementCollectionHolder {
-      public:
-      // This mostly exists to provide a const swap().
-      // We swap MonitorElementCollection data a lot, the implementation is
-      // std::vector::swap which is zero-copy and easy to reason about in
-      // terms of ownership.
-      mutable MonitorElementCollection mes;
-      mutable std::mutex lock_;
-
-    public:
-      void swap(MonitorElementCollection& other) const {
-        auto lock = std::scoped_lock(lock_);
-        mes.swap(other);
-      }
+      // nothing to hold here, we just keep stuff in the DQMStore until produce().
     };
-  }  // namespace reco
+  };  // namespace reco
 }  // namespace dqm
 
 class DQMEDAnalyzer : public edm::stream::EDProducer<
@@ -81,10 +70,10 @@ public:
     produces<MonitorElementCollection, edm::Transition::EndRun>("DQMGenerationRecoRun");
   }
 
-      void beginStream(edm::StreamID id) { 
-        dqmstore_ = std::make_unique<DQMStore>();
-        dqmstore_->setMaster(globalCache()->master_, &globalCache()->lock_);
-      }
+  void beginStream(edm::StreamID id) {
+    dqmstore_ = std::make_unique<DQMStore>();
+    dqmstore_->setMaster(globalCache()->master_, &globalCache()->lock_);
+  }
 
   static std::shared_ptr<dqm::reco::MonitorElementCollectionHolder> globalBeginRunSummary(edm::Run const&,
                                                                                           edm::EventSetup const&,
@@ -121,25 +110,19 @@ public:
   static void globalEndLuminosityBlockSummary(edm::LuminosityBlock const& lumi,
                                               edm::EventSetup const& setup,
                                               LuminosityBlockContext const* context,
-                                              dqm::reco::MonitorElementCollectionHolder* data) {
-        auto lock = std::scoped_lock(context->global()->lock_);
-        auto master = context->global()->master_;
-        auto out = master->toProduct(edm::Transition::EndLuminosityBlock, lumi.run(), lumi.luminosityBlock());
-    data->swap(out);
-    TRACE("data " << data->mes.size());
-    TRACE("out " << out.size());
-  }
+                                              dqm::reco::MonitorElementCollectionHolder* data) {}
 
   static void globalEndLuminosityBlockProduce(edm::LuminosityBlock& lumi,
                                               edm::EventSetup const& setup,
                                               LuminosityBlockContext const* context,
                                               dqm::reco::MonitorElementCollectionHolder const* data) {
     auto prod = std::make_unique<MonitorElementCollection>();
-    TRACE("data " << data->mes.size());
-    TRACE("prod " << prod->size());
-    data->swap(*prod);
-    TRACE("data " << data->mes.size());
-    TRACE("prod " << prod->size());
+    {
+      auto lock = std::scoped_lock(context->global()->lock_);
+      auto master = context->global()->master_;
+      auto out = master->toProduct(edm::Transition::EndLuminosityBlock, lumi.run(), lumi.luminosityBlock());
+      prod->swap(out);
+    }
     lumi.put(std::move(prod), "DQMGenerationRecoLumi");
   }
 
@@ -152,19 +135,19 @@ public:
   static void globalEndRunSummary(edm::Run const& run,
                                   edm::EventSetup const& setup,
                                   RunContext const* context,
-                                  dqm::reco::MonitorElementCollectionHolder const* data) {
-        auto lock = std::scoped_lock(context->global()->lock_);
-        auto master = context->global()->master_;
-        auto out = master->toProduct(edm::Transition::EndRun, run.run(), edm::invalidLuminosityBlockNumber);
-        data->swap(out);
-  }
+                                  dqm::reco::MonitorElementCollectionHolder const* data) {}
 
   static void globalEndRunProduce(edm::Run& run,
                                   edm::EventSetup const& setup,
                                   RunContext const* context,
                                   dqm::reco::MonitorElementCollectionHolder const* data) {
     auto prod = std::make_unique<MonitorElementCollection>();
-    data->swap(*prod);
+    {
+      auto lock = std::scoped_lock(context->global()->lock_);
+      auto master = context->global()->master_;
+      auto out = master->toProduct(edm::Transition::EndRun, run.run(), edm::invalidLuminosityBlockNumber);
+      prod->swap(out);
+    }
     run.put(std::move(prod), "DQMGenerationRecoRun");
   }
 
