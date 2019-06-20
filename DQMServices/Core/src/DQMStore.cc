@@ -442,8 +442,8 @@ namespace dqm {
                                                      edm::RunNumber_t run,
                                                      edm::LuminosityBlockNumber_t lumi) {
       MonitorElementCollection product;  // A product to return
-
-      for (auto it = localmes_.begin(); it != localmes_.end(); it++) {
+      auto it = localmes_.begin();
+      while(it != localmes_.end()) {
         // Sanity checks
         if (t == edm::Transition::EndRun) {
           if (it->first.coveredrange_.startRun() != it->first.coveredrange_.endRun()) {
@@ -479,11 +479,10 @@ namespace dqm {
           std::unique_ptr<ME> localMe = nullptr;
           // After a swap the map contains a null pointer
           it->second.swap(localMe);
-
-          // Erase null pointer from the map
+          // Erase null pointer from the map. `it` now points to the next element
           it = localmes_.erase(it);
 
-          // This is only makes sense if there are no other references to localMe->internal()
+          // This only makes sense if there are no other references to localMe->internal()
           auto meData = std::unique_ptr<const MonitorElementData>(localMe->internal());
 
           // We have to create a prototype MonitorElementData for potential
@@ -517,10 +516,10 @@ namespace dqm {
           value2.scalar = value1.scalar;
           meData = nullptr;
         }
+        else {
+          it = std::next(it);
+        }
       }
-
-      std::cout << "Returning product:" << std::endl;
-      std::cout << product.size() << std::endl;
 
       return product;
     }
