@@ -87,8 +87,9 @@ namespace dqm {
 
         return existing.get();
       } else {
+        auto result = me.get();
         localmes_[me->internal()->key_] = std::move(me);
-        return me.get();
+        return result;
       }
     }
 

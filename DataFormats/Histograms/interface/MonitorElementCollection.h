@@ -88,7 +88,7 @@ struct MonitorElementData {
     JOB = 1,
     RUN = 2,
     LUMI = 3,
-    DEFAULT = 4 /* = RUN? */
+    DEFAULT = RUN
   };
 
   // The main ME data. We don't keep references/QTest results, instead we use
