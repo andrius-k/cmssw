@@ -29,6 +29,7 @@ namespace dqm {
     };
 
     class MonitorElementCollectionHolder {
+      public:
       // This mostly exists to provide a const swap().
       // We swap MonitorElementCollection data a lot, the implementation is
       // std::vector::swap which is zero-copy and easy to reason about in
@@ -124,7 +125,9 @@ public:
         auto lock = std::scoped_lock(context->global()->lock_);
         auto master = context->global()->master_;
         auto out = master->toProduct(edm::Transition::EndLuminosityBlock, lumi.run(), lumi.luminosityBlock());
-        data->swap(out);
+    data->swap(out);
+    TRACE("data " << data->mes.size());
+    TRACE("out " << out.size());
   }
 
   static void globalEndLuminosityBlockProduce(edm::LuminosityBlock& lumi,
@@ -132,7 +135,11 @@ public:
                                               LuminosityBlockContext const* context,
                                               dqm::reco::MonitorElementCollectionHolder const* data) {
     auto prod = std::make_unique<MonitorElementCollection>();
+    TRACE("data " << data->mes.size());
+    TRACE("prod " << prod->size());
     data->swap(*prod);
+    TRACE("data " << data->mes.size());
+    TRACE("prod " << prod->size());
     lumi.put(std::move(prod), "DQMGenerationRecoLumi");
   }
 

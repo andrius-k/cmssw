@@ -50,7 +50,7 @@
 #endif
 
 // TODO: Remove at some point:
-#define TRACE(msg) std::cout << "TRACE: " << __FILE__ << ":" << __LINE__ << " " << (msg) << std::endl;
+#define TRACE(msg) std::cout << "TRACE: " << __FILE__ << ":" << __LINE__ << "(" << __FUNCTION__ << ") " << msg << std::endl;
 #define TRACE_ TRACE("");
 
 class TFile;
