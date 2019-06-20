@@ -88,7 +88,7 @@ struct MonitorElementData {
     JOB = 1,
     RUN = 2,
     LUMI = 3,
-    DEFAULT = RUN
+    DEFAULT = LUMI
   };
 
   // The main ME data. We don't keep references/QTest results, instead we use
@@ -171,7 +171,12 @@ struct MonitorElementData {
 // the DQMStore, while this type is only exported/imported there.
 // TODO: This really, really, should be unique_ptr. But ROOT wants to copy it
 // for serialization.
-class MonitorElementCollection : public std::vector<std::unique_ptr<const MonitorElementData>> {
+// This suppose to inherit from std::vector<unique_ptr<MonitorElementData>>
+// but due to an issue: https://github.com/cms-sw/cmssw/issues/27277
+// dictionary for pointer type products is not being generated and there is 
+// no known way to disable persistance.
+// TODO: Change the base class:
+class MonitorElementCollection : public std::list<MonitorElementData> {
 public:
   bool mergeProduct(MonitorElementCollection const& product) {
     assert(!"Not implemented yet.");

@@ -483,7 +483,8 @@ namespace dqm {
           // Erase null pointer from the map
           it = localmes_.erase(it);
 
-          product.push_back(std::unique_ptr<const MonitorElementData>(localMe->internal()));
+          // This is only makes sense if there are no other references to localMe->internal()
+          auto meData = std::unique_ptr<const MonitorElementData>(localMe->internal());
 
           // We have to create a prototype MonitorElementData for potential
           // upcoming lumisection only if there is no other (currently being filled)
@@ -496,14 +497,30 @@ namespace dqm {
           bool existsBelow = it != localmes_.begin() && std::prev(it)->second->getFullname() == localMe->getFullname();
           if (existsAbove || existsBelow) {
             // Clone and reset for potential reuse in the next lumi
-            MonitorElementData* clone = cloneMonitorElementData(localMe->internal());
+            MonitorElementData* clone = cloneMonitorElementData(meData.get());
             clone->key_.coveredrange_ = edm::LuminosityBlockRange();
 
             localMe->setInternal(clone);
-            localmes_[localMe->internal()->key_].swap(localMe);
+            localmes_[meData->key_].swap(localMe);
+          } else {
+            localMe = nullptr;
           }
+
+          // TODO: Once product inherits from a vector of unique_ptrs, 
+          // the following line should be used to insert product:
+          // product.push_back(std::unique_ptr<const MonitorElementData>(meData));
+          auto& ref = product.emplace_back();
+          ref.key_ = meData->key_;
+          MonitorElementData::Value::Access value1(meData->value_);
+          MonitorElementData::Value::Access value2(ref.value_);
+          value2.object.swap(value1.object);
+          value2.scalar = value1.scalar;
+          meData = nullptr;
         }
       }
+
+      std::cout << "Returning product:" << std::endl;
+      std::cout << product.size() << std::endl;
 
       return product;
     }
@@ -577,6 +594,7 @@ namespace dqm {
 
     template <class ME, class STORE>
     ME* IGetter<ME, STORE>::get(std::string const& path) const {
+      // TODO: implement :)
       assert(!"NIY");
     }
 
