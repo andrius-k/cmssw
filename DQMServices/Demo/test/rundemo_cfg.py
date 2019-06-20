@@ -47,7 +47,7 @@ process.harv3 = DQMEDHarvester("DemoHarvester",
 process.demo_reco_dqm = cms.Task(process.ana1, process.ana2)
 process.demo_harvesting = cms.Task(process.harv1, process.harv2)
 
-# process.p = cms.Path(process.demo_reco_dqm, process.demo_harvesting)
+process.p = cms.Path(process.demo_reco_dqm, process.demo_harvesting)
 # process.p = cms.Path()
 process.e = cms.EndPath(process.harv3);
 

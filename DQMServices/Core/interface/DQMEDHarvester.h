@@ -55,6 +55,7 @@ protected:
   edm::GetterOfProducts<MonitorElementCollection> lumimegetter_;
 public:
   DQMEDHarvester (edm::ParameterSet const& iConfig) {
+    dqmstore_ = std::make_unique<DQMStore>();
     // TODO: Run/Lumi suffix should not be needed, complain to CMSSW core in case.
     produces<MonitorElementCollection,edm::Transition::EndLuminosityBlock>("DQMGenerationHarvestingLumi");
     produces<MonitorElementCollection,edm::Transition::EndRun>("DQMGenerationHarvestingRun");
@@ -63,8 +64,8 @@ public:
     auto inputtags = iConfig.getUntrackedParameter<std::vector<edm::InputTag>>("inputMEs", std::vector<edm::InputTag>());
     if (inputtags.empty()) {
       // ... use all RECO MEs.
-      inputtags.push_back(edm::InputTag("DQMGenerationRecoRun", ""));
-      inputtags.push_back(edm::InputTag("DQMGenerationRecoLumi", ""));
+      inputtags.push_back(edm::InputTag("", "DQMGenerationRecoRun"));
+      inputtags.push_back(edm::InputTag("", "DQMGenerationRecoLumi"));
     }
     runmegetter_ = edm::GetterOfProducts<MonitorElementCollection>(edm::VInputTagMatch(inputtags), this, edm::InRun);
     lumimegetter_ = edm::GetterOfProducts<MonitorElementCollection>(edm::VInputTagMatch(inputtags), this, edm::InLumi);
