@@ -375,7 +375,7 @@ namespace dqm {
         internal_ = data;
       }
 
-    private:
+    protected:
       // The actual object holding ME state, including a potential ROOT object.
       // We typically don't own this object, it might be shared with a product
       // and therefore immutable or shared with other DQMStore but still
@@ -403,7 +403,6 @@ namespace dqm {
     class MonitorElement : public dqm::legacy::MonitorElement {
     public:
       MonitorElement() = default;
-      MonitorElement(MonitorElement&&) = default;
       MonitorElement(MonitorElement const& me) : dqm::legacy::MonitorElement(me){};
       MonitorElement(MonitorElementData const* data) : dqm::legacy::MonitorElement(data){};
       ~MonitorElement() = default;
@@ -468,9 +467,12 @@ namespace dqm {
     class MonitorElement : public dqm::reco::MonitorElement {
     public:
       MonitorElement() = default;
-      MonitorElement(MonitorElement&&) = default;
       MonitorElement(MonitorElement const& me) : dqm::reco::MonitorElement(me){};
-      MonitorElement(MonitorElementData const* data) : dqm::reco::MonitorElement(data){};
+      MonitorElement(MonitorElementData const* data, bool readonly = false) 
+        : dqm::reco::MonitorElement(data) {
+        this->is_readonly_ = readonly;
+        this->is_owned_ = readonly;
+      };
       ~MonitorElement() = default;
 
       // In harvesting, we un-ban some of the operations banned before. Eventually,
@@ -665,7 +667,7 @@ namespace dqm {
     };
     class IGetter {
     public:
-      // get MEs that are direct children of full path path
+      // get MEs that are direct children of full path `path`
       virtual std::vector<dqm::harvesting::MonitorElement*> getContents(std::string const& path) const = 0;
       DQM_DEPRECATED  // for use of tag
           virtual std::vector<dqm::harvesting::MonitorElement*>
@@ -686,14 +688,14 @@ namespace dqm {
       DQM_DEPRECATED
       virtual void removeElement(std::string const& dir, std::string const& name, bool warning = true) = 0;
 
-      // get all elements below full path path
+      // get all elements below full path `path`
       // we have to discuss semantics here -- are run/lumi ever used?
       virtual std::vector<dqm::harvesting::MonitorElement*> getAllContents(std::string const& path) const = 0;
       DQM_DEPRECATED
       virtual std::vector<dqm::harvesting::MonitorElement*> getAllContents(std::string const& path,
                                                                            uint32_t runNumber = 0,
                                                                            uint32_t lumi = 0) const = 0;
-      // return ME identified by full path path, or nullptr
+      // return ME identified by full path `path`, or nullptr
       virtual MonitorElement* get(std::string const& path) const = 0;
 
       // same as get, throws an exception if histogram not found
@@ -705,7 +707,7 @@ namespace dqm {
       virtual std::vector<std::string> getSubdirs() const = 0;
       // return element names of direct children of current directory
       virtual std::vector<std::string> getMEs() const = 0;
-      // returns whether there are objects at full path path
+      // returns whether there are objects at full path `path`
       virtual bool dirExists(std::string const& path) const = 0;
 
       virtual void cd() = 0;
@@ -1056,19 +1058,30 @@ namespace dqm {
       }
 
     private:
-      static MonitorElementData* cloneMonitorElementData(MonitorElementData const* input) {
-        MonitorElementData* clone = new MonitorElementData();
-        clone->key_ = input->key_;
-        MonitorElementData::Value::Access newvalue(clone->value_);
-        MonitorElementData::Value::Access oldvalue(input->value_);
-        newvalue.scalar = oldvalue.scalar;
-        if (oldvalue.object) {
-          newvalue.object = std::unique_ptr<TH1>((TH1*)oldvalue.object->Clone());
-        } else {
-          newvalue.object = nullptr;
-        }
-        return clone;
-      }
+      // Clone data including the underlying ROOT object (calls ->Clone()).
+      static MonitorElementData* cloneMonitorElementData(MonitorElementData const* input);
+
+      // A helper class to search and iterate MEs in all available products.
+      // It will provide all MEs ordering > than the given key, as they appear
+      // in the local MEs and the input collection. Once the returned MEs are
+      // no longer relevant, advance to the next collection by setting `toofar`.
+      class InputMEIterator {
+        DQMStore<ME> const& store_;
+        MonitorElementData::Key key_;
+        // TODO: is there a more elegant way to name these types?
+        typename std::map<MonitorElementData::Key, std::unique_ptr<ME>>::const_iterator local_it;
+        std::vector<edm::Handle<MonitorElementCollection>>::const_iterator input_it;
+        MonitorElementCollection::const_iterator collection_it; 
+        MonitorElementCollection::const_iterator collection_end; 
+      public:
+        // Initialize iterator, like std lower_bound.
+        InputMEIterator(MonitorElementData::Key key, DQMStore<ME> const& store);
+        // Next ME, or nullptr when no more elements remain. When `toofar` is 
+        // set, we advance to the next collection. Else, continue to provide
+        // elements from the current collection until they run out.
+        MonitorElementData const* next(bool toofar);
+      };
+
 
     private:
       // MEs owned by us. All book/get interactions will hand out pointers into
