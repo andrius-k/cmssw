@@ -93,6 +93,8 @@ public:
     auto refs = std::vector<edm::Handle<MonitorElementCollection>>();
     lumimegetter_.fillHandles(lumi, refs);
     for (auto h : refs) {
+      std::cout << "Size: ";
+      std::cout << h->size() << std::endl;
       dqmstore_->registerProduct(h);
     }
 

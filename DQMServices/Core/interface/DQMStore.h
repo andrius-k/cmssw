@@ -667,6 +667,7 @@ namespace dqm {
     };
     class IGetter {
     public:
+      // TODO: review and possibly rename the all methods below:
       // get MEs that are direct children of full path `path`
       virtual std::vector<dqm::harvesting::MonitorElement*> getContents(std::string const& path) const = 0;
       DQM_DEPRECATED  // for use of tag
@@ -695,8 +696,9 @@ namespace dqm {
       virtual std::vector<dqm::harvesting::MonitorElement*> getAllContents(std::string const& path,
                                                                            uint32_t runNumber = 0,
                                                                            uint32_t lumi = 0) const = 0;
+      // TODO: rename to reflect the fact that it requires full path
       // return ME identified by full path `path`, or nullptr
-      virtual MonitorElement* get(std::string const& path) const = 0;
+      virtual MonitorElement* get(std::string const& fullpath) const = 0;
 
       // same as get, throws an exception if histogram not found
       // Deprecated simply because it is barely used.
@@ -736,6 +738,7 @@ namespace dqm {
     public:
       void cd();
       void cd(std::string const& dir);
+      // This is the only method that is allowed to change cwd_ value
       void setCurrentFolder(std::string const& fullpath);
       void goUp();
       std::string const& pwd();
@@ -909,7 +912,7 @@ namespace dqm {
       virtual std::vector<dqm::harvesting::MonitorElement*> getAllContents(std::string const& path,
                                                                            uint32_t runNumber,
                                                                            uint32_t lumi) const;
-      virtual ME* get(std::string const& path) const;
+      virtual ME* get(std::string const& fullpath) const;
 
       DQM_DEPRECATED
       virtual ME* getElement(std::string const& path) const;
@@ -1082,32 +1085,6 @@ namespace dqm {
         MonitorElementData const* next(bool toofar);
       };
 
-
-    private:
-      // MEs owned by us. All book/get interactions will hand out pointers into
-      // this stucture. They may or may not own a ROOT object: in
-      // harvesting, we also keep read-only versions of foreign MEs here.
-      // MonitorElementDatas in this map can potentially be shared across
-      // multiple DQMStores.
-      // Expect 10-10000 entries.
-      std::map<MonitorElementData::Key, std::unique_ptr<ME>> localmes_;
-      // in case of reco and edm::stream, we keep areference to the master
-      // DQMStore here. All booking calls should be forwarded ther, and no
-      // other operations should be required in reco.
-      // All accesses have to take the lock, there will be multiple threads
-      // accessing this instance!
-      // TODO: use some sort of structure that enforces taking the lock before
-      // using the pointer.
-      std::shared_ptr<DQMStore<ME>> master_;
-      std::mutex* masterlock_;
-      // edm products that we can read MEs from. On get, we will implicitly
-      // create a read-only ME that does not own a ROOT object in our localmes_
-      // from the data here, if we found the requested ME. If a non-const
-      // method on such a ME is called, it will again implicitly copy the ROOT
-      // object to own it.
-      // Expect 100-1000 entries.
-      std::vector<edm::Handle<MonitorElementCollection>> inputs_;
-    };
   }  // namespace implementation
   namespace reco {
     class DQMStore : public dqm::implementation::DQMStore<MonitorElement> {

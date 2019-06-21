@@ -13,37 +13,12 @@ namespace dqm {
   }  // namespace legacy
 
   namespace implementation {
-
     std::string const& NavigatorBase::pwd() { return cwd_; }
     void NavigatorBase::cd() { setCurrentFolder(""); }
     void NavigatorBase::cd(std::string const& dir) { setCurrentFolder(cwd_ + dir); }
     void NavigatorBase::goUp() { cd(".."); }
     void NavigatorBase::setCurrentFolder(std::string const& fullpath) {
-      // clean up the path and normalize it to preserve certain invariants.
-      // this is the only method that should set cwd_.
-      // Instead of reasoning about whatever properties of paths, we just parse
-      // the thing and build a normalized instance with no slash in the beginning
-      // and a slash in the end.
-      std::string in(fullpath);
-      std::vector<std::string> buf;
-      std::regex dir("^/*([^/]+)");
-      std::smatch m;
-      while (std::regex_search(in, m, dir)) {
-        in = m.suffix().str();
-        if (m[0] == "..") {
-          if (!buf.empty()) {
-            buf.pop_back();
-          }
-        } else {
-          buf.push_back(m[0]);
-        }
-      }
-      std::string normalized;
-      for (auto& s : buf) {
-        normalized += s;
-        normalized += "/";
-      }
-      cwd_ = normalized;
+      cwd_ = normalizePath(fullpath);
     }
 
     template <class ME, class STORE>
@@ -665,9 +640,20 @@ namespace dqm {
     }
 
     template <class ME, class STORE>
-    ME* IGetter<ME, STORE>::get(std::string const& path) const {
-      // TODO: implement :)
-      assert(!"NIY");
+    ME* IGetter<ME, STORE>::get(std::string const& fullpath) const {
+      // TODO: implement
+      MonitorElementData::Path path;
+      path.set(fullpath, MonitorElementData::Path::Type::DIR_AND_NAME);
+
+      DQMStore<ME>::InputMEIterator it(MonitorElementData::Key{.path_ = path}, this);
+
+      MonitorElementData const* meData = it.next();
+      if(meData != nullptr) {
+        ME* me = new ME(meDta);
+        return me;
+      }
+
+      return nullptr;
     }
 
     template <class ME, class STORE>
