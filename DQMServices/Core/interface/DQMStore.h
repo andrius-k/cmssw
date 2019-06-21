@@ -667,6 +667,7 @@ namespace dqm {
     };
     class IGetter {
     public:
+      // TODO: review and possibly rename the all methods below:
       // get MEs that are direct children of full path `path`
       virtual std::vector<dqm::harvesting::MonitorElement*> getContents(std::string const& path) const = 0;
       DQM_DEPRECATED  // for use of tag
@@ -695,8 +696,9 @@ namespace dqm {
       virtual std::vector<dqm::harvesting::MonitorElement*> getAllContents(std::string const& path,
                                                                            uint32_t runNumber = 0,
                                                                            uint32_t lumi = 0) const = 0;
+      // TODO: rename to reflect the fact that it requires full path
       // return ME identified by full path `path`, or nullptr
-      virtual MonitorElement* get(std::string const& path) const = 0;
+      virtual MonitorElement* get(std::string const& fullpath) const = 0;
 
       // same as get, throws an exception if histogram not found
       // Deprecated simply because it is barely used.
@@ -736,6 +738,7 @@ namespace dqm {
     public:
       void cd();
       void cd(std::string const& dir);
+      // This is the only method that is allowed to change cwd_ value
       void setCurrentFolder(std::string const& fullpath);
       void goUp();
       std::string const& pwd();
@@ -909,7 +912,7 @@ namespace dqm {
       virtual std::vector<dqm::harvesting::MonitorElement*> getAllContents(std::string const& path,
                                                                            uint32_t runNumber,
                                                                            uint32_t lumi) const;
-      virtual ME* get(std::string const& path) const;
+      virtual ME* get(std::string const& fullpath) const;
 
       DQM_DEPRECATED
       virtual ME* getElement(std::string const& path) const;

@@ -46,6 +46,7 @@
 #include <vector>
 #include <string>
 #include <mutex>
+#include <regex>
 
 #include "TH1.h"
 
@@ -124,15 +125,68 @@ struct MonitorElementData {
 
   Value value_;
 
+  struct Path {
+  private:
+    // We could use pointers to interned strings here to save some space.
+    std::string dirname_;
+    std::string objname_;
+
+  public:
+    enum class Type {
+      DIR,
+      DIR_AND_NAME
+    };
+
+    std::string getDirname() { return dirname_; }
+    std::string getObjectname() { return objname_; }
+    
+    // Clean up the path and normalize it to preserve certain invariants.
+    // Instead of reasoning about whatever properties of paths, we just parse
+    // the thing and build a normalized instance with no slash in the beginning
+    // and a slash in the end.
+    // Type of string `path` could be just directory name, or
+    // directory name followed by the name of the monitor element
+    void set(std::string path, Path::Type type) {
+      std::string in(path);
+      std::vector<std::string> buf;
+      std::regex dir("^/*([^/]+)");
+      std::smatch m;
+
+      while (std::regex_search(in, m, dir)) {
+        in = m.suffix().str();
+        if (m[0] == "..") {
+          if (!buf.empty()) {
+            buf.pop_back();
+          }
+        } else {
+          buf.push_back(m[0]);
+        }
+      }
+
+      // Construct dirname_ and object_name
+      int numberOfItems = buf.size();
+      for(int i = 0; i < numberOfItems; i++) {
+        if(i == numberOfItems - 1) {
+          // Processing last component...
+          if(type == Path::Type::DIR_AND_NAME) {
+            objname_ = buf[i];
+          } else if(type == Path::Type::DIR) {
+            dirname_ += buf[i] + "/";
+          }
+        } else {
+          dirname_ += buf[i] + "/";
+        }
+      }
+    }
+  };
+
   // Metadata about the ME. The range is included here in case we have e.g.
   // multiple per-lumi histograms in one collection. For a logical comparison,
   // one should look only at the name.
   struct Key {
     Kind kind_;
 
-    // We could use pointers to interned strings here to save some space.
-    std::string dirname_;
-    std::string objname_;
+    Path path_;
 
     // The range from the first to the last event that actually went into this
     // histogram. When merging, we extend this range; merging overlapping but not
@@ -145,8 +199,8 @@ struct MonitorElementData {
 
     bool operator<(Key const& other) const {
       auto makeKeyTuple = [](Key const& k) {
-        return std::make_tuple(k.dirname_,
-                               k.objname_,
+        return std::make_tuple(k.path_.getDirname(),
+                               k.path_.getObjectname(),
                                k.scope_,
                                k.coveredrange_.startRun(),
                                k.coveredrange_.startLumi(),
