@@ -147,13 +147,13 @@ namespace dqm {
       Kind kind() const { return internal_->key_.kind_; }
 
       /// get name of ME
-      const std::string& getName() const { return internal_->key_.objname_; }
+      const std::string& getName() const { return internal_->key_.path_.getObjectname(); }
 
       /// get pathname of parent folder
-      const std::string& getPathname() const { return internal_->key_.dirname_; }
+      const std::string& getPathname() const { return internal_->key_.path_.getDirname(); }
 
       /// get full name of ME including Pathname
-      const std::string getFullname() const { return internal_->key_.dirname_ + internal_->key_.objname_; }
+      const std::string getFullname() const { return internal_->key_.path_.getDirname() + internal_->key_.path_.getObjectname(); }
 
       /// specify whether ME should be reset at end of monitoring cycle (default:false);
       /// (typically called by Sources that control the original ME)
@@ -1063,28 +1063,6 @@ namespace dqm {
     private:
       // Clone data including the underlying ROOT object (calls ->Clone()).
       static MonitorElementData* cloneMonitorElementData(MonitorElementData const* input);
-
-      // A helper class to search and iterate MEs in all available products.
-      // It will provide all MEs ordering > than the given key, as they appear
-      // in the local MEs and the input collection. Once the returned MEs are
-      // no longer relevant, advance to the next collection by setting `toofar`.
-      class InputMEIterator {
-        DQMStore<ME> const& store_;
-        MonitorElementData::Key key_;
-        // TODO: is there a more elegant way to name these types?
-        typename std::map<MonitorElementData::Key, std::unique_ptr<ME>>::const_iterator local_it;
-        std::vector<edm::Handle<MonitorElementCollection>>::const_iterator input_it;
-        MonitorElementCollection::const_iterator collection_it; 
-        MonitorElementCollection::const_iterator collection_end; 
-      public:
-        // Initialize iterator, like std lower_bound.
-        InputMEIterator(MonitorElementData::Key key, DQMStore<ME> const& store);
-        // Next ME, or nullptr when no more elements remain. When `toofar` is 
-        // set, we advance to the next collection. Else, continue to provide
-        // elements from the current collection until they run out.
-        MonitorElementData const* next(bool toofar);
-      };
-
 
     private:
       // MEs owned by us. All book/get interactions will hand out pointers into

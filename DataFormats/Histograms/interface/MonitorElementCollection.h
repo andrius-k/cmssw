@@ -137,8 +137,8 @@ struct MonitorElementData {
       DIR_AND_NAME
     };
 
-    std::string getDirname() { return dirname_; }
-    std::string getObjectname() { return objname_; }
+    std::string const& getDirname() const { return dirname_; }
+    std::string const& getObjectname() const { return objname_; }
     
     // Clean up the path and normalize it to preserve certain invariants.
     // Instead of reasoning about whatever properties of paths, we just parse
@@ -184,8 +184,6 @@ struct MonitorElementData {
   // multiple per-lumi histograms in one collection. For a logical comparison,
   // one should look only at the name.
   struct Key {
-    Kind kind_;
-
     Path path_;
 
     // The range from the first to the last event that actually went into this
@@ -196,6 +194,7 @@ struct MonitorElementData {
     // double counting for debugging.
     edm::LuminosityBlockRange coveredrange_;
     Scope scope_;
+    Kind kind_;
 
     bool operator<(Key const& other) const {
       auto makeKeyTuple = [](Key const& k) {
@@ -214,6 +213,10 @@ struct MonitorElementData {
 
   Key key_;
 
+  bool operator<(MonitorElementData const& other) const {
+    return this->key_ < other.key_;
+  }
+
   // We don't declare/ban any default constructors.
 };
 
@@ -229,8 +232,7 @@ struct MonitorElementData {
 // but due to an issue: https://github.com/cms-sw/cmssw/issues/27277
 // dictionary for pointer type products is not being generated and there is 
 // no known way to disable persistance.
-// TODO: Change the base class:
-class MonitorElementCollection : public std::list<MonitorElementData> {
+class MonitorElementCollection : public std::set<MonitorElementData> {
 public:
   bool mergeProduct(MonitorElementCollection const& product) {
     assert(!"Not implemented yet.");
@@ -258,6 +260,52 @@ public:
     // MEs in the lumi block don't actually correspond to the lumi block they
     // are in) but the DQMIO output should be able to handle that.
   }
+
+  // Pair with getters to allow range-based for syntax
+  struct Range {
+    MonitorElementCollection::const_iterator begin_;
+    MonitorElementCollection::const_iterator end_;
+    MonitorElementCollection::const_iterator begin() const {
+      return begin_;
+    }
+    MonitorElementCollection::const_iterator end() const {
+      return end_;
+    }
+  };
+
+  // return Range of all objects in the given directory (name is ignored)
+  // Taking Path to enforce normalization of the path.
+  Range dir_range(MonitorElementData::Path const& dir) const {
+    assert(dir.getObjectname() == "");
+    MonitorElementData proto;
+    // all other key fields are default-initialied -- this relies on 
+    // invaldidRun/Lumi sorting below any valid lumi/run, which it does.
+    proto.key_ = MonitorElementData::Key{dir};
+    Range r;
+    r.begin_ = this->lower_bound(proto);
+    r.end_ = r.begin_;
+    while (r.end_ != this->end() && r.end_->key_.path_.getDirname().rfind(dir.getDirname(), 0) != std::string::npos) {
+      r.end_++;
+    }
+    return r;
+  }
+
+  // return Range of all objects at the given path. Might be more than one, if
+  // there are instances for different Lumis/Runs etc.
+  Range name_range(MonitorElementData::Path const& fullpath) const {
+    MonitorElementData proto;
+    // all other key fields are default-initialised -- this relies on 
+    // invaldidRun/Lumi sorting below any valid lumi/run, which it does.
+    proto.key_ = MonitorElementData::Key{fullpath};
+    Range r;
+    r.begin_ = this->lower_bound(proto);
+    r.end_ = r.begin_;
+    while (r.end_ != this->end() && r.end_->key_.path_.getDirname() == fullpath.getDirname() && r.end_->key_.path_.getObjectname() == fullpath.getObjectname()) {
+      r.end_++;
+    }
+    return r;
+  }
+
 };
 
 #endif

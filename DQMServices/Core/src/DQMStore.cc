@@ -503,10 +503,11 @@ namespace dqm {
           // TODO: Once product inherits from a vector of unique_ptrs, 
           // the following line should be used to insert product:
           // product.push_back(std::unique_ptr<const MonitorElementData>(meData));
-          auto& ref = product.emplace_back();
-          ref.key_ = meData->key_;
+          auto const& [ref, ok] = product.emplace({.key = meData->key_});
+          assert(ok || !"MonitorElement exists already in product!"); 
+          ref->key_ = meData->key_;
           MonitorElementData::Value::Access value1(meData->value_);
-          MonitorElementData::Value::Access value2(ref.value_);
+          MonitorElementData::Value::Access value2(ref->value_);
           value2.object.swap(value1.object);
           value2.scalar = value1.scalar;
           meData = nullptr;
@@ -537,64 +538,6 @@ namespace dqm {
       }
 
       inputs_.push_back(mes);
-    }
-
-    template <class ME>
-    DQMStore<ME>::InputMEIterator::InputMEIterator(MonitorElementData::Key key, 
-                                                   DQMStore<ME> const& store)
-      : store_(store), key_(key) {
-      // Invariants:
-      // - All iterators point to the *next* thing to look at after next()
-      // - if local_it is not at the end, we use it. 
-      // - collection_it *can* point to collection_end.
-      local_it = store_.localmes_.begin();
-      input_it = store_.inputs_.begin();
-      // collection_it is undefined until input_it has moved 
-    };
-
-    template <class ME>
-    MonitorElementData const* DQMStore<ME>::InputMEIterator::next(bool toofar) {
-      // This for the very first call.
-      if (local_it == store_.localmes_.begin()) {
-        local_it = store_.localmes_.lower_bound(key_);
-      }
-      // iterate localmes.
-      if (!toofar && local_it != store_.localmes_.end()) {
-        auto res = local_it->second->internal();
-        local_it++;
-        return res;
-      } else { // toofar
-        local_it = store_.localmes_.end();
-      }
-      // first next input collection
-      if (toofar || input_it == store_.inputs_.begin()) {
-        // loop to find next valid handle, or return if we ran out.
-        do {
-          if (input_it == store_.inputs_.end())
-            return nullptr;
-          if (input_it->isValid()) 
-            break;
-          input_it++;
-        } while (true);
-        collection_it = (*input_it)->begin();
-        collection_end = (*input_it)->end();
-        input_it++;
-        // TODO: binary search to find lower bound. This way we can avoid 
-        // looking at all MEs. 
-        while (collection_it != collection_end && collection_it->key_ < key_) {
-          collection_it++;
-        }
-      }
-      // now we have a valid collection, but we might be at the end of it.
-      if (collection_it == collection_end) {
-        // this collection ran empty, we should try the next one. We call 
-        // recursive, hoping there are not too many collections...
-        return next(true);
-      }
-      // If we made it here, collection_it should point to a good object.
-      auto res = &*collection_it;
-      collection_it++;
-      return res;
     }
 
     template <class ME, class STORE>
