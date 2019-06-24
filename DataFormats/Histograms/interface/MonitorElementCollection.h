@@ -281,7 +281,7 @@ public:
 
   // return Range of all objects in the given directory (name is ignored)
   // Taking Path to enforce normalization of the path.
-  Range dir_range(MonitorElementData::Path const& dir) const {
+  Range dirRange(MonitorElementData::Path const& dir) const {
     assert(dir.getObjectname() == "");
     MonitorElementData proto;
     // all other key fields are default-initialied -- this relies on 
@@ -298,7 +298,7 @@ public:
 
   // return Range of all objects at the given path. Might be more than one, if
   // there are instances for different Lumis/Runs etc.
-  Range name_range(MonitorElementData::Path const& fullpath) const {
+  Range nameRange(MonitorElementData::Path const& fullpath) const {
     MonitorElementData proto;
     // all other key fields are default-initialised -- this relies on 
     // invaldidRun/Lumi sorting below any valid lumi/run, which it does.
