@@ -1064,26 +1064,30 @@ namespace dqm {
       // Clone data including the underlying ROOT object (calls ->Clone()).
       static MonitorElementData* cloneMonitorElementData(MonitorElementData const* input);
 
-      // A helper class to search and iterate MEs in all available products.
-      // It will provide all MEs ordering > than the given key, as they appear
-      // in the local MEs and the input collection. Once the returned MEs are
-      // no longer relevant, advance to the next collection by setting `toofar`.
-      class InputMEIterator {
-        DQMStore<ME> const& store_;
-        MonitorElementData::Key key_;
-        // TODO: is there a more elegant way to name these types?
-        typename std::map<MonitorElementData::Key, std::unique_ptr<ME>>::const_iterator local_it;
-        std::vector<edm::Handle<MonitorElementCollection>>::const_iterator input_it;
-        MonitorElementCollection::const_iterator collection_it; 
-        MonitorElementCollection::const_iterator collection_end; 
-      public:
-        // Initialize iterator, like std lower_bound.
-        InputMEIterator(MonitorElementData::Key key, DQMStore<ME> const& store);
-        // Next ME, or nullptr when no more elements remain. When `toofar` is 
-        // set, we advance to the next collection. Else, continue to provide
-        // elements from the current collection until they run out.
-        MonitorElementData const* next(bool toofar);
-      };
+    private:
+      // MEs owned by us. All book/get interactions will hand out pointers into
+      // this stucture. They may or may not own a ROOT object: in
+      // harvesting, we also keep read-only versions of foreign MEs here.
+      // MonitorElementDatas in this map can potentially be shared across
+      // multiple DQMStores.
+      // Expect 10-10000 entries.
+      std::map<MonitorElementData::Key, std::unique_ptr<ME>> localmes_;
+      // in case of reco and edm::stream, we keep areference to the master
+      // DQMStore here. All booking calls should be forwarded ther, and no
+      // other operations should be required in reco.
+      // All accesses have to take the lock, there will be multiple threads
+      // accessing this instance!
+      // TODO: use some sort of structure that enforces taking the lock before
+      // using the pointer.
+      std::shared_ptr<DQMStore<ME>> master_;
+      std::mutex* masterlock_;
+      // edm products that we can read MEs from. On get, we will implicitly
+      // create a read-only ME that does not own a ROOT object in our localmes_
+      // from the data here, if we found the requested ME. If a non-const
+      // method on such a ME is called, it will again implicitly copy the ROOT
+      // object to own it.
+      // Expect 100-1000 entries.
+      std::vector<edm::Handle<MonitorElementCollection>> inputs_;
     };
   }  // namespace implementation
   namespace reco {
