@@ -18,7 +18,9 @@ namespace dqm {
     void NavigatorBase::cd(std::string const& dir) { setCurrentFolder(cwd_ + dir); }
     void NavigatorBase::goUp() { cd(".."); }
     void NavigatorBase::setCurrentFolder(std::string const& fullpath) {
-      cwd_ = normalizePath(fullpath);
+      MonitorElementData::Path path;
+      path.set(fullpath, MonitorElementData::Path::Type::DIR);
+      cwd_ = path.getDirname();
     }
 
     template <class ME, class STORE>
@@ -32,8 +34,10 @@ namespace dqm {
       MonitorElementData::Key key;
       MonitorElementData::Value::Access value(data->value_);
       key.kind_ = kind;
-      key.objname_ = std::string(name.View());
-      key.dirname_ = pwd();
+      MonitorElementData::Path path;
+      std::string fullpath = pwd() + std::string(name.View());
+      path.set(fullpath, MonitorElementData::Path::Type::DIR_AND_NAME);
+      key.path_ = path;
       key.scope_ = MonitorElementData::Scope::DEFAULT;
       value.object = std::unique_ptr<TH1>(object);
       data->key_ = key;
@@ -503,9 +507,10 @@ namespace dqm {
           // TODO: Once product inherits from a vector of unique_ptrs, 
           // the following line should be used to insert product:
           // product.push_back(std::unique_ptr<const MonitorElementData>(meData));
-          auto const& [ref, ok] = product.emplace({.key = meData->key_});
-          assert(ok || !"MonitorElement exists already in product!"); 
-          ref->key_ = meData->key_;
+          auto pair = product.insert(MonitorElementData{meData->key_});
+          auto const& ref = pair.first;
+          bool ok = pair.second;
+          assert(ok || !"MonitorElement exists already in product!");
           MonitorElementData::Value::Access value1(meData->value_);
           MonitorElementData::Value::Access value2(ref->value_);
           value2.object.swap(value1.object);
@@ -583,8 +588,8 @@ namespace dqm {
     }
 
     template <class ME, class STORE>
-    ME* IGetter<ME, STORE>::get(std::string const& path) const {
-      // TODO: implement :)
+    ME* IGetter<ME, STORE>::get(std::string const& fullpath) const {
+      // TODO: implement
       assert(!"NIY");
     }
 

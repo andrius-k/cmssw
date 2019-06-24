@@ -121,9 +121,13 @@ struct MonitorElementData {
       Access(MonitorElementData::Value const& value)
           : lock(value.lock_), scalar(value.scalar_), object(value.object_){};
     };
-  };
 
-  Value value_;
+    Value() {}
+    Value(Value&& other) :
+      scalar_(std::move(other.scalar_)),
+      object_(std::move(other.object_)),
+      lock_() {}
+  };
 
   struct Path {
   private:
@@ -211,11 +215,13 @@ struct MonitorElementData {
     }
   };
 
-  Key key_;
-
   bool operator<(MonitorElementData const& other) const {
     return this->key_ < other.key_;
   }
+
+  // All non class/struct members
+  Key key_;
+  Value value_;
 
   // We don't declare/ban any default constructors.
 };
