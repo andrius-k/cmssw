@@ -1064,7 +1064,8 @@ namespace dqm {
       // Clone data including the underlying ROOT object (calls ->Clone()).
       static MonitorElementData* cloneMonitorElementData(MonitorElementData const* input);
 
-    private:
+    // TODO: Make this section provate. localmes_ and inputs_ should be friends with IGetter. 
+    public:
       // MEs owned by us. All book/get interactions will hand out pointers into
       // this stucture. They may or may not own a ROOT object: in
       // harvesting, we also keep read-only versions of foreign MEs here.

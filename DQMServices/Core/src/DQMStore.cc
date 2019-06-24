@@ -590,7 +590,27 @@ namespace dqm {
     template <class ME, class STORE>
     ME* IGetter<ME, STORE>::get(std::string const& fullpath) const {
       // TODO: implement
-      assert(!"NIY");
+      // assert(!"NIY");
+
+      MonitorElementData::Path path;
+      path.set(fullpath, MonitorElementData::Path::Type::DIR_AND_NAME);
+
+      for(auto& [key, me] : store_->localmes_) {
+        if(me->internal()->key_.path_.getDirname() == path.getDirname() && me->internal()->key_.path_.getObjectname() == path.getObjectname()) {
+          return me.get();
+        }
+      }
+
+      for(auto& collection : store_->inputs_) {
+        for(auto& meData : collection->nameRange(path)) {
+          // Return first element
+          // Make a copy of ME sharing the underlying MonitorElementData and root TH1 object
+          store_->localmes_[meData.key_] = std::make_unique<dqm::harvesting::MonitorElement>(dqm::harvesting::MonitorElement(&meData, true));
+          return store_->localmes_[meData.key_].get();
+        }
+      }
+      std::cout << "get(): returning nullptr" << std::endl;
+      return nullptr;
     }
 
     template <class ME, class STORE>
