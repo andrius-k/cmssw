@@ -147,13 +147,13 @@ namespace dqm {
       Kind kind() const { return internal_->key_.kind_; }
 
       /// get name of ME
-      const std::string& getName() const { return internal_->key_.objname_; }
+      const std::string& getName() const { return internal_->key_.path_.getObjectname(); }
 
       /// get pathname of parent folder
-      const std::string& getPathname() const { return internal_->key_.dirname_; }
+      const std::string& getPathname() const { return internal_->key_.path_.getDirname(); }
 
       /// get full name of ME including Pathname
-      const std::string getFullname() const { return internal_->key_.dirname_ + internal_->key_.objname_; }
+      const std::string getFullname() const { return internal_->key_.path_.getDirname() + internal_->key_.path_.getObjectname(); }
 
       /// specify whether ME should be reset at end of monitoring cycle (default:false);
       /// (typically called by Sources that control the original ME)
@@ -1084,7 +1084,7 @@ namespace dqm {
         // elements from the current collection until they run out.
         MonitorElementData const* next(bool toofar);
       };
-
+    };
   }  // namespace implementation
   namespace reco {
     class DQMStore : public dqm::implementation::DQMStore<MonitorElement> {
