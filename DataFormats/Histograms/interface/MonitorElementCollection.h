@@ -123,6 +123,10 @@ struct MonitorElementData {
     };
 
     Value() {}
+    // TODO: to be really safe, this would need to take the lock on `other`
+    // before moving the data. However, if there are concurrent accesses while
+    // moving thigs are logically deeply broken anyways. Still, it would be 
+    // better to drop this constructor once we can have unique_ptr in products.
     Value(Value&& other) :
       scalar_(std::move(other.scalar_)),
       object_(std::move(other.object_)),
@@ -157,17 +161,19 @@ struct MonitorElementData {
       std::smatch m;
 
       while (std::regex_search(in, m, dir)) {
-        in = m.suffix().str();
-        if (m[0] == "..") {
+        if (m[1] == "..") {
           if (!buf.empty()) {
             buf.pop_back();
           }
         } else {
-          buf.push_back(m[0]);
+          buf.push_back(m[1]);
         }
+        in = m.suffix().str();
       }
 
       // Construct dirname_ and object_name
+      dirname_ = "";
+      objname_ = "";
       int numberOfItems = buf.size();
       for(int i = 0; i < numberOfItems; i++) {
         if(i == numberOfItems - 1) {
