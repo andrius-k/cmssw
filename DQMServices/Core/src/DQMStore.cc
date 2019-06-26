@@ -1,3 +1,5 @@
+// silence deprecation warnings for the DQMStore itself.
+#define DQM_DEPRECATED
 #include "DQMServices/Core/interface/DQMStore.h"
 #include <string>
 #include <regex>
@@ -596,6 +598,7 @@ namespace dqm {
       path.set(fullpath, MonitorElementData::Path::Type::DIR_AND_NAME);
 
       for(auto& [key, me] : store_->localmes_) {
+        (void) key; // unused
         if(me->internal()->key_.path_.getDirname() == path.getDirname() && me->internal()->key_.path_.getObjectname() == path.getObjectname()) {
           return me.get();
         }
