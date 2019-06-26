@@ -53,12 +53,14 @@ protected:
   std::unique_ptr<DQMStore> dqmstore_;
   edm::GetterOfProducts<MonitorElementCollection> runmegetter_;
   edm::GetterOfProducts<MonitorElementCollection> lumimegetter_;
+  edm::EDPutTokenT<MonitorElementCollection> lumiToken_;
+  edm::EDPutTokenT<MonitorElementCollection> runToken_;
 public:
   DQMEDHarvester (edm::ParameterSet const& iConfig) {
     dqmstore_ = std::make_unique<DQMStore>();
     // TODO: Run/Lumi suffix should not be needed, complain to CMSSW core in case.
-    produces<MonitorElementCollection,edm::Transition::EndLuminosityBlock>("DQMGenerationHarvestingLumi");
-    produces<MonitorElementCollection,edm::Transition::EndRun>("DQMGenerationHarvestingRun");
+    lumiToken_ = produces<MonitorElementCollection,edm::Transition::EndLuminosityBlock>("DQMGenerationHarvestingLumi");
+    runToken_ = produces<MonitorElementCollection,edm::Transition::EndRun>("DQMGenerationHarvestingRun");
 
     // Use explicitly specified inputs, but if there are none...
     auto inputtags = iConfig.getUntrackedParameter<std::vector<edm::InputTag>>("inputMEs", std::vector<edm::InputTag>());
@@ -98,10 +100,7 @@ public:
 
     dqmEndLuminosityBlock(*dqmstore_, *dqmstore_, lumi, es);
 
-    auto out = dqmstore_->toProduct(edm::Transition::EndLuminosityBlock, lumi.run(), lumi.luminosityBlock());
-    auto prod = std::make_unique<MonitorElementCollection>();
-    prod->swap(out);
-    lumi.put(std::move(prod), "DQMGenerationHarvestingLumi");
+    lumi.emplace(lumiToken_, dqmstore_->toProduct(edm::Transition::EndLuminosityBlock, lumi.run(), lumi.luminosityBlock()));
 
   }
 
@@ -111,7 +110,7 @@ public:
 
   void endRunProduce(edm::Run &run, edm::EventSetup const &setup) final {
     // TODO: if we could somehow know that this is the last run to be processed,
-    // we could keep the lod semantics and put job products 
+    // we could keep the old semantics and put job products 
     auto refs = std::vector<edm::Handle<MonitorElementCollection>>();
     runmegetter_.fillHandles(run, refs);
     for (auto h : refs) {
@@ -121,10 +120,7 @@ public:
     // TODO: we should, and probably can, rename this.
     dqmEndJob(*dqmstore_, *dqmstore_);
 
-    auto out = dqmstore_->toProduct(edm::Transition::EndRun, run.run(), 0);
-    auto prod = std::make_unique<MonitorElementCollection>();
-    prod->swap(out);
-    run.put(std::move(prod), "DQMGenerationHarvestingRun");
+    run.emplace(runToken_, dqmstore_->toProduct(edm::Transition::EndRun, run.run(), 0));
   }
 
   void endRun(edm::Run const &, edm::EventSetup const &) override {};

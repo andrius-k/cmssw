@@ -53,8 +53,8 @@ namespace dqm {
     ME* DQMStore<ME>::putME(std::unique_ptr<ME>&& me) {
       if (master_ != nullptr) {
         // We have a master, so we simply forward the ME to there.
-        auto lock = std::scoped_lock(*masterlock_);
-        ME* me_ptr = master_->putME(std::move(me));
+        auto lock = std::scoped_lock(master_->lock_);
+        ME* me_ptr = master_->master_.putME(std::move(me));
 
         // Make a copy of ME sharing the underlying MonitorElementData and root TH1 object
         localmes_[me_ptr->internal()->key_] = std::make_unique<ME>(*me_ptr);
@@ -356,8 +356,8 @@ namespace dqm {
 
       if (master_ != nullptr) {
         // We have a master, so we forward the call there first.
-        auto lock = std::scoped_lock(*masterlock_);
-        master_->enterLumi(run, lumi);
+        auto lock = std::scoped_lock(master_->lock_);
+        master_->master_.enterLumi(run, lumi);
 
         // Now, for each local ME we look into the master to get the matching
         // MEData. This should always give us a good ME to use.
@@ -373,7 +373,7 @@ namespace dqm {
           updaterange(key, unused_isfull);
 
           // find matching data
-          auto& masterme = master_->localmes_[key];
+          auto& masterme = master_->master_.localmes_[key];
           assert(masterme || !"Master does not have the ME we need.");
 
           // update ME and store it
@@ -442,6 +442,10 @@ namespace dqm {
     MonitorElementCollection DQMStore<ME>::toProduct(edm::Transition t,
                                                      edm::RunNumber_t run,
                                                      edm::LuminosityBlockNumber_t lumi) {
+      // the correct thing would be to forward here, but nobody should need 
+      // that for now.
+      assert(master_ == nullptr);
+
       MonitorElementCollection product;  // A product to return
       auto it = localmes_.begin();
       while(it != localmes_.end()) {
@@ -509,7 +513,7 @@ namespace dqm {
           // TODO: Once product inherits from a vector of unique_ptrs, 
           // the following line should be used to insert product:
           // product.push_back(std::unique_ptr<const MonitorElementData>(meData));
-          auto pair = product.insert(MonitorElementData{meData->key_});
+          auto pair = product.emplace(meData->key_);
           auto const& ref = pair.first;
           bool ok = pair.second;
           assert(ok || !"MonitorElement exists already in product!");
@@ -524,7 +528,7 @@ namespace dqm {
         }
       }
 
-      return product;
+      return std::move(product);
     }
 
     template <class ME>

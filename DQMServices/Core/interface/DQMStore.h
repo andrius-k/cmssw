@@ -1054,9 +1054,13 @@ namespace dqm {
       // reco versions of the same ME available). Also need to handle updating
       // MEs read from lumi products.
       void importFromProduct(MonitorElementData::Key const& key);
+
       // to be used only by DQMEDAnalyzer.
-      void setMaster(std::shared_ptr<DQMStore<ME>> master, std::mutex* lock) {
-        masterlock_ = lock;
+      struct DQMStoreMaster {
+        mutable DQMStore<ME> master_;
+        mutable std::mutex lock_;
+      };
+      void setMaster(std::shared_ptr<DQMStoreMaster> master) {
         master_ = master;
       }
 
@@ -1074,14 +1078,11 @@ namespace dqm {
       // Expect 10-10000 entries.
       std::map<MonitorElementData::Key, std::unique_ptr<ME>> localmes_;
       // in case of reco and edm::stream, we keep areference to the master
-      // DQMStore here. All booking calls should be forwarded ther, and no
+      // DQMStore here. All booking calls should be forwarded there, and no
       // other operations should be required in reco.
       // All accesses have to take the lock, there will be multiple threads
       // accessing this instance!
-      // TODO: use some sort of structure that enforces taking the lock before
-      // using the pointer.
-      std::shared_ptr<DQMStore<ME>> master_;
-      std::mutex* masterlock_;
+      std::shared_ptr<DQMStoreMaster> master_;
       // edm products that we can read MEs from. On get, we will implicitly
       // create a read-only ME that does not own a ROOT object in our localmes_
       // from the data here, if we found the requested ME. If a non-const

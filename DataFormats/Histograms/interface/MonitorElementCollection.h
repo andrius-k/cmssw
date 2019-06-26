@@ -121,16 +121,6 @@ struct MonitorElementData {
       Access(MonitorElementData::Value const& value)
           : lock(value.lock_), scalar(value.scalar_), object(value.object_){};
     };
-
-    Value() {}
-    // TODO: to be really safe, this would need to take the lock on `other`
-    // before moving the data. However, if there are concurrent accesses while
-    // moving thigs are logically deeply broken anyways. Still, it would be 
-    // better to drop this constructor once we can have unique_ptr in products.
-    Value(Value&& other) :
-      scalar_(std::move(other.scalar_)),
-      object_(std::move(other.object_)),
-      lock_() {}
   };
 
   struct Path {
@@ -225,11 +215,17 @@ struct MonitorElementData {
     return this->key_ < other.key_;
   }
 
-  // All non class/struct members
+  // The only non class/struct members
   Key key_;
   Value value_;
 
-  // We don't declare/ban any default constructors.
+  // Due to the value_, which allows neither copy nor move, we basically only
+  // have the default empty constructor. 
+  MonitorElementData() {};
+  // This is to allow emplace'ing into a set, where the key has to be known
+  // from the beginning (value_ can be set later) 
+  explicit MonitorElementData(Key const& key) : key_(key), value_() {};
+
 };
 
 // For now, no additional (meta-)data is needed apart from the MEs themselves.
@@ -244,6 +240,8 @@ struct MonitorElementData {
 // but due to an issue: https://github.com/cms-sw/cmssw/issues/27277
 // dictionary for pointer type products is not being generated and there is 
 // no known way to disable persistance.
+// TODO: it's impolite to derive from containers. Make this a `using` or have
+// the container as a member. 
 class MonitorElementCollection : public std::set<MonitorElementData> {
 public:
   bool mergeProduct(MonitorElementCollection const& product) {

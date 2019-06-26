@@ -3,14 +3,18 @@
 
 #include "FWCore/Framework/interface/stream/makeGlobal.h"
 
-namespace dqm::reco {
-  class DQMStoreGroup;
-}
+namespace dqm {
+  namespace reco {
+    struct DQMEDAnalyzerGlobalCache;
+  };  // namespace reco
+}  // namespace dqm
 
 namespace edm::stream::impl {
   template <typename T>
-  T* makeStreamModule(edm::ParameterSet const& iPSet, dqm::reco::DQMStoreGroup const*) {
-    return new T(iPSet);
+  T* makeStreamModule(edm::ParameterSet const& iPSet, dqm::reco::DQMEDAnalyzerGlobalCache const* global) {
+    auto t = new T(iPSet);
+    t->initTokens(global);
+    return t;
   }
 }  // namespace edm::stream::impl
 
@@ -22,15 +26,14 @@ namespace edm::stream::impl {
 
 namespace dqm {
   namespace reco {
-    struct DQMStoreGroup {
-      // Use the internal type here so DQMstore can easily access it.
-      mutable std::shared_ptr<dqm::implementation::DQMStore<MonitorElement>> master_ =
-          std::make_shared<dqm::implementation::DQMStore<MonitorElement>>();
-      mutable std::mutex lock_;
-    };
-
     class MonitorElementCollectionHolder {
       // nothing to hold here, we just keep stuff in the DQMStore until produce().
+    };
+    struct DQMEDAnalyzerGlobalCache {
+      // this could be a value instead, but then the DQMStore should take "borrowed" refs.
+      std::shared_ptr<DQMStore::DQMStoreMaster> master_ = std::make_shared<DQMStore::DQMStoreMaster>();
+      mutable edm::EDPutTokenT<MonitorElementCollection> lumiToken_;
+      mutable edm::EDPutTokenT<MonitorElementCollection> runToken_;
     };
   };  // namespace reco
 }  // namespace dqm
@@ -39,18 +42,13 @@ class DQMEDAnalyzer : public edm::stream::EDProducer<
                           // We use a lot of edm features. We need all the caches to get the global
                           // transitions, where we can pull the (shared) MonitorElements out of the
                           // DQMStores.
-                          edm::GlobalCache<dqm::reco::DQMStoreGroup>,
+                          edm::GlobalCache<dqm::reco::DQMEDAnalyzerGlobalCache>,
                           edm::EndLuminosityBlockProducer,
                           edm::LuminosityBlockSummaryCache<dqm::reco::MonitorElementCollectionHolder>,
                           edm::EndRunProducer,
                           edm::RunSummaryCache<dqm::reco::MonitorElementCollectionHolder>,
                           // This feature is essentially made for DQM and required to get per-event calls.
                           edm::Accumulator> {
-  // TODO: seems we cannot use tokens here, since we have to put() from a
-  // static context.
-  //private:
-  //  edm::EDPutTokenT<MonitorElementCollection> lumiToken_;
-  //  edm::EDPutTokenT<MonitorElementCollection> runToken_;
 protected:
   std::shared_ptr<dqm::reco::DQMStore> dqmstore_;
 
@@ -61,18 +59,22 @@ public:
   // The following EDM methods are listed (as much as possible) in the order
   // that edm calls them in.
 
-  static std::unique_ptr<dqm::reco::DQMStoreGroup> initializeGlobalCache(edm::ParameterSet const&) {
-    return std::make_unique<dqm::reco::DQMStoreGroup>();
+  static std::unique_ptr<dqm::reco::DQMEDAnalyzerGlobalCache> initializeGlobalCache(edm::ParameterSet const&) {
+    return std::make_unique<dqm::reco::DQMEDAnalyzerGlobalCache>();
   }
 
   DQMEDAnalyzer() {
-    produces<MonitorElementCollection, edm::Transition::EndLuminosityBlock>("DQMGenerationRecoLumi");
-    produces<MonitorElementCollection, edm::Transition::EndRun>("DQMGenerationRecoRun");
+  }
+
+  void initTokens(dqm::reco::DQMEDAnalyzerGlobalCache const* global) {
+    auto lock = std::scoped_lock(global->master_->lock_);
+    global->lumiToken_ = produces<MonitorElementCollection, edm::Transition::EndLuminosityBlock>("DQMGenerationRecoLumi");
+    global->runToken_ = produces<MonitorElementCollection, edm::Transition::EndRun>("DQMGenerationRecoRun");
   }
 
   void beginStream(edm::StreamID id) {
     dqmstore_ = std::make_unique<DQMStore>();
-    dqmstore_->setMaster(globalCache()->master_, &globalCache()->lock_);
+    dqmstore_->setMaster(globalCache()->master_);
   }
 
   static std::shared_ptr<dqm::reco::MonitorElementCollectionHolder> globalBeginRunSummary(edm::Run const&,
@@ -116,14 +118,9 @@ public:
                                               edm::EventSetup const& setup,
                                               LuminosityBlockContext const* context,
                                               dqm::reco::MonitorElementCollectionHolder const* data) {
-    auto prod = std::make_unique<MonitorElementCollection>();
-    {
-      auto lock = std::scoped_lock(context->global()->lock_);
-      auto master = context->global()->master_;
-      auto out = master->toProduct(edm::Transition::EndLuminosityBlock, lumi.run(), lumi.luminosityBlock());
-      prod->swap(out);
-    }
-    lumi.put(std::move(prod), "DQMGenerationRecoLumi");
+    auto lock = std::scoped_lock(context->global()->master_->lock_);
+    auto& master = context->global()->master_->master_;
+    lumi.emplace(context->global()->lumiToken_,  master.toProduct(edm::Transition::EndLuminosityBlock, lumi.run(), lumi.luminosityBlock()));
   }
 
   void endRun(edm::Run const& run, edm::EventSetup const& setup){};
@@ -141,17 +138,12 @@ public:
                                   edm::EventSetup const& setup,
                                   RunContext const* context,
                                   dqm::reco::MonitorElementCollectionHolder const* data) {
-    auto prod = std::make_unique<MonitorElementCollection>();
-    {
-      auto lock = std::scoped_lock(context->global()->lock_);
-      auto master = context->global()->master_;
-      auto out = master->toProduct(edm::Transition::EndRun, run.run(), edm::invalidLuminosityBlockNumber);
-      prod->swap(out);
-    }
-    run.put(std::move(prod), "DQMGenerationRecoRun");
+    auto lock = std::scoped_lock(context->global()->master_->lock_);
+    auto& master = context->global()->master_->master_;
+    run.emplace(context->global()->runToken_, master.toProduct(edm::Transition::EndRun, run.run(), edm::invalidLuminosityBlockNumber));
   }
 
-  static void globalEndJob(dqm::reco::DQMStoreGroup*){};
+  static void globalEndJob(dqm::reco::DQMEDAnalyzerGlobalCache*){};
 
   // Methods to be implemented by the users
   virtual void bookHistograms(DQMStore::IBooker& i, edm::Run const&, edm::EventSetup const&) = 0;
