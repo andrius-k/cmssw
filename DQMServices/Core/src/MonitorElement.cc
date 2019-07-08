@@ -18,6 +18,14 @@
 
 namespace dqm::impl {
 
+static TH1 *checkRootObject(const std::string &name, TObject *tobj, const char *func, int reqdim) {
+  if (!tobj)
+    raiseDQMError("MonitorElement",
+                  "Method '%s' cannot be invoked on monitor"
+                  " element '%s' because it is not a ROOT object.",
+                  func,
+                  name.c_str());
+
   static TH1 *checkRootObject(const std::string &name, TObject *tobj, const char *func, int reqdim) {
     if (!tobj)
       raiseDQMError("MonitorElement",
@@ -1128,236 +1136,136 @@ namespace dqm::impl {
                       obj->IsA()->GetName(),
                       data_.objname.c_str());
     }
-  }
+}
 
-  void MonitorElement::copyFrom(TH1 *from) {
-    TH1 *orig = accessRootObject(__PRETTY_FUNCTION__, 1);
-    if (orig->GetTitle() != from->GetTitle())
-      orig->SetTitle(from->GetTitle());
+// -------------------------------------------------------------------
+TObject *MonitorElement::getRootObject() const {
+  const_cast<MonitorElement *>(this)->update();
+  return object_;
+}
 
-    if (!isAccumulateEnabled())
-      orig->Reset();
+TH1 *MonitorElement::getTH1() const {
+  const_cast<MonitorElement *>(this)->update();
+  return accessRootObject(__PRETTY_FUNCTION__, 0);
+}
 
-    if (isSoftResetEnabled()) {
-      if (kind() == Kind::TH1F || kind() == Kind::TH1S || kind() == Kind::TH1D || kind() == Kind::TH2F ||
-          kind() == Kind::TH2S || kind() == Kind::TH2D || kind() == Kind::TH3F)
-        // subtract "reference"
-        orig->Add(from, refvalue_, 1, -1);
-      else if (kind() == Kind::TPROFILE)
-        // subtract "reference"
-        addProfiles(
-            static_cast<TProfile *>(from), static_cast<TProfile *>(refvalue_), static_cast<TProfile *>(orig), 1, -1);
-      else if (kind() == Kind::TPROFILE2D)
-        // subtract "reference"
-        addProfiles(static_cast<TProfile2D *>(from),
-                    static_cast<TProfile2D *>(refvalue_),
-                    static_cast<TProfile2D *>(orig),
-                    1,
-                    -1);
-      else
-        incompatible(__PRETTY_FUNCTION__);
-    } else
-      orig->Add(from);
+TH1F *MonitorElement::getTH1F() const {
+  assert(kind() == DQM_KIND_TH1F);
+  const_cast<MonitorElement *>(this)->update();
+  return static_cast<TH1F *>(accessRootObject(__PRETTY_FUNCTION__, 1));
+}
 
-    copyFunctions(from, orig);
-  }
+TH1S *MonitorElement::getTH1S() const {
+  assert(kind() == DQM_KIND_TH1S);
+  const_cast<MonitorElement *>(this)->update();
+  return static_cast<TH1S *>(accessRootObject(__PRETTY_FUNCTION__, 1));
+}
 
-  // --- Operations on MEs that are normally reset at end of monitoring cycle ---
-  void MonitorElement::getQReport(bool create, const std::string &qtname, QReport *&qr, DQMNet::QValue *&qv) {
-    assert(qreports_.size() == data_.qreports.size());
+TH1D *MonitorElement::getTH1D() const {
+  assert(kind() == DQM_KIND_TH1D);
+  const_cast<MonitorElement *>(this)->update();
+  return static_cast<TH1D *>(accessRootObject(__PRETTY_FUNCTION__, 1));
+}
 
-    qr = nullptr;
-    qv = nullptr;
+TH2F *MonitorElement::getTH2F() const {
+  assert(kind() == DQM_KIND_TH2F);
+  const_cast<MonitorElement *>(this)->update();
+  return static_cast<TH2F *>(accessRootObject(__PRETTY_FUNCTION__, 2));
+}
 
-    size_t pos = 0, end = qreports_.size();
-    while (pos < end && data_.qreports[pos].qtname != qtname)
-      ++pos;
+TH2S *MonitorElement::getTH2S() const {
+  assert(kind() == DQM_KIND_TH2S);
+  const_cast<MonitorElement *>(this)->update();
+  return static_cast<TH2S *>(accessRootObject(__PRETTY_FUNCTION__, 2));
+}
 
-    if (pos == end && !create)
-      return;
-    else if (pos == end) {
-      data_.qreports.emplace_back();
-      qreports_.push_back(QReport(nullptr, nullptr));
+TH2D *MonitorElement::getTH2D() const {
+  assert(kind() == DQM_KIND_TH2D);
+  const_cast<MonitorElement *>(this)->update();
+  return static_cast<TH2D *>(accessRootObject(__PRETTY_FUNCTION__, 2));
+}
 
-      DQMNet::QValue &q = data_.qreports.back();
-      q.code = dqm::qstatus::DID_NOT_RUN;
-      q.qtresult = 0;
-      q.qtname = qtname;
-      q.message = "NO_MESSAGE_ASSIGNED";
-      q.algorithm = "UNKNOWN_ALGORITHM";
-    }
+TH3F *MonitorElement::getTH3F() const {
+  assert(kind() == DQM_KIND_TH3F);
+  const_cast<MonitorElement *>(this)->update();
+  return static_cast<TH3F *>(accessRootObject(__PRETTY_FUNCTION__, 3));
+}
 
-    qr = &qreports_[pos];
-    qv = &data_.qreports[pos];
-  }
+TProfile *MonitorElement::getTProfile() const {
+  assert(kind() == DQM_KIND_TPROFILE);
+  const_cast<MonitorElement *>(this)->update();
+  return static_cast<TProfile *>(accessRootObject(__PRETTY_FUNCTION__, 1));
+}
 
-  /// Add quality report, from DQMStore.
-  void MonitorElement::addQReport(const DQMNet::QValue &desc, QCriterion *qc) {
-    QReport *qr;
-    DQMNet::QValue *qv;
-    getQReport(true, desc.qtname, qr, qv);
-    qr->qcriterion_ = qc;
-    *qv = desc;
-    update();
-  }
+TProfile2D *MonitorElement::getTProfile2D() const {
+  assert(kind() == DQM_KIND_TPROFILE2D);
+  const_cast<MonitorElement *>(this)->update();
+  return static_cast<TProfile2D *>(accessRootObject(__PRETTY_FUNCTION__, 2));
+}
 
-  void MonitorElement::addQReport(QCriterion *qc) {
-    QReport *qr;
-    DQMNet::QValue *qv;
-    getQReport(true, qc->getName(), qr, qv);
-    qv->code = dqm::qstatus::DID_NOT_RUN;
-    qv->message = "NO_MESSAGE_ASSIGNED";
-    qr->qcriterion_ = qc;
-    update();
-  }
+// -------------------------------------------------------------------
+TObject *MonitorElement::getRefRootObject() const {
+  const_cast<MonitorElement *>(this)->update();
+  return reference_;
+}
 
-  /// Refresh QReport stats, usually after MEs were read in from a file.
-  void MonitorElement::updateQReportStats() {
-    data_.flags &= ~DQMNet::DQM_PROP_REPORT_ALARM;
-    for (auto &qreport : data_.qreports)
-      switch (qreport.code) {
-        case dqm::qstatus::STATUS_OK:
-          break;
-        case dqm::qstatus::WARNING:
-          data_.flags |= DQMNet::DQM_PROP_REPORT_WARN;
-          break;
-        case dqm::qstatus::ERROR:
-          data_.flags |= DQMNet::DQM_PROP_REPORT_ERROR;
-          break;
-        default:
-          data_.flags |= DQMNet::DQM_PROP_REPORT_OTHER;
-          break;
-      }
-  }
+TH1 *MonitorElement::getRefTH1() const {
+  const_cast<MonitorElement *>(this)->update();
+  return checkRootObject(data_.objname, reference_, __PRETTY_FUNCTION__, 0);
+}
 
-  // -------------------------------------------------------------------
-  TObject *MonitorElement::getRootObject() const {
-    const_cast<MonitorElement *>(this)->update();
-    return object_;
-  }
+TH1F *MonitorElement::getRefTH1F() const {
+  assert(kind() == DQM_KIND_TH1F);
+  const_cast<MonitorElement *>(this)->update();
+  return static_cast<TH1F *>(checkRootObject(data_.objname, reference_, __PRETTY_FUNCTION__, 1));
+}
 
-  TH1 *MonitorElement::getTH1() const {
-    const_cast<MonitorElement *>(this)->update();
-    return accessRootObject(__PRETTY_FUNCTION__, 0);
-  }
+TH1S *MonitorElement::getRefTH1S() const {
+  assert(kind() == DQM_KIND_TH1S);
+  const_cast<MonitorElement *>(this)->update();
+  return static_cast<TH1S *>(checkRootObject(data_.objname, reference_, __PRETTY_FUNCTION__, 1));
+}
 
-  TH1F *MonitorElement::getTH1F() const {
-    assert(kind() == Kind::TH1F);
-    const_cast<MonitorElement *>(this)->update();
-    return static_cast<TH1F *>(accessRootObject(__PRETTY_FUNCTION__, 1));
-  }
+TH1D *MonitorElement::getRefTH1D() const {
+  assert(kind() == DQM_KIND_TH1D);
+  const_cast<MonitorElement *>(this)->update();
+  return static_cast<TH1D *>(checkRootObject(data_.objname, reference_, __PRETTY_FUNCTION__, 1));
+}
 
-  TH1S *MonitorElement::getTH1S() const {
-    assert(kind() == Kind::TH1S);
-    const_cast<MonitorElement *>(this)->update();
-    return static_cast<TH1S *>(accessRootObject(__PRETTY_FUNCTION__, 1));
-  }
+TH2F *MonitorElement::getRefTH2F() const {
+  assert(kind() == DQM_KIND_TH2F);
+  const_cast<MonitorElement *>(this)->update();
+  return static_cast<TH2F *>(checkRootObject(data_.objname, reference_, __PRETTY_FUNCTION__, 2));
+}
 
-  TH1D *MonitorElement::getTH1D() const {
-    assert(kind() == Kind::TH1D);
-    const_cast<MonitorElement *>(this)->update();
-    return static_cast<TH1D *>(accessRootObject(__PRETTY_FUNCTION__, 1));
-  }
+TH2S *MonitorElement::getRefTH2S() const {
+  assert(kind() == DQM_KIND_TH2S);
+  const_cast<MonitorElement *>(this)->update();
+  return static_cast<TH2S *>(checkRootObject(data_.objname, reference_, __PRETTY_FUNCTION__, 2));
+}
 
-  TH2F *MonitorElement::getTH2F() const {
-    assert(kind() == Kind::TH2F);
-    const_cast<MonitorElement *>(this)->update();
-    return static_cast<TH2F *>(accessRootObject(__PRETTY_FUNCTION__, 2));
-  }
+TH2D *MonitorElement::getRefTH2D() const {
+  assert(kind() == DQM_KIND_TH2D);
+  const_cast<MonitorElement *>(this)->update();
+  return static_cast<TH2D *>(checkRootObject(data_.objname, reference_, __PRETTY_FUNCTION__, 2));
+}
 
-  TH2S *MonitorElement::getTH2S() const {
-    assert(kind() == Kind::TH2S);
-    const_cast<MonitorElement *>(this)->update();
-    return static_cast<TH2S *>(accessRootObject(__PRETTY_FUNCTION__, 2));
-  }
+TH3F *MonitorElement::getRefTH3F() const {
+  assert(kind() == DQM_KIND_TH3F);
+  const_cast<MonitorElement *>(this)->update();
+  return static_cast<TH3F *>(checkRootObject(data_.objname, reference_, __PRETTY_FUNCTION__, 3));
+}
 
-  TH2D *MonitorElement::getTH2D() const {
-    assert(kind() == Kind::TH2D);
-    const_cast<MonitorElement *>(this)->update();
-    return static_cast<TH2D *>(accessRootObject(__PRETTY_FUNCTION__, 2));
-  }
+TProfile *MonitorElement::getRefTProfile() const {
+  assert(kind() == DQM_KIND_TPROFILE);
+  const_cast<MonitorElement *>(this)->update();
+  return static_cast<TProfile *>(checkRootObject(data_.objname, reference_, __PRETTY_FUNCTION__, 1));
+}
 
-  TH3F *MonitorElement::getTH3F() const {
-    assert(kind() == Kind::TH3F);
-    const_cast<MonitorElement *>(this)->update();
-    return static_cast<TH3F *>(accessRootObject(__PRETTY_FUNCTION__, 3));
-  }
+TProfile2D *MonitorElement::getRefTProfile2D() const {
+  assert(kind() == DQM_KIND_TPROFILE2D);
+  const_cast<MonitorElement *>(this)->update();
+  return static_cast<TProfile2D *>(checkRootObject(data_.objname, reference_, __PRETTY_FUNCTION__, 2));
+}
 
-  TProfile *MonitorElement::getTProfile() const {
-    assert(kind() == Kind::TPROFILE);
-    const_cast<MonitorElement *>(this)->update();
-    return static_cast<TProfile *>(accessRootObject(__PRETTY_FUNCTION__, 1));
-  }
-
-  TProfile2D *MonitorElement::getTProfile2D() const {
-    assert(kind() == Kind::TPROFILE2D);
-    const_cast<MonitorElement *>(this)->update();
-    return static_cast<TProfile2D *>(accessRootObject(__PRETTY_FUNCTION__, 2));
-  }
-
-  // -------------------------------------------------------------------
-  TObject *MonitorElement::getRefRootObject() const {
-    const_cast<MonitorElement *>(this)->update();
-    return reference_;
-  }
-
-  TH1 *MonitorElement::getRefTH1() const {
-    const_cast<MonitorElement *>(this)->update();
-    return checkRootObject(data_.objname, reference_, __PRETTY_FUNCTION__, 0);
-  }
-
-  TH1F *MonitorElement::getRefTH1F() const {
-    assert(kind() == Kind::TH1F);
-    const_cast<MonitorElement *>(this)->update();
-    return static_cast<TH1F *>(checkRootObject(data_.objname, reference_, __PRETTY_FUNCTION__, 1));
-  }
-
-  TH1S *MonitorElement::getRefTH1S() const {
-    assert(kind() == Kind::TH1S);
-    const_cast<MonitorElement *>(this)->update();
-    return static_cast<TH1S *>(checkRootObject(data_.objname, reference_, __PRETTY_FUNCTION__, 1));
-  }
-
-  TH1D *MonitorElement::getRefTH1D() const {
-    assert(kind() == Kind::TH1D);
-    const_cast<MonitorElement *>(this)->update();
-    return static_cast<TH1D *>(checkRootObject(data_.objname, reference_, __PRETTY_FUNCTION__, 1));
-  }
-
-  TH2F *MonitorElement::getRefTH2F() const {
-    assert(kind() == Kind::TH2F);
-    const_cast<MonitorElement *>(this)->update();
-    return static_cast<TH2F *>(checkRootObject(data_.objname, reference_, __PRETTY_FUNCTION__, 2));
-  }
-
-  TH2S *MonitorElement::getRefTH2S() const {
-    assert(kind() == Kind::TH2S);
-    const_cast<MonitorElement *>(this)->update();
-    return static_cast<TH2S *>(checkRootObject(data_.objname, reference_, __PRETTY_FUNCTION__, 2));
-  }
-
-  TH2D *MonitorElement::getRefTH2D() const {
-    assert(kind() == Kind::TH2D);
-    const_cast<MonitorElement *>(this)->update();
-    return static_cast<TH2D *>(checkRootObject(data_.objname, reference_, __PRETTY_FUNCTION__, 2));
-  }
-
-  TH3F *MonitorElement::getRefTH3F() const {
-    assert(kind() == Kind::TH3F);
-    const_cast<MonitorElement *>(this)->update();
-    return static_cast<TH3F *>(checkRootObject(data_.objname, reference_, __PRETTY_FUNCTION__, 3));
-  }
-
-  TProfile *MonitorElement::getRefTProfile() const {
-    assert(kind() == Kind::TPROFILE);
-    const_cast<MonitorElement *>(this)->update();
-    return static_cast<TProfile *>(checkRootObject(data_.objname, reference_, __PRETTY_FUNCTION__, 1));
-  }
-
-  TProfile2D *MonitorElement::getRefTProfile2D() const {
-    assert(kind() == Kind::TPROFILE2D);
-    const_cast<MonitorElement *>(this)->update();
-    return static_cast<TProfile2D *>(checkRootObject(data_.objname, reference_, __PRETTY_FUNCTION__, 2));
-  }
-
-}  // namespace dqm::impl
+}

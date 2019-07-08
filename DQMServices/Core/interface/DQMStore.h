@@ -68,9 +68,9 @@ class MEtoEDMConverter;
 
 namespace dqm::impl {
 
-  class MonitorElement;
+class MonitorElement;
 
-  /** Implements RegEx patterns which occur often in a high-performant
+/** Implements RegEx patterns which occur often in a high-performant
     mattern. For all other expressions, the full RegEx engine is used.
     Note: this class can only be used for lat::Regexp::Wildcard-like
     patterns.  */
@@ -852,15 +852,55 @@ namespace dqm::impl {
 
 }  // namespace dqm::impl
 
+  unsigned verbose_{1};
+  unsigned verboseQT_{1};
+  bool reset_{false};
+  double scaleFlag_;
+  bool collateHistograms_{false};
+  bool enableMultiThread_{false};
+  bool LSbasedMode_;
+  bool forceResetOnBeginLumi_{false};
+  std::string readSelectedDirectory_{};
+  uint32_t run_{};
+  uint32_t moduleId_{};
+  // set to true in the transaction if module supports per-lumi saving.
+  bool canSaveByLumi_{false};
+  // set to true in configuration if per-lumi saving is requested.
+  bool doSaveByLumi_{false};
+  std::unique_ptr<std::ostream> stream_{nullptr};
+
+  std::string pwd_{};
+  MEMap data_;
+  std::set<std::string> dirs_;
+
+  QCMap qtests_;
+  QAMap qalgos_;
+  QTestSpecs qtestspecs_;
+
+  std::mutex book_mutex_;
+
+  friend DQMService;
+  friend DQMNet;
+  friend DQMArchiver;
+  friend DQMStoreExample;  // for get{All,Matching}Contents -- sole user of this method!
+  friend DQMRootOutputModule;
+  friend DQMRootSource;
+  friend DQMFileSaver;
+  friend MEtoEDMConverter;
+};
+
+}
+
 // These will become distinct classes in the future.
-namespace dqm::legacy {
+namespace  dqm::legacy {
   typedef dqm::impl::DQMStore DQMStore;
 }
-namespace dqm::reco {
+namespace  dqm::reco {
   typedef dqm::impl::DQMStore DQMStore;
 }
-namespace dqm::harvesting {
+namespace  dqm::harvesting {
   typedef dqm::impl::DQMStore DQMStore;
 }
+
 
 #endif  // DQMServices_Core_DQMStore_h

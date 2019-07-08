@@ -119,17 +119,6 @@ namespace dqm::impl {
     m[T::getAlgoName()] = &makeQCriterion<T>;
   }
 
-  /////////////////////////////////////////////////////////////
-  fastmatch::fastmatch(std::string fastString) : fastString_{move(fastString)}, matching_{UseFull} {
-    try {
-      regexp_ = std::make_unique<lat::Regexp>(fastString_, 0, lat::Regexp::Wildcard);
-      regexp_->study();
-    } catch (lat::Error& e) {
-      raiseDQMError("DQMStore",
-                    "Invalid wildcard pattern '%s' in quality"
-                    " test specification",
-                    fastString_.c_str());
-    }
 
     // count stars ( "*" )
     size_t starCount = 0;
@@ -3435,4 +3424,5 @@ namespace dqm::impl {
       }
     }
   }
-}  // namespace dqm::impl
+}
+}

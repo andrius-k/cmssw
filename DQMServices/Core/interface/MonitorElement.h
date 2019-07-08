@@ -35,212 +35,212 @@ class DQMService;
 struct MonitorElementNoCloneTag {};
 
 namespace dqm::impl {
-  /** The base class for all MonitorElements (ME) */
-  class MonitorElement {
-    friend class DQMStore;
-    friend DQMService;
+/** The base class for all MonitorElements (ME) */
+class MonitorElement {
+  friend class DQMStore;
+  friend DQMService;
 
-  public:
-    struct Scalar {
-      int64_t num;
-      double real;
-      std::string str;
-    };
+public:
+  struct Scalar {
+    int64_t num;
+    double real;
+    std::string str;
+  };
 
-    enum class Kind {
-      INVALID = DQMNet::DQM_PROP_TYPE_INVALID,
-      INT = DQMNet::DQM_PROP_TYPE_INT,
-      REAL = DQMNet::DQM_PROP_TYPE_REAL,
-      STRING = DQMNet::DQM_PROP_TYPE_STRING,
-      TH1F = DQMNet::DQM_PROP_TYPE_TH1F,
-      TH1S = DQMNet::DQM_PROP_TYPE_TH1S,
-      TH1D = DQMNet::DQM_PROP_TYPE_TH1D,
-      TH2F = DQMNet::DQM_PROP_TYPE_TH2F,
-      TH2S = DQMNet::DQM_PROP_TYPE_TH2S,
-      TH2D = DQMNet::DQM_PROP_TYPE_TH2D,
-      TH3F = DQMNet::DQM_PROP_TYPE_TH3F,
-      TPROFILE = DQMNet::DQM_PROP_TYPE_TPROF,
-      TPROFILE2D = DQMNet::DQM_PROP_TYPE_TPROF2D
-    };
+  enum Kind {
+    DQM_KIND_INVALID = DQMNet::DQM_PROP_TYPE_INVALID,
+    DQM_KIND_INT = DQMNet::DQM_PROP_TYPE_INT,
+    DQM_KIND_REAL = DQMNet::DQM_PROP_TYPE_REAL,
+    DQM_KIND_STRING = DQMNet::DQM_PROP_TYPE_STRING,
+    DQM_KIND_TH1F = DQMNet::DQM_PROP_TYPE_TH1F,
+    DQM_KIND_TH1S = DQMNet::DQM_PROP_TYPE_TH1S,
+    DQM_KIND_TH1D = DQMNet::DQM_PROP_TYPE_TH1D,
+    DQM_KIND_TH2F = DQMNet::DQM_PROP_TYPE_TH2F,
+    DQM_KIND_TH2S = DQMNet::DQM_PROP_TYPE_TH2S,
+    DQM_KIND_TH2D = DQMNet::DQM_PROP_TYPE_TH2D,
+    DQM_KIND_TH3F = DQMNet::DQM_PROP_TYPE_TH3F,
+    DQM_KIND_TPROFILE = DQMNet::DQM_PROP_TYPE_TPROF,
+    DQM_KIND_TPROFILE2D = DQMNet::DQM_PROP_TYPE_TPROF2D
+  };
 
-  private:
-    DQMNet::CoreObject data_;        //< Core object information.
-    Scalar scalar_;                  //< Current scalar value.
-    TH1 *object_;                    //< Current ROOT object value.
-    TH1 *reference_;                 //< Current ROOT reference object.
-    TH1 *refvalue_;                  //< Soft reference if any.
-    std::vector<QReport> qreports_;  //< QReports associated to this object.
+private:
+  DQMNet::CoreObject data_;        //< Core object information.
+  Scalar scalar_;                  //< Current scalar value.
+  TH1 *object_;                    //< Current ROOT object value.
+  TH1 *reference_;                 //< Current ROOT reference object.
+  TH1 *refvalue_;                  //< Soft reference if any.
+  std::vector<QReport> qreports_;  //< QReports associated to this object.
 
-    MonitorElement *initialise(Kind kind);
-    MonitorElement *initialise(Kind kind, TH1 *rootobj);
-    MonitorElement *initialise(Kind kind, const std::string &value);
-    void globalize() { data_.moduleId = 0; }
-    void setLumi(uint32_t ls) { data_.lumi = ls; }
+  MonitorElement *initialise(Kind kind);
+  MonitorElement *initialise(Kind kind, TH1 *rootobj);
+  MonitorElement *initialise(Kind kind, const std::string &value);
+  void globalize() { data_.moduleId = 0; }
+  void setLumi(uint32_t ls) { data_.lumi = ls; }
 
-  public:
-    MonitorElement();
-    MonitorElement(const std::string *path, const std::string &name);
-    MonitorElement(const std::string *path, const std::string &name, uint32_t run, uint32_t moduleId);
-    MonitorElement(const MonitorElement &, MonitorElementNoCloneTag);
-    MonitorElement(const MonitorElement &);
-    MonitorElement(MonitorElement &&);
-    MonitorElement &operator=(const MonitorElement &) = delete;
-    MonitorElement &operator=(MonitorElement &&) = delete;
-    ~MonitorElement();
+public:
+  MonitorElement();
+  MonitorElement(const std::string *path, const std::string &name);
+  MonitorElement(const std::string *path, const std::string &name, uint32_t run, uint32_t moduleId);
+  MonitorElement(const MonitorElement &, MonitorElementNoCloneTag);
+  MonitorElement(const MonitorElement &);
+  MonitorElement(MonitorElement &&);
+  MonitorElement &operator=(const MonitorElement &) = delete;
+  MonitorElement &operator=(MonitorElement &&) = delete;
+  ~MonitorElement();
 
-    /// Compare monitor elements, for ordering in sets.
-    bool operator<(const MonitorElement &x) const { return DQMNet::setOrder(data_, x.data_); }
+  /// Compare monitor elements, for ordering in sets.
+  bool operator<(const MonitorElement &x) const { return DQMNet::setOrder(data_, x.data_); }
 
-    /// Check the consistency of the axis labels
-    static bool CheckBinLabels(const TAxis *a1, const TAxis *a2);
+  /// Check the consistency of the axis labels
+  static bool CheckBinLabels(const TAxis *a1, const TAxis *a2);
 
-    /// Get the type of the monitor element.
-    Kind kind() const { return Kind(data_.flags & DQMNet::DQM_PROP_TYPE_MASK); }
+  /// Get the type of the monitor element.
+  Kind kind() const { return Kind(data_.flags & DQMNet::DQM_PROP_TYPE_MASK); }
 
-    /// Get the object flags.
-    uint32_t flags() const { return data_.flags; }
+  /// Get the object flags.
+  uint32_t flags() const { return data_.flags; }
 
-    /// get name of ME
-    const std::string &getName() const { return data_.objname; }
+  /// get name of ME
+  const std::string &getName() const { return data_.objname; }
 
-    /// get pathname of parent folder
-    const std::string &getPathname() const { return *data_.dirname; }
+  /// get pathname of parent folder
+  const std::string &getPathname() const { return *data_.dirname; }
 
-    /// get full name of ME including Pathname
-    const std::string getFullname() const {
-      std::string path;
-      path.reserve(data_.dirname->size() + data_.objname.size() + 2);
-      path += *data_.dirname;
-      if (!data_.dirname->empty())
-        path += '/';
-      path += data_.objname;
-      return path;
-    }
+  /// get full name of ME including Pathname
+  const std::string getFullname() const {
+    std::string path;
+    path.reserve(data_.dirname->size() + data_.objname.size() + 2);
+    path += *data_.dirname;
+    if (!data_.dirname->empty())
+      path += '/';
+    path += data_.objname;
+    return path;
+  }
 
-    /// true if ME was updated in last monitoring cycle
-    bool wasUpdated() const { return data_.flags & DQMNet::DQM_PROP_NEW; }
+  /// true if ME was updated in last monitoring cycle
+  bool wasUpdated() const { return data_.flags & DQMNet::DQM_PROP_NEW; }
 
-    /// Mark the object updated.
-    void update() { data_.flags |= DQMNet::DQM_PROP_NEW; }
+  /// Mark the object updated.
+  void update() { data_.flags |= DQMNet::DQM_PROP_NEW; }
 
-    /// specify whether ME should be reset at end of monitoring cycle (default:false);
-    /// (typically called by Sources that control the original ME)
-    void setResetMe(bool /* flag */) { data_.flags |= DQMNet::DQM_PROP_RESET; }
+  /// specify whether ME should be reset at end of monitoring cycle (default:false);
+  /// (typically called by Sources that control the original ME)
+  void setResetMe(bool /* flag */) { data_.flags |= DQMNet::DQM_PROP_RESET; }
 
-    /// true if ME is meant to be stored for each luminosity section
-    bool getLumiFlag() const { return data_.flags & DQMNet::DQM_PROP_LUMI; }
+  /// true if ME is meant to be stored for each luminosity section
+  bool getLumiFlag() const { return data_.flags & DQMNet::DQM_PROP_LUMI; }
 
-    /// this ME is meant to be stored for each luminosity section
-    void setLumiFlag() { data_.flags |= DQMNet::DQM_PROP_LUMI; }
+  /// this ME is meant to be stored for each luminosity section
+  void setLumiFlag() { data_.flags |= DQMNet::DQM_PROP_LUMI; }
 
-    /// this ME is meant to be an efficiency plot that must not be
-    /// normalized when drawn in the DQM GUI.
-    void setEfficiencyFlag() { data_.flags |= DQMNet::DQM_PROP_EFFICIENCY_PLOT; }
+  /// this ME is meant to be an efficiency plot that must not be
+  /// normalized when drawn in the DQM GUI.
+  void setEfficiencyFlag() { data_.flags |= DQMNet::DQM_PROP_EFFICIENCY_PLOT; }
 
-    // A static assert to check that T actually fits in
-    // int64_t.
-    template <typename T>
-    struct fits_in_int64_t {
-      int checkArray[sizeof(int64_t) - sizeof(T) + 1];
-    };
+  // A static assert to check that T actually fits in
+  // int64_t.
+  template <typename T>
+  struct fits_in_int64_t {
+    int checkArray[sizeof(int64_t) - sizeof(T) + 1];
+  };
 
-    void Fill(long long x) {
-      fits_in_int64_t<long long>();
-      doFill(static_cast<int64_t>(x));
-    }
-    void Fill(unsigned long long x) {
-      fits_in_int64_t<unsigned long long>();
-      doFill(static_cast<int64_t>(x));
-    }
-    void Fill(unsigned long x) {
-      fits_in_int64_t<unsigned long>();
-      doFill(static_cast<int64_t>(x));
-    }
-    void Fill(long x) {
-      fits_in_int64_t<long>();
-      doFill(static_cast<int64_t>(x));
-    }
-    void Fill(unsigned int x) {
-      fits_in_int64_t<unsigned int>();
-      doFill(static_cast<int64_t>(x));
-    }
-    void Fill(int x) {
-      fits_in_int64_t<int>();
-      doFill(static_cast<int64_t>(x));
-    }
-    void Fill(short x) {
-      fits_in_int64_t<short>();
-      doFill(static_cast<int64_t>(x));
-    }
-    void Fill(unsigned short x) {
-      fits_in_int64_t<unsigned short>();
-      doFill(static_cast<int64_t>(x));
-    }
-    void Fill(char x) {
-      fits_in_int64_t<char>();
-      doFill(static_cast<int64_t>(x));
-    }
-    void Fill(unsigned char x) {
-      fits_in_int64_t<unsigned char>();
-      doFill(static_cast<int64_t>(x));
-    }
+  void Fill(long long x) {
+    fits_in_int64_t<long long>();
+    doFill(static_cast<int64_t>(x));
+  }
+  void Fill(unsigned long long x) {
+    fits_in_int64_t<unsigned long long>();
+    doFill(static_cast<int64_t>(x));
+  }
+  void Fill(unsigned long x) {
+    fits_in_int64_t<unsigned long>();
+    doFill(static_cast<int64_t>(x));
+  }
+  void Fill(long x) {
+    fits_in_int64_t<long>();
+    doFill(static_cast<int64_t>(x));
+  }
+  void Fill(unsigned int x) {
+    fits_in_int64_t<unsigned int>();
+    doFill(static_cast<int64_t>(x));
+  }
+  void Fill(int x) {
+    fits_in_int64_t<int>();
+    doFill(static_cast<int64_t>(x));
+  }
+  void Fill(short x) {
+    fits_in_int64_t<short>();
+    doFill(static_cast<int64_t>(x));
+  }
+  void Fill(unsigned short x) {
+    fits_in_int64_t<unsigned short>();
+    doFill(static_cast<int64_t>(x));
+  }
+  void Fill(char x) {
+    fits_in_int64_t<char>();
+    doFill(static_cast<int64_t>(x));
+  }
+  void Fill(unsigned char x) {
+    fits_in_int64_t<unsigned char>();
+    doFill(static_cast<int64_t>(x));
+  }
 
-    void Fill(float x) { Fill(static_cast<double>(x)); }
-    void Fill(double x);
-    void Fill(std::string &value);
+  void Fill(float x) { Fill(static_cast<double>(x)); }
+  void Fill(double x);
+  void Fill(std::string &value);
 
-    void Fill(double x, double yw);
-    void Fill(double x, double y, double zw);
-    void Fill(double x, double y, double z, double w);
-    void ShiftFillLast(double y, double ye = 0., int32_t xscale = 1);
-    void Reset();
+  void Fill(double x, double yw);
+  void Fill(double x, double y, double zw);
+  void Fill(double x, double y, double z, double w);
+  void ShiftFillLast(double y, double ye = 0., int32_t xscale = 1);
+  void Reset();
 
-    std::string valueString() const;
-    std::string tagString() const;
-    std::string tagLabelString() const;
-    std::string effLabelString() const;
-    std::string qualityTagString(const DQMNet::QValue &qv) const;
-    void packScalarData(std::string &into, const char *prefix) const;
-    void packQualityData(std::string &into) const;
+  std::string valueString() const;
+  std::string tagString() const;
+  std::string tagLabelString() const;
+  std::string effLabelString() const;
+  std::string qualityTagString(const DQMNet::QValue &qv) const;
+  void packScalarData(std::string &into, const char *prefix) const;
+  void packQualityData(std::string &into) const;
 
-    /// true if at least of one of the quality tests returned an error
-    bool hasError() const { return data_.flags & DQMNet::DQM_PROP_REPORT_ERROR; }
+  /// true if at least of one of the quality tests returned an error
+  bool hasError() const { return data_.flags & DQMNet::DQM_PROP_REPORT_ERROR; }
 
-    /// true if at least of one of the quality tests returned a warning
-    bool hasWarning() const { return data_.flags & DQMNet::DQM_PROP_REPORT_WARN; }
+  /// true if at least of one of the quality tests returned a warning
+  bool hasWarning() const { return data_.flags & DQMNet::DQM_PROP_REPORT_WARN; }
 
-    /// true if at least of one of the tests returned some other (non-ok) status
-    bool hasOtherReport() const { return data_.flags & DQMNet::DQM_PROP_REPORT_OTHER; }
+  /// true if at least of one of the tests returned some other (non-ok) status
+  bool hasOtherReport() const { return data_.flags & DQMNet::DQM_PROP_REPORT_OTHER; }
 
-    /// true if the plot has been marked as an efficiency plot, which
-    /// will not be normalized when rendered within the DQM GUI.
-    bool isEfficiency() const { return data_.flags & DQMNet::DQM_PROP_EFFICIENCY_PLOT; }
+  /// true if the plot has been marked as an efficiency plot, which
+  /// will not be normalized when rendered within the DQM GUI.
+  bool isEfficiency() const { return data_.flags & DQMNet::DQM_PROP_EFFICIENCY_PLOT; }
 
-    /// get QReport corresponding to <qtname> (null pointer if QReport does not exist)
-    const QReport *getQReport(const std::string &qtname) const;
+  /// get QReport corresponding to <qtname> (null pointer if QReport does not exist)
+  const QReport *getQReport(const std::string &qtname) const;
 
-    /// get map of QReports
-    std::vector<QReport *> getQReports() const;
+  /// get map of QReports
+  std::vector<QReport *> getQReports() const;
 
-    /// get warnings from last set of quality tests
-    std::vector<QReport *> getQWarnings() const;
+  /// get warnings from last set of quality tests
+  std::vector<QReport *> getQWarnings() const;
 
-    /// get errors from last set of quality tests
-    std::vector<QReport *> getQErrors() const;
+  /// get errors from last set of quality tests
+  std::vector<QReport *> getQErrors() const;
 
-    /// get "other" (i.e. non-error, non-warning, non-"ok") QReports
-    /// from last set of quality tests
-    std::vector<QReport *> getQOthers() const;
+  /// get "other" (i.e. non-error, non-warning, non-"ok") QReports
+  /// from last set of quality tests
+  std::vector<QReport *> getQOthers() const;
 
-    /// run all quality tests
-    void runQTests();
+  /// run all quality tests
+  void runQTests();
 
-  private:
-    void doFill(int64_t x);
-    void incompatible(const char *func) const;
-    TH1 *accessRootObject(const char *func, int reqdim) const;
+private:
+  void doFill(int64_t x);
+  void incompatible(const char *func) const;
+  TH1 *accessRootObject(const char *func, int reqdim) const;
 
-  public:
+public:
 #if DQM_ROOT_METHODS
     double getMean(int axis = 1) const;
     double getMeanError(int axis = 1) const;
@@ -386,6 +386,19 @@ namespace dqm::impl {
   };
 
 }  // namespace dqm::impl
+
+// These will become distinct classes in the future.
+namespace dqm::legacy {
+  typedef dqm::impl::MonitorElement MonitorElement;
+}
+namespace dqm::reco {
+  typedef dqm::impl::MonitorElement MonitorElement;
+}
+namespace dqm::harvesting {
+  typedef dqm::impl::MonitorElement MonitorElement;
+}
+
+}
 
 // These will become distinct classes in the future.
 namespace dqm::legacy {
