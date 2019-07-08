@@ -10,6 +10,7 @@
 #include <vector>
 #include <TH1.h>
 
+
 class DQMRivetClient : public edm::EDAnalyzer {
 public:
   typedef dqm::legacy::DQMStore DQMStore;

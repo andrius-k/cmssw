@@ -4,6 +4,7 @@
 #include "DQM/SiStripCommissioningClients/interface/CommissioningHistograms.h"
 #include "DQMServices/Core/interface/DQMStore.h"
 
+
 class PedsFullNoiseHistograms : public virtual CommissioningHistograms {
 public:
   PedsFullNoiseHistograms(const edm::ParameterSet& pset, DQMStore*);

@@ -28,6 +28,7 @@
 #include "DataFormats/Common/interface/DetSetVectorNew.h"
 
 #include "DQMServices/Core/interface/DQMEDAnalyzer.h"
+#include "DQMServices/Core/interface/DQMStore.h"
 
 class SiStripDetCabling;
 class SiStripCluster;

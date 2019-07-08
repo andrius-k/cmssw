@@ -24,6 +24,7 @@
 #include <TGraphAsymmErrors.h>
 #endif
 
+
 class DQMGenericClient : public DQMEDHarvester {
 public:
   DQMGenericClient(const edm::ParameterSet& pset);

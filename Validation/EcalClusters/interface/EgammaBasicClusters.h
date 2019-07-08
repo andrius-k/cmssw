@@ -20,6 +20,7 @@
 
 #include <string>
 
+
 class EgammaBasicClusters : public DQMEDAnalyzer {
 public:
   explicit EgammaBasicClusters(const edm::ParameterSet &);

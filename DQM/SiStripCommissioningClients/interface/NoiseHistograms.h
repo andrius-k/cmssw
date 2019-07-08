@@ -4,6 +4,7 @@
 #include "DQM/SiStripCommissioningClients/interface/CommissioningHistograms.h"
 #include "DQMServices/Core/interface/DQMStore.h"
 
+
 class NoiseHistograms : public virtual CommissioningHistograms {
 public:
   NoiseHistograms(const edm::ParameterSet& pset, DQMStore*);

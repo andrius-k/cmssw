@@ -17,9 +17,11 @@
 #include "SimTracker/TrackTriggerAssociation/interface/TTClusterAssociationMap.h"
 #include "SimTracker/TrackTriggerAssociation/interface/TTStubAssociationMap.h"
 #include "SimTracker/TrackTriggerAssociation/interface/TTTrackAssociationMap.h"
+#include "DQMServices/Core/interface/DQMStore.h"
 #include <memory>
 #include <string>
 #include <vector>
+
 
 class OuterTrackerMonitorTrackingParticles : public DQMEDAnalyzer {
 public:

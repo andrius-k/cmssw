@@ -20,6 +20,8 @@
 #include "DataFormats/HcalRecHit/interface/HcalRecHitCollections.h"
 #include "DataFormats/JetReco/interface/CaloJet.h"
 #include "DataFormats/JetReco/interface/CaloJetCollection.h"
+#include "DQMServices/Core/interface/DQMStore.h"
+
 
 class DQMHcalDiJetsAlCaReco : public DQMEDAnalyzer {
 public:

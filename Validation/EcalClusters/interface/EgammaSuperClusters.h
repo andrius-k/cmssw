@@ -22,6 +22,7 @@
 
 #include <string>
 
+
 class EgammaSuperClusters : public DQMEDAnalyzer {
 public:
   explicit EgammaSuperClusters(const edm::ParameterSet &);

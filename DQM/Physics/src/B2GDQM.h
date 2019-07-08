@@ -67,6 +67,7 @@
 #include "CommonTools/Utils/interface/StringCutObjectSelector.h"
 
 #include "DataFormats/Math/interface/deltaPhi.h"
+#include "DQMServices/Core/interface/DQMStore.h"
 
 #include <iostream>
 #include <fstream>
@@ -74,6 +75,7 @@
 #include <vector>
 #include <map>
 #include <cmath>
+
 
 class B2GDQM : public DQMEDAnalyzer {
 public:

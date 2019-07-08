@@ -22,12 +22,14 @@
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
+#include "DQMServices/Core/interface/DQMStore.h"
 #include <memory>
 #include <unistd.h>
 
 #include <fstream>
 #include <iostream>
 #include <vector>
+
 
 class NoiseRatesClient : public DQMEDHarvester {
 private:

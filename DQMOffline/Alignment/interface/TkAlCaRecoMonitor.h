@@ -25,6 +25,7 @@ related to Tracker Alignment AlCaReco Production.
 
 // DataFormats
 #include "DataFormats/TrackReco/interface/TrackFwd.h"
+#include "DQMServices/Core/interface/DQMStore.h"
 #include <DataFormats/JetReco/interface/CaloJet.h>
 
 class TrackerGeometry;

@@ -32,12 +32,14 @@
 
 #include "DQMServices/Core/interface/DQMStore.h"
 #include "DQMServices/Core/interface/DQMEDAnalyzer.h"
+#include "DQMServices/Core/interface/DQMStore.h"
 
 #include <iostream>
 #include <fstream>
 #include <string>
 #include <vector>
 #include <map>
+
 
 class HiggsDQM : public DQMEDAnalyzer {
 public:

@@ -2,6 +2,7 @@
 #ifndef ElectronDqmHarvesterBase_h
 #define ElectronDqmHarvesterBase_h
 
+
 #include "FWCore/Framework/interface/EDAnalyzer.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include <Rtypes.h>
@@ -11,6 +12,7 @@
 //DQM
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "DQMServices/Core/interface/DQMEDHarvester.h"
+#include "DQMServices/Core/interface/MonitorElement.h"
 #include "DQMServices/Core/interface/DQMStore.h"
 
 class ElectronDqmHarvesterBase : public DQMEDHarvester {

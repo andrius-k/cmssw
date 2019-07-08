@@ -4,6 +4,7 @@
 #include "DQM/SiStripCommissioningClients/interface/CommissioningHistograms.h"
 #include "DQMServices/Core/interface/DQMStore.h"
 
+
 class FastFedCablingHistograms : public virtual CommissioningHistograms {
 public:
   FastFedCablingHistograms(const edm::ParameterSet& pset, DQMStore*);

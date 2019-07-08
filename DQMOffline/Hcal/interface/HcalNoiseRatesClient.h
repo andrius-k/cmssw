@@ -31,6 +31,7 @@
 #include <iostream>
 #include <vector>
 
+
 class HcalNoiseRatesClient : public DQMEDHarvester {
 private:
   std::string outputFile_;

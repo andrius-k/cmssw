@@ -25,6 +25,7 @@ namespace reco {
   class BeamSpot;
 }  // namespace reco
 
+
 class EwkMuDQM : public DQMEDAnalyzer {
 public:
   EwkMuDQM(const edm::ParameterSet&);

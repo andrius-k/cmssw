@@ -34,6 +34,7 @@
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "DQMServices/Core/interface/DQMStore.h"
 #include "FWCore/MessageLogger/interface/ErrorSummaryEntry.h"
+#include "DQMServices/Core/interface/DQMStore.h"
 
 #include <DQMServices/Core/interface/DQMEDAnalyzer.h>
 

@@ -37,7 +37,7 @@
 #include "CondFormats/SiStripObjects/interface/SiStripBadStrip.h"
 #include "CondFormats/SiStripObjects/interface/SiStripFedCabling.h"
 #include "CalibTracker/Records/interface/SiStripDependentRecords.h"
-#include "DQMServices/Core/interface/DQMStore.h"
+
 
 class SiStripBadModuleFedErrESSource : public edm::ESProducer, public edm::EventSetupRecordIntervalFinder {
 public:

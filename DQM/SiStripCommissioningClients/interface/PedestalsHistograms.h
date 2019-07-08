@@ -4,6 +4,7 @@
 #include "DQM/SiStripCommissioningClients/interface/CommissioningHistograms.h"
 #include "DQMServices/Core/interface/DQMStore.h"
 
+
 class PedestalsHistograms : public virtual CommissioningHistograms {
 public:
   PedestalsHistograms(const edm::ParameterSet& pset, DQMStore*);

@@ -6,6 +6,7 @@
 #include "CondFormats/SiStripObjects/interface/FedCablingAnalysis.h"
 #include "DQMServices/Core/interface/DQMStore.h"
 
+
 class FedCablingHistograms : virtual public CommissioningHistograms {
 public:
   FedCablingHistograms(const edm::ParameterSet& pset, DQMStore*);

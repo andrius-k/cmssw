@@ -10,6 +10,7 @@
 #include "DQMServices/Core/interface/DQMEDAnalyzer.h"
 #include "DQMServices/Core/interface/DQMStore.h"
 
+
 class ESOccupancyTask : public DQMEDAnalyzer {
 public:
   ESOccupancyTask(const edm::ParameterSet& ps);

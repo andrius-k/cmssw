@@ -13,6 +13,7 @@
 #include "TProfile.h"
 #include "DQMServices/Core/interface/DQMStore.h"
 
+
 class ESTrendTask : public DQMEDAnalyzer {
 public:
   // Constructor
