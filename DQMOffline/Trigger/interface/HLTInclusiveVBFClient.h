@@ -33,7 +33,6 @@
 #include <fstream>
 #include <vector>
 
-
 class HLTInclusiveVBFClient : public edm::EDAnalyzer {
 public:
   typedef dqm::legacy::MonitorElement MonitorElement;

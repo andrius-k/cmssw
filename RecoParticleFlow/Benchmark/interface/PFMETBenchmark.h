@@ -27,7 +27,6 @@
 #include <string>
 #include <TFile.h>
 
-
 class PFMETBenchmark {
 public:
   typedef dqm::legacy::DQMStore DQMStore;

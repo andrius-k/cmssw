@@ -39,7 +39,6 @@
 #include "CalibTracker/Records/interface/SiStripDependentRecords.h"
 #include "DQMServices/Core/interface/DQMStore.h"
 
-
 class SiStripBadModuleFedErrESSource : public edm::ESProducer, public edm::EventSetupRecordIntervalFinder {
 public:
   typedef dqm::legacy::MonitorElement MonitorElement;
