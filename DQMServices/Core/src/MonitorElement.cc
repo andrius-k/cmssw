@@ -26,8 +26,41 @@ static TH1 *checkRootObject(const std::string &name, TObject *tobj, const char *
                   func,
                   name.c_str());
 
-  static TH1 *checkRootObject(const std::string &name, TObject *tobj, const char *func, int reqdim) {
-    if (!tobj)
+  auto *h = static_cast<TH1 *>(tobj);
+  int ndim = h->GetDimension();
+  if (reqdim < 0 || reqdim > ndim)
+    raiseDQMError("MonitorElement",
+                  "Method '%s' cannot be invoked on monitor"
+                  " element '%s' because it requires %d dimensions; this"
+                  " object of type '%s' has %d dimensions",
+                  func,
+                  name.c_str(),
+                  reqdim,
+                  typeid(*h).name(),
+                  ndim);
+
+  return h;
+}
+
+MonitorElement *MonitorElement::initialise(Kind kind) {
+  switch (kind) {
+    case DQM_KIND_INT:
+    case DQM_KIND_REAL:
+    case DQM_KIND_STRING:
+    case DQM_KIND_TH1F:
+    case DQM_KIND_TH1S:
+    case DQM_KIND_TH1D:
+    case DQM_KIND_TH2F:
+    case DQM_KIND_TH2S:
+    case DQM_KIND_TH2D:
+    case DQM_KIND_TH3F:
+    case DQM_KIND_TPROFILE:
+    case DQM_KIND_TPROFILE2D:
+      data_.flags &= ~DQMNet::DQM_PROP_TYPE_MASK;
+    data_.flags |= ((int)kind);
+      break;
+
+    default:
       raiseDQMError("MonitorElement",
                     "Method '%s' cannot be invoked on monitor"
                     " element '%s' because it is not a ROOT object.",
@@ -105,23 +138,48 @@ static TH1 *checkRootObject(const std::string &name, TObject *tobj, const char *
         object_ = rootobj;
         break;
 
-      case Kind::TH2S:
-        assert(dynamic_cast<TH2S *>(rootobj));
-        assert(!reference_ || dynamic_cast<TH2S *>(reference_));
-        object_ = rootobj;
-        break;
+MonitorElement::MonitorElement() : object_(nullptr), reference_(nullptr), refvalue_(nullptr) {
+  data_.version = 0;
+  data_.dirname = nullptr;
+  data_.run = 0;
+  data_.lumi = 0;
+  data_.streamId = 0;
+  data_.moduleId = 0;
+  data_.tag = 0;
+  data_.flags = ((int) Kind::INVALID) | DQMNet::DQM_PROP_NEW;
+  scalar_.num = 0;
+  scalar_.real = 0;
+}
 
-      case Kind::TH2D:
-        assert(dynamic_cast<TH2D *>(rootobj));
-        assert(!reference_ || dynamic_cast<TH1D *>(reference_));
-        object_ = rootobj;
-        break;
+MonitorElement::MonitorElement(const std::string *path, const std::string &name)
+    : object_(nullptr), reference_(nullptr), refvalue_(nullptr) {
+  data_.version = 0;
+  data_.run = 0;
+  data_.lumi = 0;
+  data_.streamId = 0;
+  data_.moduleId = 0;
+  data_.dirname = path;
+  data_.objname = name;
+  data_.tag = 0;
+  data_.flags = ((int) Kind::INVALID) | DQMNet::DQM_PROP_NEW;
+  scalar_.num = 0;
+  scalar_.real = 0;
+}
 
-      case Kind::TH3F:
-        assert(dynamic_cast<TH3F *>(rootobj));
-        assert(!reference_ || dynamic_cast<TH3F *>(reference_));
-        object_ = rootobj;
-        break;
+MonitorElement::MonitorElement(const std::string *path, const std::string &name, uint32_t run, uint32_t moduleId)
+    : object_(nullptr), reference_(nullptr), refvalue_(nullptr) {
+  data_.version = 0;
+  data_.run = run;
+  data_.lumi = 0;
+  data_.streamId = 0;
+  data_.moduleId = moduleId;
+  data_.dirname = path;
+  data_.objname = name;
+  data_.tag = 0;
+  data_.flags = ((int) Kind::INVALID) | DQMNet::DQM_PROP_NEW;
+  scalar_.num = 0;
+  scalar_.real = 0;
+}
 
       case Kind::TPROFILE:
         assert(dynamic_cast<TProfile *>(rootobj));
