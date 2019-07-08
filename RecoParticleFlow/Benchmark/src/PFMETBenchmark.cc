@@ -1,4 +1,5 @@
 #include "RecoParticleFlow/Benchmark/interface/PFMETBenchmark.h"
+#include "DQMServices/Core/interface/DQMStore.h"
 
 // preprocessor macro for booking 1d histos with DQMStore -or- bare Root
 #define BOOK1D(name, title, nbinsx, lowx, highx) \

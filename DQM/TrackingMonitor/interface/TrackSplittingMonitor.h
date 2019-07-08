@@ -36,7 +36,6 @@ class TProfile;
 
 #include "DataFormats/MuonReco/interface/Muon.h"
 #include "DataFormats/MuonReco/interface/MuonFwd.h"
-#include "DQMServices/Core/interface/DQMStore.h"
 
 class TrackSplittingMonitor : public DQMEDAnalyzer {
 public:

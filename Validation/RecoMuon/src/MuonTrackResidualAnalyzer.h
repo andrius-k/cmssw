@@ -26,7 +26,6 @@
 
 #include "DataFormats/DetId/interface/DetId.h"
 #include "TrackingTools/PatternTools/interface/Trajectory.h"
-#include "DQMServices/Core/interface/DQMStore.h"
 #include <DQMServices/Core/interface/DQMEDAnalyzer.h>
 
 namespace edm {

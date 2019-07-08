@@ -21,7 +21,6 @@
 #include "DQM/SiStripCommon/interface/APVShotFinder.h"
 #include "DQM/SiStripCommon/interface/APVShot.h"
 #include "DQM/SiStripCommon/interface/SiStripFolderOrganizer.h"
-#include "DQMServices/Core/interface/DQMStore.h"
 
 #include <DQMServices/Core/interface/oneDQMEDAnalyzer.h>
 

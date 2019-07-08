@@ -20,7 +20,6 @@
 #include "DataFormats/Common/interface/TriggerResults.h"
 #include "DataFormats/HLTReco/interface/TriggerEvent.h"
 #include "DataFormats/HcalRecHit/interface/HcalRecHitCollections.h"
-#include "DQMServices/Core/interface/DQMStore.h"
 
 
 class DQMHcalIsolatedBunchAlCaReco : public DQMEDAnalyzer {

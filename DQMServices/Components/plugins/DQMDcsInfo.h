@@ -16,7 +16,7 @@
 #include <FWCore/ServiceRegistry/interface/Service.h>
 
 #include <DQMServices/Core/interface/DQMStore.h>
-#include <DQMServices/Core/interface/oneDQMEDAnalyzer.h>
+#include <DQMServices/Core/interface/DQMEDAnalyzer.h>
 //DataFormats
 #include "DataFormats/Scalers/interface/DcsStatus.h"
 #include "DataFormats/L1GlobalTrigger/interface/L1GlobalTriggerReadoutRecord.h"

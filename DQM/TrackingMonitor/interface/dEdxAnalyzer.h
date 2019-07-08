@@ -26,7 +26,6 @@ Monitoring source for general quantities related to track dEdx.
 #include "DataFormats/TrackReco/interface/DeDxData.h"
 #include "DataFormats/TrackReco/interface/Track.h"
 #include "DataFormats/TrackReco/interface/TrackFwd.h"
-#include "DQMServices/Core/interface/DQMStore.h"
 
 #include <DQMServices/Core/interface/DQMEDAnalyzer.h>
 

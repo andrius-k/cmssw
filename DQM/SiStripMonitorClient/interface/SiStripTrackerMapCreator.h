@@ -7,7 +7,6 @@
 #include "DQMServices/Core/interface/DQMStore.h"
 #include "FWCore/Framework/interface/ESHandle.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
-#include "DQMServices/Core/interface/DQMStore.h"
 
 #include <TTree.h>
 #include <fstream>

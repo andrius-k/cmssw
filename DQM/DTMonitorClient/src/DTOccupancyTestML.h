@@ -34,7 +34,6 @@ class DTChamberId;
 
 #include "TFile.h"
 #include "TNtuple.h"
-#include "DQMServices/Core/interface/DQMStore.h"
 
 class DTOccupancyTestML : public DQMEDHarvester {
 public:

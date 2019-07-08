@@ -67,7 +67,6 @@
 #include "CommonTools/Utils/interface/StringCutObjectSelector.h"
 
 #include "DataFormats/Math/interface/deltaPhi.h"
-#include "DQMServices/Core/interface/DQMStore.h"
 
 #include <iostream>
 #include <fstream>

@@ -17,7 +17,6 @@
 #include "DQMServices/Core/interface/DQMStore.h"
 #include "DataFormats/FEDRawData/interface/FEDRawDataCollection.h"
 #include "DataFormats/HcalRecHit/interface/HcalRecHitCollections.h"
-#include "DQMServices/Core/interface/DQMStore.h"
 
 
 class DQMHcalPhiSymAlCaReco : public DQMEDAnalyzer {

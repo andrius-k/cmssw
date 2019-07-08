@@ -67,7 +67,7 @@ private:
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
 #include "CalibFormats/SiStripObjects/interface/SiStripQuality.h"
-#include "CondFormats/SiStripObjects/interface/SiStripFedCabling.h"
+#include "DQMServices/Core/interface/DQMStore.h"
 
 SiStripBadModuleFedErrESSource::SiStripBadModuleFedErrESSource(const edm::ParameterSet& iConfig) {
   setWhatProduced(this).setConsumes(cablingToken_);

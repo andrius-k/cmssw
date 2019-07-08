@@ -29,6 +29,7 @@
 #include "DataFormats/TrackReco/interface/Track.h"
 #include "DataFormats/TrajectorySeed/interface/TrajectorySeedCollection.h"
 
+
 class EfficiencyAnalyzer : public DQMEDAnalyzer {
 public:
   /* Constructor */

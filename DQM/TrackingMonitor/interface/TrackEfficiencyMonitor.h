@@ -31,7 +31,6 @@ Monitoring source to measure the track efficiency
 #include "TrackingTools/TransientTrack/interface/TransientTrackBuilder.h"
 #include "DataFormats/MuonReco/interface/MuonFwd.h"
 #include "DataFormats/MuonReco/interface/MuonSelectors.h"
-#include "DQMServices/Core/interface/DQMStore.h"
 
 namespace reco {
   class TransientTrack;
