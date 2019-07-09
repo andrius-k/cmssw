@@ -17,8 +17,8 @@ using namespace std;
 namespace {
   typedef dqm::reco::DQMStore DQMStore;
 
-  void BinLogX(TH1* h) {
-    TAxis* axis = h->GetXaxis();
+  void BinLogX(TH1 *h) {
+    TAxis *axis = h->GetXaxis();
     int bins = axis->GetNbins();
 
     float from = axis->GetXmin();

@@ -24,9 +24,6 @@
 
 class PFTauElecRejectionBenchmark;
 
-class TH1F;
-class TH2F;
-
 class PFTauElecRejectionBenchmark {
 public:
   typedef dqm::legacy::DQMStore DQMStore;

@@ -155,10 +155,10 @@ struct MTVHistoProducerAlgoForTrackerHistograms {
 };
 
 class MTVHistoProducerAlgoForTracker {
-public:
-  typedef dqm::reco::DQMStore DQMStore;
+ public:
+  typedef dqm::reco::DQMStore DQMStore; 
 
-  MTVHistoProducerAlgoForTracker(const edm::ParameterSet& pset, const bool doSeedPlots);
+  MTVHistoProducerAlgoForTracker(const edm::ParameterSet& pset, const bool doSeedPlots) ;
   ~MTVHistoProducerAlgoForTracker();
 
   static std::unique_ptr<RecoTrackSelectorBase> makeRecoTrackSelectorFromTPSelectorParameters(
