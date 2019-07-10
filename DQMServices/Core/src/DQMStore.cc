@@ -119,6 +119,17 @@ namespace dqm::impl {
     m[T::getAlgoName()] = &makeQCriterion<T>;
   }
 
+  /////////////////////////////////////////////////////////////
+  fastmatch::fastmatch(std::string fastString) : fastString_{move(fastString)}, matching_{UseFull} {
+    try {
+      regexp_ = std::make_unique<lat::Regexp>(fastString_, 0, lat::Regexp::Wildcard);
+      regexp_->study();
+    } catch (lat::Error& e) {
+      raiseDQMError("DQMStore",
+                    "Invalid wildcard pattern '%s' in quality"
+                    " test specification",
+                    fastString_.c_str());
+    }
 
     // count stars ( "*" )
     size_t starCount = 0;
@@ -918,289 +929,302 @@ namespace dqm::impl {
     }
   }
 
-/// true if directory exists
-bool DQMStore::dirExists(std::string const& path) const { return dirs_.count(path) > 0; }
+  /// true if directory exists
+  bool DQMStore::dirExists(std::string const& path) const { return dirs_.count(path) > 0; }
 
-// //====================================================
-// // Global-histogram booking
-// MonitorElement*
-// DQMStore::bookInt(char_string const& name)
-// {
-//   return bookInt(0, 0, pwd_, name);
-// }
+  // //====================================================
+  // // Global-histogram booking
+  // MonitorElement*
+  // DQMStore::bookInt(char_string const& name)
+  // {
+  //   return bookInt(0, 0, pwd_, name);
+  // }
 
-// MonitorElement*
-// DQMStore::bookFloat(char_string const& name)
-// {
-//   return bookFloat(0, 0, pwd_, name);
-// }
+  // MonitorElement*
+  // DQMStore::bookFloat(char_string const& name)
+  // {
+  //   return bookFloat(0, 0, pwd_, name);
+  // }
 
-// MonitorElement*
-// DQMStore::bookString(char_string const& name,
-//                      char_string const& value)
-// {
-//   return bookString(0, 0, pwd_, name, value);
-// }
+  // MonitorElement*
+  // DQMStore::bookString(char_string const& name,
+  //                      char_string const& value)
+  // {
+  //   return bookString(0, 0, pwd_, name, value);
+  // }
 
-// MonitorElement*
-// DQMStore::book1D(char_string const& name,
-//                  char_string const& title,
-//                  int const nchX, double const lowX, double const highX)
-// {
-//   return book1D(0, 0,  pwd_, name, title, nchX, lowX, highX);
-// }
+  // MonitorElement*
+  // DQMStore::book1D(char_string const& name,
+  //                  char_string const& title,
+  //                  int const nchX, double const lowX, double const highX)
+  // {
+  //   return book1D(0, 0,  pwd_, name, title, nchX, lowX, highX);
+  // }
 
-// MonitorElement*
-// DQMStore::book1D(char_string const& name,
-//                  char_string const& title,
-//                  int const nchX, float const* xbinsize)
-// {
-//   return book1D(0, 0,  pwd_, name, title, nchX, xbinsize);
-// }
+  // MonitorElement*
+  // DQMStore::book1D(char_string const& name,
+  //                  char_string const& title,
+  //                  int const nchX, float const* xbinsize)
+  // {
+  //   return book1D(0, 0,  pwd_, name, title, nchX, xbinsize);
+  // }
 
-// MonitorElement*
-// DQMStore::book1D(char_string const& name, TH1F* h)
-// {
-//   return book1D(0, 0, pwd_, name, h);
-// }
+  // MonitorElement*
+  // DQMStore::book1D(char_string const& name, TH1F* h)
+  // {
+  //   return book1D(0, 0, pwd_, name, h);
+  // }
 
-// MonitorElement*
-// DQMStore::book1S(char_string const& name,
-//                  char_string const& title,
-//                  int const nchX, double const lowX, double const highX)
-// {
-//   return book1S(0, 0,  pwd_, name, title, nchX, lowX, highX);
-// }
+  // MonitorElement*
+  // DQMStore::book1S(char_string const& name,
+  //                  char_string const& title,
+  //                  int const nchX, double const lowX, double const highX)
+  // {
+  //   return book1S(0, 0,  pwd_, name, title, nchX, lowX, highX);
+  // }
 
-// MonitorElement*
-// DQMStore::book1S(char_string const& name,
-//                  char_string const& title,
-//                  int const nchX, float const* xbinsize)
-// {
-//   return book1S(0, 0,  pwd_, name, title, nchX, xbinsize);
-// }
+  // MonitorElement*
+  // DQMStore::book1S(char_string const& name,
+  //                  char_string const& title,
+  //                  int const nchX, float const* xbinsize)
+  // {
+  //   return book1S(0, 0,  pwd_, name, title, nchX, xbinsize);
+  // }
 
-// MonitorElement*
-// DQMStore::book1S(char_string const& name, TH1S* h)
-// {
-//   return book1S(0, 0, pwd_, name, h);
-// }
+  // MonitorElement*
+  // DQMStore::book1S(char_string const& name, TH1S* h)
+  // {
+  //   return book1S(0, 0, pwd_, name, h);
+  // }
 
-// MonitorElement*
-// DQMStore::book1DD(char_string const& name,
-//                   char_string const& title,
-//                   int const nchX, double const lowX, double const highX)
-// {
-//   return book1DD(0, 0,  pwd_, name, title, nchX, lowX, highX);
-// }
+  // MonitorElement*
+  // DQMStore::book1DD(char_string const& name,
+  //                   char_string const& title,
+  //                   int const nchX, double const lowX, double const highX)
+  // {
+  //   return book1DD(0, 0,  pwd_, name, title, nchX, lowX, highX);
+  // }
 
-// MonitorElement*
-// DQMStore::book1DD(char_string const& name,
-//                   char_string const& title,
-//                   int const nchX, float const* xbinsize)
-// {
-//   return book1DD(0, 0,  pwd_, name, title, nchX, xbinsize);
-// }
+  // MonitorElement*
+  // DQMStore::book1DD(char_string const& name,
+  //                   char_string const& title,
+  //                   int const nchX, float const* xbinsize)
+  // {
+  //   return book1DD(0, 0,  pwd_, name, title, nchX, xbinsize);
+  // }
 
-// MonitorElement*
-// DQMStore::book1DD(char_string const& name, TH1D* h)
-// {
-//   return book1DD(0, 0, pwd_, name, h);
-// }
+  // MonitorElement*
+  // DQMStore::book1DD(char_string const& name, TH1D* h)
+  // {
+  //   return book1DD(0, 0, pwd_, name, h);
+  // }
 
-// MonitorElement*
-// DQMStore::book2D(char_string const& name,
-//                  char_string const& title,
-//                  int const nchX, double const lowX, double const highX,
-//                  int const nchY, double const lowY, double const highY)
-// {
-//   return book2D(0, 0,  pwd_, name, title, nchX, lowX, highX, nchY, lowY, highY);
-// }
+  // MonitorElement*
+  // DQMStore::book2D(char_string const& name,
+  //                  char_string const& title,
+  //                  int const nchX, double const lowX, double const highX,
+  //                  int const nchY, double const lowY, double const highY)
+  // {
+  //   return book2D(0, 0,  pwd_, name, title, nchX, lowX, highX, nchY, lowY, highY);
+  // }
 
-// MonitorElement*
-// DQMStore::book2D(char_string const& name,
-//                  char_string const& title,
-//                  int const nchX, float const* xbinsize,
-//                  int const nchY, float const* ybinsize)
-// {
-//   return book2D(0, 0,  pwd_, name, title, nchX, xbinsize, nchY, ybinsize);
-// }
+  // MonitorElement*
+  // DQMStore::book2D(char_string const& name,
+  //                  char_string const& title,
+  //                  int const nchX, float const* xbinsize,
+  //                  int const nchY, float const* ybinsize)
+  // {
+  //   return book2D(0, 0,  pwd_, name, title, nchX, xbinsize, nchY, ybinsize);
+  // }
 
-// MonitorElement*
-// DQMStore::book2D(char_string const& name, TH2F* h)
-// {
-//   return book2D(0, 0, pwd_, name, h);
-// }
+  // MonitorElement*
+  // DQMStore::book2D(char_string const& name, TH2F* h)
+  // {
+  //   return book2D(0, 0, pwd_, name, h);
+  // }
 
-// MonitorElement*
-// DQMStore::book2S(char_string const& name,
-//                  char_string const& title,
-//                  int const nchX, double const lowX, double const highX,
-//                  int const nchY, double const lowY, double const highY)
-// {
-//   return book2S(0, 0,  pwd_, name, title, nchX, lowX, highX, nchY, lowY, highY);
-// }
+  // MonitorElement*
+  // DQMStore::book2S(char_string const& name,
+  //                  char_string const& title,
+  //                  int const nchX, double const lowX, double const highX,
+  //                  int const nchY, double const lowY, double const highY)
+  // {
+  //   return book2S(0, 0,  pwd_, name, title, nchX, lowX, highX, nchY, lowY, highY);
+  // }
 
-// MonitorElement*
-// DQMStore::book2S(char_string const& name,
-//                  char_string const& title,
-//                  int const nchX, float const* xbinsize,
-//                  int const nchY, float const* ybinsize)
-// {
-//   return book2S(0, 0,  pwd_, name, title, nchX, xbinsize, nchY, ybinsize);
-// }
+  // MonitorElement*
+  // DQMStore::book2S(char_string const& name,
+  //                  char_string const& title,
+  //                  int const nchX, float const* xbinsize,
+  //                  int const nchY, float const* ybinsize)
+  // {
+  //   return book2S(0, 0,  pwd_, name, title, nchX, xbinsize, nchY, ybinsize);
+  // }
 
-// MonitorElement*
-// DQMStore::book2S(char_string const& name, TH2S* h)
-// {
-//   return book2S(0, 0, pwd_, name, h);
-// }
+  // MonitorElement*
+  // DQMStore::book2S(char_string const& name, TH2S* h)
+  // {
+  //   return book2S(0, 0, pwd_, name, h);
+  // }
 
-// MonitorElement*
-// DQMStore::book2DD(char_string const& name,
-//                   char_string const& title,
-//                   int const nchX, double const lowX, double const highX,
-//                   int const nchY, double const lowY, double const highY)
-// {
-//   return book2DD(0, 0,  pwd_, name, title, nchX, lowX, highX, nchY, lowY, highY);
-// }
+  // MonitorElement*
+  // DQMStore::book2DD(char_string const& name,
+  //                   char_string const& title,
+  //                   int const nchX, double const lowX, double const highX,
+  //                   int const nchY, double const lowY, double const highY)
+  // {
+  //   return book2DD(0, 0,  pwd_, name, title, nchX, lowX, highX, nchY, lowY, highY);
+  // }
 
-// MonitorElement*
-// DQMStore::book2DD(char_string const& name,
-//                   char_string const& title,
-//                   int const nchX, float const* xbinsize,
-//                   int const nchY, float const* ybinsize)
-// {
-//   return book2DD(0, 0,  pwd_, name, title, nchX, xbinsize, nchY, ybinsize);
-// }
+  // MonitorElement*
+  // DQMStore::book2DD(char_string const& name,
+  //                   char_string const& title,
+  //                   int const nchX, float const* xbinsize,
+  //                   int const nchY, float const* ybinsize)
+  // {
+  //   return book2DD(0, 0,  pwd_, name, title, nchX, xbinsize, nchY, ybinsize);
+  // }
 
-// MonitorElement*
-// DQMStore::book2DD(char_string const& name, TH2D* h)
-// {
-//   return book2DD(0, 0, pwd_, name, h);
-// }
+  // MonitorElement*
+  // DQMStore::book2DD(char_string const& name, TH2D* h)
+  // {
+  //   return book2DD(0, 0, pwd_, name, h);
+  // }
 
-// MonitorElement*
-// DQMStore::book3D(char_string const& name,
-//                  char_string const& title,
-//                  int const nchX, double const lowX, double const highX,
-//                  int const nchY, double const lowY, double const highY,
-//                  int const nchZ, double const lowZ, double const highZ)
-// {
-//   return book3D(0, 0,  pwd_, name, title,
-//                 nchX, lowX, highX,
-//                 nchY, lowY, highY,
-//                 nchZ, lowZ, highZ);
-// }
+  // MonitorElement*
+  // DQMStore::book3D(char_string const& name,
+  //                  char_string const& title,
+  //                  int const nchX, double const lowX, double const highX,
+  //                  int const nchY, double const lowY, double const highY,
+  //                  int const nchZ, double const lowZ, double const highZ)
+  // {
+  //   return book3D(0, 0,  pwd_, name, title,
+  //                 nchX, lowX, highX,
+  //                 nchY, lowY, highY,
+  //                 nchZ, lowZ, highZ);
+  // }
 
-// MonitorElement*
-// DQMStore::book3D(char_string const& name, TH3F* h)
-// {
-//   return book3D(0, 0, pwd_, name, h);
-// }
+  // MonitorElement*
+  // DQMStore::book3D(char_string const& name, TH3F* h)
+  // {
+  //   return book3D(0, 0, pwd_, name, h);
+  // }
 
-// MonitorElement*
-// DQMStore::bookProfile(char_string const& name,
-//                       char_string const& title,
-//                       int const nchX, double const lowX, double const highX,
-//                       int const nchY, double const lowY, double const highY,
-//                       char const* option)
-// {
-//   return bookProfile(0, 0,  pwd_, name, title, nchX, lowX, highX, nchY, lowY, highY, option);
-// }
+  // MonitorElement*
+  // DQMStore::bookProfile(char_string const& name,
+  //                       char_string const& title,
+  //                       int const nchX, double const lowX, double const highX,
+  //                       int const nchY, double const lowY, double const highY,
+  //                       char const* option)
+  // {
+  //   return bookProfile(0, 0,  pwd_, name, title, nchX, lowX, highX, nchY, lowY, highY, option);
+  // }
 
-// MonitorElement*
-// DQMStore::bookProfile(char_string const& name,
-//                       char_string const& title,
-//                       int const nchX, double const lowX, double const highX,
-//                       double const lowY, double const highY,
-//                       char const* option)
-// {
-//   return bookProfile(0, 0,  pwd_, name, title, nchX, lowX, highX, lowY, highY, option);
-// }
+  // MonitorElement*
+  // DQMStore::bookProfile(char_string const& name,
+  //                       char_string const& title,
+  //                       int const nchX, double const lowX, double const highX,
+  //                       double const lowY, double const highY,
+  //                       char const* option)
+  // {
+  //   return bookProfile(0, 0,  pwd_, name, title, nchX, lowX, highX, lowY, highY, option);
+  // }
 
-// MonitorElement*
-// DQMStore::bookProfile(char_string const& name,
-//                       char_string const& title,
-//                       int const nchX, double const* xbinsize,
-//                       int const nchY, double const lowY, double const highY,
-//                       char const* option)
-// {
-//   return bookProfile(0, 0,  pwd_, name, title, nchX, xbinsize, nchY, lowY, highY, option);
-// }
+  // MonitorElement*
+  // DQMStore::bookProfile(char_string const& name,
+  //                       char_string const& title,
+  //                       int const nchX, double const* xbinsize,
+  //                       int const nchY, double const lowY, double const highY,
+  //                       char const* option)
+  // {
+  //   return bookProfile(0, 0,  pwd_, name, title, nchX, xbinsize, nchY, lowY, highY, option);
+  // }
 
-// MonitorElement*
-// DQMStore::bookProfile(char_string const& name,
-//                       char_string const& title,
-//                       int const nchX, double const* xbinsize,
-//                       double const lowY, double const highY,
-//                       char const* option)
-// {
-//   return bookProfile(0, 0,  pwd_, name, title, nchX, xbinsize, lowY, highY, option);
-// }
+  // MonitorElement*
+  // DQMStore::bookProfile(char_string const& name,
+  //                       char_string const& title,
+  //                       int const nchX, double const* xbinsize,
+  //                       double const lowY, double const highY,
+  //                       char const* option)
+  // {
+  //   return bookProfile(0, 0,  pwd_, name, title, nchX, xbinsize, lowY, highY, option);
+  // }
 
-// MonitorElement*
-// DQMStore::bookProfile(char_string const& name, TProfile* h)
-// {
-//   return bookProfile(0, 0, pwd_, name, h);
-// }
+  // MonitorElement*
+  // DQMStore::bookProfile(char_string const& name, TProfile* h)
+  // {
+  //   return bookProfile(0, 0, pwd_, name, h);
+  // }
 
-// MonitorElement*
-// DQMStore::bookProfile2D(char_string const& name,
-//                         char_string const& title,
-//                         int const nchX, double const lowX, double const highX,
-//                         int const nchY, double const lowY, double const highY,
-//                         int const nchZ, double const lowZ, double const highZ,
-//                         char const* option)
-// {
-//   return bookProfile2D(0, 0,  pwd_, name, title,
-//                        nchX, lowX, highX,
-//                        nchY, lowY, highY,
-//                        nchZ, lowZ, highZ, option);
-// }
+  // MonitorElement*
+  // DQMStore::bookProfile2D(char_string const& name,
+  //                         char_string const& title,
+  //                         int const nchX, double const lowX, double const highX,
+  //                         int const nchY, double const lowY, double const highY,
+  //                         int const nchZ, double const lowZ, double const highZ,
+  //                         char const* option)
+  // {
+  //   return bookProfile2D(0, 0,  pwd_, name, title,
+  //                        nchX, lowX, highX,
+  //                        nchY, lowY, highY,
+  //                        nchZ, lowZ, highZ, option);
+  // }
 
-// MonitorElement*
-// DQMStore::bookProfile2D(char_string const& name,
-//                         char_string const& title,
-//                         int const nchX, double const lowX, double const highX,
-//                         int const nchY, double const lowY, double const highY,
-//                         double const lowZ, double const highZ,
-//                         char const* option)
-// {
-//   return bookProfile2D(0, 0,  pwd_, name, title,
-//                        nchX, lowX, highX,
-//                        nchY, lowY, highY,
-//                        lowZ, highZ, option);
-// }
+  // MonitorElement*
+  // DQMStore::bookProfile2D(char_string const& name,
+  //                         char_string const& title,
+  //                         int const nchX, double const lowX, double const highX,
+  //                         int const nchY, double const lowY, double const highY,
+  //                         double const lowZ, double const highZ,
+  //                         char const* option)
+  // {
+  //   return bookProfile2D(0, 0,  pwd_, name, title,
+  //                        nchX, lowX, highX,
+  //                        nchY, lowY, highY,
+  //                        lowZ, highZ, option);
+  // }
 
-// MonitorElement*
-// DQMStore::bookProfile2D(char_string const& name, TProfile2D* h)
-// {
-//   return bookProfile2D(0, 0, pwd_, name, h);
-// }
+  // MonitorElement*
+  // DQMStore::bookProfile2D(char_string const& name, TProfile2D* h)
+  // {
+  //   return bookProfile2D(0, 0, pwd_, name, h);
+  // }
 
-//////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////
-template <class HISTO, class COLLATE>
-MonitorElement* DQMStore::book_(
-    std::string const& dir, std::string const& name, char const* context, MonitorElement::Kind const kind, HISTO* h, COLLATE collate) {
-  assert(name.find('/') == std::string::npos);
-  if (verbose_ > 3)
-    print_trace(dir, name);
-  std::string path;
-  mergePath(path, dir, name);
+  //////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////
+  template <class HISTO, class COLLATE>
+  MonitorElement* DQMStore::book_(std::string const& dir,
+                                  std::string const& name,
+                                  char const* context,
+                                  MonitorElement::Kind const kind,
+                                  HISTO* h,
+                                  COLLATE collate) {
+    assert(name.find('/') == std::string::npos);
+    if (verbose_ > 3)
+      print_trace(dir, name);
+    std::string path;
+    mergePath(path, dir, name);
 
-  // Put us in charge of h.
-  h->SetDirectory(nullptr);
+    // Put us in charge of h.
+    h->SetDirectory(nullptr);
 
-  // Check if the request monitor element already exists.
-  MonitorElement* me = findObject(run_, 0, moduleId_, dir, name);
-  if (me) {
-    if (collateHistograms_) {
-      collate(me, h, verbose_);
-      delete h;
-      return me;
+    // Check if the request monitor element already exists.
+    MonitorElement* me = findObject(run_, 0, moduleId_, dir, name);
+    if (me) {
+      if (collateHistograms_) {
+        collate(me, h, verbose_);
+        delete h;
+        return me;
+      } else {
+        if (verbose_ > 1)
+          std::cout << "DQMStore: " << context << ": monitor element '" << path << "' already exists, collating"
+                    << std::endl;
+        me->Reset();
+        collate(me, h, verbose_);
+        delete h;
+        return me;
+      }
     } else {
       // Create and initialise core object.
       assert(dirs_.count(dir));
@@ -1277,8 +1301,6 @@ MonitorElement* DQMStore::book_(
     }
     return book_(dir, name, "bookInt")->initialise(MonitorElement::Kind::INT);
   }
-  return book_(dir, name, "bookInt")->initialise(MonitorElement::Kind::INT);
-}
 
   /// Book int.
   MonitorElement* DQMStore::bookInt(char_string const& name) { return bookInt_(pwd_, name); }
@@ -1294,8 +1316,6 @@ MonitorElement* DQMStore::book_(
     }
     return book_(dir, name, "bookFloat")->initialise(MonitorElement::Kind::REAL);
   }
-  return book_(dir, name, "bookFloat")->initialise(MonitorElement::Kind::REAL);
-}
 
   /// Book float.
   MonitorElement* DQMStore::bookFloat(char_string const& name) { return bookFloat_(pwd_, name); }
@@ -1309,29 +1329,27 @@ MonitorElement* DQMStore::book_(
     }
     return book_(dir, name, "bookString")->initialise(MonitorElement::Kind::STRING, value);
   }
-  return book_(dir, name, "bookString")->initialise(MonitorElement::Kind::STRING, value);
-}
 
   /// Book string.
   MonitorElement* DQMStore::bookString(char_string const& name, char_string const& value) {
     return bookString_(pwd_, name, value);
   }
 
-// -------------------------------------------------------------------
-/// Book 1D histogram based on TH1F.
-MonitorElement* DQMStore::book1D_(std::string const& dir, std::string const& name, TH1F* h) {
-  return book_(dir, name, "book1D", MonitorElement::Kind::TH1F, h, collate1D);
-}
+  // -------------------------------------------------------------------
+  /// Book 1D histogram based on TH1F.
+  MonitorElement* DQMStore::book1D_(std::string const& dir, std::string const& name, TH1F* h) {
+    return book_(dir, name, "book1D", MonitorElement::Kind::TH1F, h, collate1D);
+  }
 
-/// Book 1D histogram based on TH1S.
-MonitorElement* DQMStore::book1S_(std::string const& dir, std::string const& name, TH1S* h) {
-  return book_(dir, name, "book1S", MonitorElement::Kind::TH1S, h, collate1S);
-}
+  /// Book 1D histogram based on TH1S.
+  MonitorElement* DQMStore::book1S_(std::string const& dir, std::string const& name, TH1S* h) {
+    return book_(dir, name, "book1S", MonitorElement::Kind::TH1S, h, collate1S);
+  }
 
-/// Book 1D histogram based on TH1D.
-MonitorElement* DQMStore::book1DD_(std::string const& dir, std::string const& name, TH1D* h) {
-  return book_(dir, name, "book1DD", MonitorElement::Kind::TH1D, h, collate1DD);
-}
+  /// Book 1D histogram based on TH1D.
+  MonitorElement* DQMStore::book1DD_(std::string const& dir, std::string const& name, TH1D* h) {
+    return book_(dir, name, "book1DD", MonitorElement::Kind::TH1D, h, collate1DD);
+  }
 
   /// Book 1D histogram.
   MonitorElement* DQMStore::book1D(
@@ -1345,74 +1363,11 @@ MonitorElement* DQMStore::book1DD_(std::string const& dir, std::string const& na
     return book1S_(pwd_, name, new TH1S(name, title, nchX, lowX, highX));
   }
 
-/// Book 1S histogram.
-MonitorElement* DQMStore::book1DD(
-    char_string const& name, char_string const& title, int const nchX, double const lowX, double const highX) {
-  return book1DD_(pwd_, name, new TH1D(name, title, nchX, lowX, highX));
-}
-
-/// Book 1D variable bin histogram.
-MonitorElement* DQMStore::book1D(char_string const& name,
-                                 char_string const& title,
-                                 int const nchX,
-                                 const float* xbinsize) {
-  return book1D_(pwd_, name, new TH1F(name, title, nchX, xbinsize));
-}
-
-/// Book 1D histogram by cloning an existing histogram.
-MonitorElement* DQMStore::book1D(char_string const& name, TH1F* source) {
-  return book1D_(pwd_, name, static_cast<TH1F*>(source->Clone(name)));
-}
-
-/// Book 1S histogram by cloning an existing histogram.
-MonitorElement* DQMStore::book1S(char_string const& name, TH1S* source) {
-  return book1S_(pwd_, name, static_cast<TH1S*>(source->Clone(name)));
-}
-
-/// Book 1D double histogram by cloning an existing histogram.
-MonitorElement* DQMStore::book1DD(char_string const& name, TH1D* source) {
-  return book1DD_(pwd_, name, static_cast<TH1D*>(source->Clone(name)));
-}
-
-// -------------------------------------------------------------------
-/// Book 2D histogram based on TH2F.
-MonitorElement* DQMStore::book2D_(std::string const& dir, std::string const& name, TH2F* h) {
-  return book_(dir, name, "book2D", MonitorElement::Kind::TH2F, h, collate2D);
-}
-
-/// Book 2D histogram based on TH2S.
-MonitorElement* DQMStore::book2S_(std::string const& dir, std::string const& name, TH2S* h) {
-  return book_(dir, name, "book2S", MonitorElement::Kind::TH2S, h, collate2S);
-}
-
-/// Book 2D histogram based on TH2D.
-MonitorElement* DQMStore::book2DD_(std::string const& dir, std::string const& name, TH2D* h) {
-  return book_(dir, name, "book2DD", MonitorElement::Kind::TH2D, h, collate2DD);
-}
-
-/// Book 2D histogram.
-MonitorElement* DQMStore::book2D(char_string const& name,
-                                 char_string const& title,
-                                 int const nchX,
-                                 double const lowX,
-                                 double const highX,
-                                 int const nchY,
-                                 double const lowY,
-                                 double const highY) {
-  return book2D_(pwd_, name, new TH2F(name, title, nchX, lowX, highX, nchY, lowY, highY));
-}
-
-/// Book 2S histogram.
-MonitorElement* DQMStore::book2S(char_string const& name,
-                                 char_string const& title,
-                                 int const nchX,
-                                 double const lowX,
-                                 double const highX,
-                                 int const nchY,
-                                 double const lowY,
-                                 double const highY) {
-  return book2S_(pwd_, name, new TH2S(name, title, nchX, lowX, highX, nchY, lowY, highY));
-}
+  /// Book 1S histogram.
+  MonitorElement* DQMStore::book1DD(
+      char_string const& name, char_string const& title, int const nchX, double const lowX, double const highX) {
+    return book1DD_(pwd_, name, new TH1D(name, title, nchX, lowX, highX));
+  }
 
   /// Book 1D variable bin histogram.
   MonitorElement* DQMStore::book1D(char_string const& name,
@@ -1448,11 +1403,10 @@ MonitorElement* DQMStore::book2S(char_string const& name,
     return book_(dir, name, "book2S", MonitorElement::Kind::TH2S, h, collate2S);
   }
 
-// -------------------------------------------------------------------
-/// Book 3D histogram based on TH3F.
-MonitorElement* DQMStore::book3D_(std::string const& dir, std::string const& name, TH3F* h) {
-  return book_(dir, name, "book3D", MonitorElement::Kind::TH3F, h, collate3D);
-}
+  /// Book 2D histogram based on TH2D.
+  MonitorElement* DQMStore::book2DD_(std::string const& dir, std::string const& name, TH2D* h) {
+    return book_(dir, name, "book2DD", MonitorElement::Kind::TH2D, h, collate2DD);
+  }
 
   /// Book 2D histogram.
   MonitorElement* DQMStore::book2D(char_string const& name,
@@ -1478,11 +1432,17 @@ MonitorElement* DQMStore::book3D_(std::string const& dir, std::string const& nam
     return book2S_(pwd_, name, new TH2S(name, title, nchX, lowX, highX, nchY, lowY, highY));
   }
 
-// -------------------------------------------------------------------
-/// Book profile histogram based on TProfile.
-MonitorElement* DQMStore::bookProfile_(std::string const& dir, std::string const& name, TProfile* h) {
-  return book_(dir, name, "bookProfile", MonitorElement::Kind::TPROFILE, h, collateProfile);
-}
+  /// Book 2D histogram.
+  MonitorElement* DQMStore::book2DD(char_string const& name,
+                                    char_string const& title,
+                                    int const nchX,
+                                    double const lowX,
+                                    double const highX,
+                                    int const nchY,
+                                    double const lowY,
+                                    double const highY) {
+    return book2DD_(pwd_, name, new TH2D(name, title, nchX, lowX, highX, nchY, lowY, highY));
+  }
 
   /// Book 2D variable bin histogram.
   MonitorElement* DQMStore::book2D(char_string const& name,
@@ -1519,11 +1479,11 @@ MonitorElement* DQMStore::bookProfile_(std::string const& dir, std::string const
     return book2DD_(pwd_, name, static_cast<TH2D*>(source->Clone(name)));
   }
 
-// -------------------------------------------------------------------
-/// Book 2D profile histogram based on TProfile2D.
-MonitorElement* DQMStore::bookProfile2D_(std::string const& dir, std::string const& name, TProfile2D* h) {
-  return book_(dir, name, "bookProfile2D", MonitorElement::Kind::TPROFILE2D, h, collateProfile2D);
-}
+  // -------------------------------------------------------------------
+  /// Book 3D histogram based on TH3F.
+  MonitorElement* DQMStore::book3D_(std::string const& dir, std::string const& name, TH3F* h) {
+    return book_(dir, name, "book3D", MonitorElement::Kind::TH3F, h, collate3D);
+  }
 
   /// Book 3D histogram.
   MonitorElement* DQMStore::book3D(char_string const& name,
@@ -1944,7 +1904,6 @@ MonitorElement* DQMStore::bookProfile2D_(std::string const& dir, std::string con
         *istr += ':';
       }
     }
-  }
 
   /// get MonitorElement <name> in directory <dir>
   /// (null if MonitorElement does not exist)
@@ -2517,12 +2476,7 @@ MonitorElement* DQMStore::bookProfile2D_(std::string const& dir, std::string con
         end = path.size();
     }
 
-void DQMStore::saveMonitorElementToROOT(MonitorElement const& me, TFile& file) {
-  // Save the object.
-  if (me.kind() < MonitorElement::Kind::TH1F) {
-    TObjString(me.tagString().c_str()).Write();
-  } else {
-    me.object_->Write();
+    return true;
   }
 
   void DQMStore::saveMonitorElementToROOT(MonitorElement const& me, TFile& file) {
@@ -2753,30 +2707,15 @@ void DQMStore::saveMonitorElementToROOT(MonitorElement const& me, TFile& file) {
     // XXX not supported by protobuf files.
   }
 
-void DQMStore::saveMonitorElementToPB(MonitorElement const& me, dqmstorepb::ROOTFilePB& file) {
-  // Save the object.
-  TBufferFile buffer(TBufferFile::kWrite);
-  if (me.kind() < MonitorElement::Kind::TH1F) {
-    TObjString object(me.tagString().c_str());
-    buffer.WriteObject(&object);
-  } else {
-    buffer.WriteObject(me.object_);
-  }
-  dqmstorepb::ROOTFilePB::Histo& histo = *file.add_histo();
-  histo.set_full_pathname(*me.data_.dirname + '/' + me.data_.objname);
-  histo.set_flags(me.data_.flags);
-  histo.set_size(buffer.Length());
-  histo.set_streamed_histo((void const*)buffer.Buffer(), buffer.Length());
-
-  // Save quality reports if this is not in reference section.
-  // XXX not supported by protobuf files.
-
-  // Save efficiency tag, if any.
-  // XXX not supported by protobuf files.
-
-  // Save tag if any.
-  // XXX not supported by protobuf files.
-}
+  void DQMStore::saveMonitorElementRangeToPB(std::string const& dir,
+                                             unsigned int const run,
+                                             MEMap::const_iterator const begin,
+                                             MEMap::const_iterator const end,
+                                             dqmstorepb::ROOTFilePB& file,
+                                             unsigned int& counter) {
+    for (auto const& me : boost::make_iterator_range(begin, end)) {
+      if (not isSubdirectory(dir, *me.data_.dirname))
+        break;
 
       if (verbose_ > 1)
         std::cout << "DQMStore::savePB:"
@@ -3429,66 +3368,70 @@ void DQMStore::saveMonitorElementToPB(MonitorElement const& me, dqmstorepb::ROOT
   //////////////////////////////////////////////////////////////////////
   /** Invoke this method after flushing all recently changed monitoring.
     Clears updated flag on all MEs and calls their Reset() method. */
-void DQMStore::scaleElements() {
-  if (scaleFlag_ == 0.0)
-    return;
-  if (verbose_ > 0)
-    std::cout << " =========== "
-              << " ScaleFlag " << scaleFlag_ << std::endl;
-  double factor = scaleFlag_;
-  int events = 1;
-  if (dirExists("Info/EventInfo")) {
-    if (scaleFlag_ == -1.0) {
-      MonitorElement* scale_me = get("Info/EventInfo/ScaleFactor");
-      if (scale_me && scale_me->kind() == MonitorElement::Kind::REAL)
-        factor = scale_me->getFloatValue();
+  void DQMStore::scaleElements() {
+    if (scaleFlag_ == 0.0)
+      return;
+    if (verbose_ > 0)
+      std::cout << " =========== "
+                << " ScaleFlag " << scaleFlag_ << std::endl;
+    double factor = scaleFlag_;
+    int events = 1;
+    if (dirExists("Info/EventInfo")) {
+      if (scaleFlag_ == -1.0) {
+        MonitorElement* scale_me = get("Info/EventInfo/ScaleFactor");
+        if (scale_me && scale_me->kind() == MonitorElement::Kind::REAL)
+          factor = scale_me->getFloatValue();
+      }
+      MonitorElement* event_me = get("Info/EventInfo/processedEvents");
+      if (event_me && event_me->kind() == MonitorElement::Kind::INT)
+        events = event_me->getIntValue();
     }
-    MonitorElement* event_me = get("Info/EventInfo/processedEvents");
-    if (event_me && event_me->kind() == MonitorElement::Kind::INT)
-      events = event_me->getIntValue();
-  }
-  factor = factor / (events * 1.0);
+    factor = factor / (events * 1.0);
 
-  for (auto const& m : data_) {
-    auto& me = const_cast<MonitorElement&>(m);
-    switch (me.kind()) {
-      case MonitorElement::Kind::TH1F: {
-        me.getTH1F()->Scale(factor);
-        break;
-      }
-      case MonitorElement::Kind::TH1S: {
-        me.getTH1S()->Scale(factor);
-        break;
-      }
-      case MonitorElement::Kind::TH1D: {
-        me.getTH1D()->Scale(factor);
-        break;
-      }
-      case MonitorElement::Kind::TH2F: {
-        me.getTH2F()->Scale(factor);
-        break;
-      }
-      case MonitorElement::Kind::TH2S: {
-        me.getTH2S()->Scale(factor);
-        break;
-      }
-      case MonitorElement::Kind::TH2D: {
-        me.getTH2D()->Scale(factor);
-        break;
-      }
-      case MonitorElement::Kind::TH3F: {
-        me.getTH3F()->Scale(factor);
-        break;
-      }
-      case MonitorElement::Kind::TPROFILE: {
-        me.getTProfile()->Scale(factor);
-        break;
-      }
-      case MonitorElement::Kind::TPROFILE2D: {
-        me.getTProfile2D()->Scale(factor);
-        break;
+    for (auto const& m : data_) {
+      auto& me = const_cast<MonitorElement&>(m);
+      switch (me.kind()) {
+        case MonitorElement::Kind::TH1F: {
+          me.getTH1F()->Scale(factor);
+          break;
+        }
+        case MonitorElement::Kind::TH1S: {
+          me.getTH1S()->Scale(factor);
+          break;
+        }
+        case MonitorElement::Kind::TH1D: {
+          me.getTH1D()->Scale(factor);
+          break;
+        }
+        case MonitorElement::Kind::TH2F: {
+          me.getTH2F()->Scale(factor);
+          break;
+        }
+        case MonitorElement::Kind::TH2S: {
+          me.getTH2S()->Scale(factor);
+          break;
+        }
+        case MonitorElement::Kind::TH2D: {
+          me.getTH2D()->Scale(factor);
+          break;
+        }
+        case MonitorElement::Kind::TH3F: {
+          me.getTH3F()->Scale(factor);
+          break;
+        }
+        case MonitorElement::Kind::TPROFILE: {
+          me.getTProfile()->Scale(factor);
+          break;
+        }
+        case MonitorElement::Kind::TPROFILE2D: {
+          me.getTProfile2D()->Scale(factor);
+          break;
+        }
+        default:
+          if (verbose_ > 0)
+            std::cout << " The DQM object '" << me.getFullname() << "' is not scalable object " << std::endl;
+          continue;
       }
     }
   }
-}
-}
+}  // namespace dqm::impl
