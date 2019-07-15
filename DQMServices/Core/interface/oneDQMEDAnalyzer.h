@@ -35,6 +35,7 @@ namespace one {
     public:
       typedef dqm::reco::DQMStore DQMStore;
       typedef dqm::reco::MonitorElement MonitorElement;
+      std::unique_ptr<DQMStore> dqmstore_; // only to make things compile
       DQMRunEDProducer() : runToken_{this->template produces<DQMToken, edm::Transition::EndRun>("endRun")} {}
       ~DQMRunEDProducer() override = default;
       DQMRunEDProducer(DQMRunEDProducer<T...> const&) = delete;
