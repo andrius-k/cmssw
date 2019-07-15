@@ -465,6 +465,7 @@ namespace dqm::impl {
     // ---------------------- Constructors ------------------------------------
     DQMStore(edm::ParameterSet const& pset, edm::ActivityRegistry&);
     DQMStore(edm::ParameterSet const& pset);
+    DQMStore() {}; // TODO: only to make things compile, will not work.
     ~DQMStore();
 
     //-------------------------------------------------------------------------
