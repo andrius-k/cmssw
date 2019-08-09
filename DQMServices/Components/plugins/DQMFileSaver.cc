@@ -1,5 +1,6 @@
 #include "DQMFileSaver.h"
 #include "DQMServices/Components/interface/fillJson.h"
+#include "DQMServices/Core/src/DQMError.h"
 #include "DQMServices/Core/interface/DQMStore.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/Run.h"
@@ -23,6 +24,8 @@
 #include <utility>
 #include <TString.h>
 #include <TSystem.h>
+
+#include "TFile.h"
 
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/property_tree/ptree.hpp>
@@ -74,6 +77,7 @@ void DQMFileSaver::saveForOfflinePB(const std::string &workflow, int run) const 
 }
 
 void DQMFileSaver::saveForOffline(const std::string &workflow, int run, int lumi) const {
+  std::cout << "DQMFileSaver::saveForOffline" << std::endl;
   char suffix[64];
   sprintf(suffix, "R%09d", run);
 
@@ -367,6 +371,8 @@ DQMFileSaver::DQMFileSaver(const edm::ParameterSet &ps)
       nlumi_(0),
       irun_(0),
       fms_(nullptr) {
+        std::cout << "This is piece of shit!" << std::endl;
+        consumesMany<MonitorElementCollection, edm::InRun>();
   // Determine the file saving convention, and adjust defaults accordingly.
   std::string convention = ps.getUntrackedParameter<std::string>("convention", "Offline");
   fakeFilterUnitMode_ = ps.getUntrackedParameter<bool>("fakeFilterUnitMode", false);
@@ -605,6 +611,74 @@ void DQMFileSaver::globalEndLuminosityBlock(const edm::LuminosityBlock &iLS, con
 }
 
 void DQMFileSaver::globalEndRun(const edm::Run &iRun, const edm::EventSetup &) const {
+  // TFile flushes to disk with fsync() on every TDirectory written to
+  // the file.  This makes DQM file saving painfully slow, and
+  // ironically makes it _more_ likely the file saving gets
+  // interrupted and corrupts the file.  The utility class below
+  // simply ignores the flush synchronisation.
+  class TFileNoSync : public TFile {
+  public:
+    TFileNoSync(char const* file, char const* opt) : TFile{file, opt} {}
+    Int_t SysSync(Int_t) override { return 0; }
+  };
+
+  std::cout << "DQMFileSaver::globalEndRun()" << std::endl;
+  std::vector<edm::Handle<MonitorElementCollection>> meCollections;
+  iRun.getManyByType(meCollections);
+  TRACE(meCollections.size());
+
+  std::string filename = "legacy.root"; //onlineOfflineFileName(fileBaseName_, std::string(suffix), workflow, child_, ROOT);
+  TFileNoSync *file = new TFileNoSync(filename.c_str(), "RECREATE"); // open file
+
+  // Traverse all MEs
+  for(edm::Handle<MonitorElementCollection> &collection : meCollections) {
+    for (unsigned i = 0; i < collection->size(); i++) {
+      MonitorElementData const* meData = &(*collection.product())[i];
+
+      // Thread safe access to MonitorElementData Value
+      MonitorElementData::Value::Access value(meData->value_);
+
+      if (meData->key_.kind_ == MonitorElement::Kind::INVALID) {
+        assert(!"Invalid monitor element found when saving legacy DQM format.");
+      }
+      else if(meData->key_.kind_ == MonitorElement::Kind::INT || meData->key_.kind_ == MonitorElement::Kind::REAL || meData->key_.kind_ == MonitorElement::Kind::STRING) {
+        TRACE("SCALAR IS HERE");
+        createDirectoryIfNeededAndCd(meData->key_.path_.getDirname());
+
+        TNamed str(meData->key_.path_.getObjectname(), value.scalar.str);
+        // TNamed str("key", "value234");
+
+        // Write string
+        str.Write();
+      }
+      else {
+        createDirectoryIfNeededAndCd(meData->key_.path_.getDirname());
+
+        // Write histogram
+        value.object->Write();
+
+        // Get back to root directory
+        gDirectory->cd("/");
+      }
+
+      // &(collection.product())[i].fuck();
+    // for(MonitorElementData const* meData : collection.product()) {
+      
+      // if(collection->value_type[i]->value_.object_ != nullptr) {
+      //   // Save a histogram
+
+      // }
+      // else {
+      //   // Save a scalar value
+      // }
+    }
+  }
+  
+  file->Close();
+
+  std::cout << "DQMFileSaver::globalEndRun() after" << std::endl;
+  return;
+  
   int irun = iRun.id().run();
   irun_ = irun;
   if (irun > 0 && saveByRun_ > 0 && (nrun_ % saveByRun_) == 0) {
@@ -666,6 +740,9 @@ void DQMFileSaver::globalEndRun(const edm::Run &iRun, const edm::EventSetup &) c
 }
 
 void DQMFileSaver::endJob() {
+  return;
+  std::cout << "DQMFileSaver::endJob()" << std::endl;
+  TRACE(dbe_->localmes_.size());
   if (saveAtJobEnd_) {
     if (convention_ == Offline && forceRunNumber_ > 0)
       saveForOffline(workflow_, forceRunNumber_, 0);
@@ -675,4 +752,47 @@ void DQMFileSaver::endJob() {
       throw cms::Exception("DQMFileSaver") << "Internal error.  Can only save files at the end of the"
                                            << " job in Offline mode.";
   }
+}
+
+/// Use this for saving monitoring objects in ROOT files with dir structure;
+/// cds into directory (creates it first if it doesn't exist);
+/// returns success flag
+bool DQMFileSaver::createDirectoryIfNeededAndCd(const std::string &path) const {
+  assert(!path.empty());
+
+  // Find the first path component.
+  size_t start = 0;
+  size_t end = path.find('/', start);
+  if (end == std::string::npos)
+    end = path.size();
+
+  while (true) {
+    // Check if this subdirectory component exists.  If yes, make sure
+    // it is actually a subdirectory.  Otherwise create or cd into it.
+    std::string part(path, start, end-start);
+    TObject* o = gDirectory->Get(part.c_str());
+    if (o && ! dynamic_cast<TDirectory*>(o))
+      raiseDQMError("DQMStore", "Attempt to create directory '%s' in a file"
+                    " fails because the part '%s' already exists and is not"
+                    " directory", path.c_str(), part.c_str());
+    else if (!o)
+      gDirectory->mkdir(part.c_str());
+
+    if (!gDirectory->cd(part.c_str()))
+      raiseDQMError("DQMStore", "Attempt to create directory '%s' in a file"
+                    " fails because could not cd into subdirectory '%s'",
+                    path.c_str(), part.c_str());
+
+    // Stop if we reached the end, ignoring any trailing '/'.
+    if (end+1 >= path.size())
+      break;
+
+    // Find the next path component.
+    start = end+1;
+    end = path.find('/', start);
+    if (end == std::string::npos)
+      end = path.size();
+  }
+
+  return true;
 }
