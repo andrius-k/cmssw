@@ -74,7 +74,8 @@ process.harv6 = DQMEDHarvester("DemoRunHarvester",
 )
 
 process.demo_reco_dqm = cms.Task(process.ana1, process.ana2, process.ana3, process.ana4, process.ana5, process.ana6)
-process.demo_harvesting = cms.Task(process.harv1, process.harv2, process.harv3, process.harv4, process.harv5, process.harv6)
+# process.demo_harvesting = cms.Task(process.harv1, process.harv2, process.harv3, process.harv4, process.harv5, process.harv6)
+process.demo_harvesting = cms.Task(process.harv1)
 
 process.p = cms.Path(process.demo_reco_dqm, process.demo_harvesting)
 
@@ -92,6 +93,7 @@ process.dqmSaver = cms.EDAnalyzer("DQMFileSaver",
     producer = cms.untracked.string('DQM'),
     workflow = cms.untracked.string('/A/B/C'),
     dirName = cms.untracked.string('.'),
+    saveAtJobEnd = cms.untracked.bool(True),
 )
 
 process.o = cms.EndPath(process.out + process.dqmSaver)

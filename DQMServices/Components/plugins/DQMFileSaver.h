@@ -58,6 +58,8 @@ private:
   void saveForFilterUnit(const std::string &rewrite, int run, int lumi, const FileFormat fileFormat) const;
   void saveJobReport(const std::string &filename) const;
 
+  bool createDirectoryIfNeededAndCd(const std::string &path) const;
+
   Convention convention_;
   FileFormat fileFormat_;
   std::string workflow_;
