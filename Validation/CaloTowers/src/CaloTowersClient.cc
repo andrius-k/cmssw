@@ -18,8 +18,6 @@ CaloTowersClient::CaloTowersClient(const edm::ParameterSet& iConfig) : conf_(iCo
 
 CaloTowersClient::~CaloTowersClient() {}
 
-void CaloTowersClient::beginJob() {}
-
 void CaloTowersClient::dqmEndJob(DQMStore::IBooker& ibooker, DQMStore::IGetter& igetter) {
   igetter.setCurrentFolder(dirName_);
 

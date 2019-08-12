@@ -27,7 +27,7 @@ EcalBarrelSimHitsValidation::EcalBarrelSimHitsValidation(const edm::ParameterSet
 
   // get hold of back-end interface
   dbe_ = nullptr;
-  dbe_ = edm::Service<DQMStore>().operator->();
+  dbe_ = std::make_unique<DQMStore>();
   if (dbe_) {
     if (verbose_) {
       dbe_->setVerbose(1);
@@ -149,15 +149,6 @@ EcalBarrelSimHitsValidation::EcalBarrelSimHitsValidation(const edm::ParameterSet
 }
 
 EcalBarrelSimHitsValidation::~EcalBarrelSimHitsValidation() {}
-
-void EcalBarrelSimHitsValidation::beginJob() {}
-
-void EcalBarrelSimHitsValidation::endJob() {
-  // for (int myStep=0; myStep<26; myStep++){
-  //  if (meEBLongitudinalShower_) meEBLongitudinalShower_->Fill(float(myStep),
-  //  eRLength[myStep]/myEntries);
-  //}
-}
 
 void EcalBarrelSimHitsValidation::analyze(const edm::Event &e, const edm::EventSetup &c) {
   edm::LogInfo("EventInfo") << " Run = " << e.id().run() << " Event = " << e.id().event();

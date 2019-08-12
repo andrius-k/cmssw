@@ -1,7 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 
 from DQMServices.Core.DQMEDAnalyzer import DQMEDAnalyzer
-hotlineDQM_HT = DQMEDAnalyzer('HotlineDQM',
+hotlineDQMHT = DQMEDAnalyzer('HotlineDQM',
      photonCollection = cms.InputTag('photons'),
      muonCollection = cms.InputTag('muons'),
      caloJetCollection = cms.InputTag('ak4CaloJets'),
@@ -17,7 +17,7 @@ hotlineDQM_HT = DQMEDAnalyzer('HotlineDQM',
      useHT = cms.bool(True)
 )
 
-hotlineDQM_HT_Tight = DQMEDAnalyzer('HotlineDQM',
+hotlineDQMHTTight = DQMEDAnalyzer('HotlineDQM',
      photonCollection = cms.InputTag('photons'),
      muonCollection = cms.InputTag('muons'),
      caloJetCollection = cms.InputTag('ak4CaloJets'),
@@ -33,7 +33,7 @@ hotlineDQM_HT_Tight = DQMEDAnalyzer('HotlineDQM',
      useHT = cms.bool(True)
 )
 
-hotlineDQM_Photon = DQMEDAnalyzer('HotlineDQM',
+hotlineDQMPhoton = DQMEDAnalyzer('HotlineDQM',
      photonCollection = cms.InputTag('photons'),
      muonCollection = cms.InputTag('muons'),
      caloJetCollection = cms.InputTag('ak4CaloJets'),
@@ -49,7 +49,7 @@ hotlineDQM_Photon = DQMEDAnalyzer('HotlineDQM',
      usePhotons = cms.bool(True)
 )
 
-hotlineDQM_Photon_Tight = DQMEDAnalyzer('HotlineDQM',
+hotlineDQMPhotonTight = DQMEDAnalyzer('HotlineDQM',
      photonCollection = cms.InputTag('photons'),
      muonCollection = cms.InputTag('muons'),
      caloJetCollection = cms.InputTag('ak4CaloJets'),
@@ -65,7 +65,7 @@ hotlineDQM_Photon_Tight = DQMEDAnalyzer('HotlineDQM',
      usePhotons = cms.bool(True)
 )
 
-hotlineDQM_MET = DQMEDAnalyzer('HotlineDQM',
+hotlineDQMMET = DQMEDAnalyzer('HotlineDQM',
      photonCollection = cms.InputTag('photons'),
      muonCollection = cms.InputTag('muons'),
      caloJetCollection = cms.InputTag('ak4CaloJets'),
@@ -81,7 +81,7 @@ hotlineDQM_MET = DQMEDAnalyzer('HotlineDQM',
      useMet = cms.bool(True)
 )
 
-hotlineDQM_MET_Tight = DQMEDAnalyzer('HotlineDQM',
+hotlineDQMMETTight = DQMEDAnalyzer('HotlineDQM',
      photonCollection = cms.InputTag('photons'),
      muonCollection = cms.InputTag('muons'),
      caloJetCollection = cms.InputTag('ak4CaloJets'),
@@ -97,7 +97,7 @@ hotlineDQM_MET_Tight = DQMEDAnalyzer('HotlineDQM',
      useMet = cms.bool(True)
 )
 
-hotlineDQM_PFMET = DQMEDAnalyzer('HotlineDQM',
+hotlineDQMPFMET = DQMEDAnalyzer('HotlineDQM',
      photonCollection = cms.InputTag('photons'),
      muonCollection = cms.InputTag('muons'),
      caloJetCollection = cms.InputTag('ak4CaloJets'),
@@ -113,7 +113,7 @@ hotlineDQM_PFMET = DQMEDAnalyzer('HotlineDQM',
      usePFMet = cms.bool(True)
 )
 
-hotlineDQM_PFMET_Tight = DQMEDAnalyzer('HotlineDQM',
+hotlineDQMPFMETTight = DQMEDAnalyzer('HotlineDQM',
      photonCollection = cms.InputTag('photons'),
      muonCollection = cms.InputTag('muons'),
      caloJetCollection = cms.InputTag('ak4CaloJets'),
@@ -129,7 +129,7 @@ hotlineDQM_PFMET_Tight = DQMEDAnalyzer('HotlineDQM',
      usePFMet = cms.bool(True)
 )
 
-hotlineDQM_Muon = DQMEDAnalyzer('HotlineDQM',
+hotlineDQMMuon = DQMEDAnalyzer('HotlineDQM',
      photonCollection = cms.InputTag('photons'),
      muonCollection = cms.InputTag('muons'),
      caloJetCollection = cms.InputTag('ak4CaloJets'),
@@ -145,7 +145,7 @@ hotlineDQM_Muon = DQMEDAnalyzer('HotlineDQM',
      useMuons = cms.bool(True)
 )
 
-hotlineDQM_Muon_Tight = DQMEDAnalyzer('HotlineDQM',
+hotlineDQMMuonTight = DQMEDAnalyzer('HotlineDQM',
      photonCollection = cms.InputTag('photons'),
      muonCollection = cms.InputTag('muons'),
      caloJetCollection = cms.InputTag('ak4CaloJets'),
@@ -161,4 +161,4 @@ hotlineDQM_Muon_Tight = DQMEDAnalyzer('HotlineDQM',
      useMuons = cms.bool(True)
 )
 
-hotlineDQMSequence = cms.Sequence(hotlineDQM_HT*hotlineDQM_HT_Tight*hotlineDQM_Photon*hotlineDQM_Photon_Tight*hotlineDQM_Muon*hotlineDQM_Muon_Tight*hotlineDQM_MET*hotlineDQM_MET_Tight*hotlineDQM_PFMET*hotlineDQM_PFMET_Tight)
+hotlineDQMSequence = cms.Sequence(hotlineDQMHT*hotlineDQMHTTight*hotlineDQMPhoton*hotlineDQMPhotonTight*hotlineDQMMuon*hotlineDQMMuonTight*hotlineDQMMET*hotlineDQMMETTight*hotlineDQMPFMET*hotlineDQMPFMETTight)

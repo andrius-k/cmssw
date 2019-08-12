@@ -59,7 +59,7 @@ private:
   int bunchcr_;
   int minbunch_;
   int maxbunch_;
-  DQMStore *dbe_;
+  std::unique_ptr<DQMStore> dbe_;
 
   edm::EDGetTokenT<CrossingFrame<SimTrack>> cfTrackToken_;
   edm::EDGetTokenT<CrossingFrame<SimTrack>> cfVertexToken_;

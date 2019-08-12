@@ -117,8 +117,8 @@ namespace protobuf_DQMServices_2fCore_2fsrc_2fROOTFilePB_2eproto {
                       TableStruct::offsets,
                       factory,
                       file_level_metadata,
-                      nullptr,
-                      nullptr);
+                      NULL,
+                      NULL);
   }
 
   void protobuf_AssignDescriptorsOnce() {

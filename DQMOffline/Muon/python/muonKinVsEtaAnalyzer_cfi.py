@@ -41,7 +41,7 @@ muonKinVsEtaAnalyzer = DQMEDAnalyzer('MuonKinVsEtaAnalyzer',
                                       etaOvlpMax = cms.double(1.1),
                                       folder = cms.string("Muons/MuonKinVsEtaAnalyzer")
                                       )
-muonKinVsEtaAnalyzer_miniAOD = DQMEDAnalyzer('MuonKinVsEtaAnalyzer',
+muonKinVsEtaAnalyzerminiAOD = DQMEDAnalyzer('MuonKinVsEtaAnalyzer',
                                               MuonServiceProxy,
                                               
                                               MuonCollection  = cms.InputTag("slimmedMuons"),

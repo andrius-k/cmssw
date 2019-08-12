@@ -52,7 +52,7 @@ private:
 
   // ----------member data ---------------------------
 
-  DQMStore* dqmStore_;
+  std::unique_ptr<DQMStore> dqmStore_;
 
   std::string filename, dirpath;
   int TotNumberOfEvents;
@@ -76,7 +76,7 @@ StatisticsFilter::StatisticsFilter(const edm::ParameterSet& iConfig)
       MinNumberOfEvents(iConfig.getUntrackedParameter<int>("minNumberOfEvents")) {
   //now do what ever initialization is needed
 
-  dqmStore_ = edm::Service<DQMStore>().operator->();
+  dqmStore_ = std::make_unique<DQMStore>();
   dqmStore_->open(filename, false);
 }
 
@@ -93,10 +93,10 @@ StatisticsFilter::~StatisticsFilter() {
 bool StatisticsFilter::filter(edm::Event& iEvent, const edm::EventSetup& iSetup) {
   TotNumberOfEvents = 0;
 
-  std::vector<MonitorElement*> MEs = dqmStore_->getAllContents(dirpath);
+  auto MEs = dqmStore_->getAllContents(dirpath);
 
-  std::vector<MonitorElement*>::const_iterator iter = MEs.begin();
-  std::vector<MonitorElement*>::const_iterator iterEnd = MEs.end();
+  auto iter = MEs.begin();
+  auto iterEnd = MEs.end();
 
   for (; iter != iterEnd; ++iter) {
     std::string me_name = (*iter)->getName();

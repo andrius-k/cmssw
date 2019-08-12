@@ -27,7 +27,7 @@ PFCandidateBenchmarkAnalyzer::PFCandidateBenchmarkAnalyzer(const edm::ParameterS
   myColl_ = consumes<PFCandidateCollection>(inputLabel_);
 }
 
-void PFCandidateBenchmarkAnalyzer::bookHistograms(DQMStore::IBooker &ibooker,
+void PFCandidateBenchmarkAnalyzer::bookHistograms(dqm::reco::DQMStore::IBooker &ibooker,
                                                   edm::Run const &iRun,
                                                   edm::EventSetup const &iSetup) {
   BenchmarkAnalyzer::bookHistograms(ibooker, iRun, iSetup);

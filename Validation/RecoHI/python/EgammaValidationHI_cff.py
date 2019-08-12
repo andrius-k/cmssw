@@ -20,12 +20,12 @@ hifiducial = cms.EDFilter("EtaPtMinCandViewSelector",
 hltlabel = "HLT"
 
 from Validation.RecoHI.HLT_HIPhoton15_DQM_cfi import *
-HLT_HIPhoton15_DQM.cutcollection = cms.InputTag("hifiducial")
-HLT_HIPhoton15_DQM.cutnum = cms.int32(1)
-HLT_HIPhoton15_DQM.pdgGen = cms.int32(22)
-HLT_HIPhoton15_DQM.triggerobject.setProcessName(hltlabel)
+HLTHIPhoton15DQM.cutcollection = cms.InputTag("hifiducial")
+HLTHIPhoton15DQM.cutnum = cms.int32(1)
+HLTHIPhoton15DQM.pdgGen = cms.int32(22)
+HLTHIPhoton15DQM.triggerobject.setProcessName(hltlabel)
 
-for filterpset in HLT_HIPhoton15_DQM.filters:
+for filterpset in HLTHIPhoton15DQM.filters:
     getattr(filterpset,'HLTCollectionLabels').setProcessName(hltlabel)
     for isocollections in getattr(filterpset,'IsoCollections'):
         isocollections.setProcessName(hltlabel)
@@ -34,4 +34,4 @@ for filterpset in HLT_HIPhoton15_DQM.filters:
 hiEgammaPrevalidationSequence = cms.Sequence( higenp * hifiducial )
 
 # validation sequence
-hiEgammaValidationSequence = cms.Sequence( HLT_HIPhoton15_DQM )
+hiEgammaValidationSequence = cms.Sequence( HLTHIPhoton15DQM )

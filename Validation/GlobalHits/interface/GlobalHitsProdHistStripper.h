@@ -62,7 +62,7 @@ private:
   bool getAllProvenances;
   bool printProvenanceInfo;
 
-  DQMStore *dbe;
+  std::unique_ptr<DQMStore> dbe;
   std::string outputfile;
   bool doOutput;
 

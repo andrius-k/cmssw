@@ -15,7 +15,7 @@ SiStripBaseCondObjDQM::SiStripBaseCondObjDQM(const edm::EventSetup &eSetup,
       hPSet_(hPSet),
       fPSet_(fPSet),
       cacheID_memory(0),
-      dqmStore_(edm::Service<DQMStore>().operator->()),
+      dqmStore_(std::make_unique<DQMStore>()),
       runNumber_(iRun) {
   reader = new SiStripDetInfoFileReader(
       edm::FileInPath(std::string("CalibTracker/SiStripCommon/data/SiStripDetInfo.dat")).fullPath());

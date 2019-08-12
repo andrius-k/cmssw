@@ -33,19 +33,19 @@ process.source = cms.Source("PoolSource",
 process.DQMStore = cms.Service("DQMStore")
 
 from DQMServices.Core.DQMEDAnalyzer import DQMEDAnalyzer
-process.analyzer_incMuon = DQMEDAnalyzer('MuIsoValidation',
+process.analyzerincMuon = DQMEDAnalyzer('MuIsoValidation',
     Global_Muon_Label = cms.untracked.InputTag("muons"),
     requireCombinedMuon = cms.untracked.bool(False),
     rootfilename = cms.untracked.string('ttbar-validation.root'),
 )
 
-process.analyzer_combinedMuon = DQMEDAnalyzer('MuIsoValidation',
+process.analyzercombinedMuon = DQMEDAnalyzer('MuIsoValidation',
     Global_Muon_Label = cms.untracked.InputTag("muons"),
     requireCombinedMuon = cms.untracked.bool(True),
     rootfilename = cms.untracked.string('ttbar-validation.root'),
 )
 
-process.p = cms.Path(process.analyzer_incMuon+process.analyzer_combinedMuon)
+process.p = cms.Path(process.analyzerincMuon+process.analyzercombinedMuon)
 process.PoolSource.fileNames = ['/store/relval/CMSSW_3_1_0_pre4/RelValTTbar/GEN-SIM-RECO/IDEAL_30X_v1/0003/00E48100-3A16-DE11-A693-001617DBCF6A.root',
                                 '/store/relval/CMSSW_3_1_0_pre4/RelValTTbar/GEN-SIM-RECO/IDEAL_30X_v1/0003/12C01897-4616-DE11-8AA7-000423D98B5C.root',
                                 '/store/relval/CMSSW_3_1_0_pre4/RelValTTbar/GEN-SIM-RECO/IDEAL_30X_v1/0003/289FC85A-4216-DE11-ACEE-000423D98844.root',

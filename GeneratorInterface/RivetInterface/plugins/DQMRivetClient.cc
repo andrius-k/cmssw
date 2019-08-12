@@ -141,7 +141,7 @@ void DQMRivetClient::endRun(const edm::Run& r, const edm::EventSetup& c) {
   // this endRun function
 
   theDQM = nullptr;
-  theDQM = Service<DQMStore>().operator->();
+  theDQM = std::make_unique<DQMStore>();
 
   if (!theDQM) {
     LogInfo("DQMRivetClient") << "Cannot create DQMStore instance\n";

@@ -76,7 +76,7 @@ class SiStripGainsPCLWorker : public DQMGlobalEDAnalyzer<APVGain::APVGainHistogr
 public:
   explicit SiStripGainsPCLWorker(const edm::ParameterSet &);
 
-  void bookHistograms(DQMStore::ConcurrentBooker &,
+  void bookHistograms(DQMStore::IBooker &,
                       edm::Run const &,
                       edm::EventSetup const &,
                       APVGain::APVGainHistograms &) const override;
@@ -87,7 +87,6 @@ public:
 private:
   void beginJob() override;
   void dqmBeginRun(edm::Run const &, edm::EventSetup const &, APVGain::APVGainHistograms &) const override;
-  void endJob() override;
   void checkBookAPVColls(const TrackerGeometry *bareTkGeomPtr, APVGain::APVGainHistograms &histograms) const;
 
   std::vector<std::string> dqm_tag_;

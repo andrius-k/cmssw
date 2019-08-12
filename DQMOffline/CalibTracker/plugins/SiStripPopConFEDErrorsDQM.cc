@@ -156,7 +156,7 @@ void SiStripPopConFEDErrorsHandlerFromDQM::dqmEndJob(DQMStore::IBooker&, DQMStor
     if (!getter.dirExists(lDirName))
       continue;
 
-    std::vector<MonitorElement*> lMeVec = getter.getContents(lDirName);
+    auto lMeVec = getter.getContents(lDirName);
 
     if (nFolders == 0) {
       for (auto iMe : lMeVec) {  //loop on ME found in directory

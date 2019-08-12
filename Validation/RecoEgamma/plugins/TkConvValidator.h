@@ -56,7 +56,7 @@ public:
   void bookHistograms(DQMStore::IBooker&, edm::Run const&, edm::EventSetup const&) override;
   void dqmBeginRun(edm::Run const& r, edm::EventSetup const& theEventSetup) override;
   void endRun(edm::Run const& r, edm::EventSetup const& es) override;
-  void endJob() override;
+  void endJob();  // TODO: endJob not allowed in DQMEDAnalyzer
 
 private:
   //
@@ -69,7 +69,6 @@ private:
                                                     const reco::Vertex& vtx);
 
   std::string fName_;
-  DQMStore* dbe_;
   edm::ESHandle<MagneticField> theMF_;
 
   int verbosity_;

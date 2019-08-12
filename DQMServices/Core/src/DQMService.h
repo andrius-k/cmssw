@@ -1,10 +1,11 @@
 #ifndef DQMSERVICES_CORE_DQM_SERVICE_H
 #define DQMSERVICES_CORE_DQM_SERVICE_H
 
-#include "DQMServices/Core/interface/DQMStore.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "FWCore/ServiceRegistry/interface/ActivityRegistry.h"
+
+#include "DQMServices/Core/interface/DQMStore.h"
 
 class DQMBasicNet;
 namespace lat {
@@ -15,8 +16,6 @@ namespace lat {
 class DQMService {
 public:
   typedef dqm::legacy::DQMStore DQMStore;
-  typedef dqm::legacy::MonitorElement MonitorElement;
-
   DQMService(const edm::ParameterSet &pset, edm::ActivityRegistry &ar);
   ~DQMService();
 
@@ -26,7 +25,7 @@ public:
 private:
   void shutdown();
 
-  DQMStore *store_;
+  std::unique_ptr<DQMStore> store_;
   DQMBasicNet *net_;
   lat::Regexp *filter_;
   double lastFlush_;

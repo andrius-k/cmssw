@@ -93,7 +93,7 @@ void PixelVTXMonitor::bookHistograms() {
   }
 }
 
-void PixelVTXMonitor::beginJob() { dbe_ = edm::Service<DQMStore>().operator->(); }
+void PixelVTXMonitor::beginJob() { dbe_ = std::make_unique<DQMStore>(); }
 
 void PixelVTXMonitor::beginRun(edm::Run const& iRun, edm::EventSetup const& iSetup) {
   bool changed = true;

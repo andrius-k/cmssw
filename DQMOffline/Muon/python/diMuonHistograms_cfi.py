@@ -23,7 +23,7 @@ diMuonHistos = DQMEDAnalyzer('DiMuonHistograms',
                               HighMassMax = cms.double(110.0),
                               folder = cms.string("Muons/diMuonHistograms")
                               )
-diMuonHistos_miniAOD = DQMEDAnalyzer('DiMuonHistograms',
+diMuonHistosminiAOD = DQMEDAnalyzer('DiMuonHistograms',
                                       MuonCollection  = cms.InputTag("slimmedMuons"),
                                       VertexLabel     = cms.InputTag("offlineSlimmedPrimaryVertices"),
                                       BeamSpotLabel   = cms.InputTag("offlineBeamSpot"),                              

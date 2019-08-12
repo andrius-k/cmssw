@@ -114,10 +114,10 @@ process.p      = cms.Path(
     process.simpleEleId70cIso          *
 #    process.topDiLeptonOfflineDQM      +
 #    process.topSingleLeptonDQM         +
-#    process.topSingleMuonLooseDQM_PU      +    
-    process.topSingleMuonMediumDQM_PU   #  +
-#    process.topSingleElectronLooseDQM_PU  +    
-#    process.topSingleElectronMediumDQM_PU
+#    process.topSingleMuonLooseDQMPU      +    
+    process.topSingleMuonMediumDQMPU   #  +
+#    process.topSingleElectronLooseDQMPU  +    
+#    process.topSingleElectronMediumDQMPU
 )
 process.endjob = cms.Path(
     process.endOfProcess
@@ -225,10 +225,10 @@ process.p      = cms.Path(
     process.simpleEleId70cIso          *
 #    process.topDiLeptonOfflineDQM      +
 #    process.topSingleLeptonDQM         +
-#    process.topSingleMuonLooseDQM_PU      +    
-    process.topSingleMuonMediumDQM_PU   +
-#    process.topSingleElectronLooseDQM_PU  +    
-    process.topSingleElectronMediumDQM_PU
+#    process.topSingleMuonLooseDQMPU      +    
+    process.topSingleMuonMediumDQMPU   +
+#    process.topSingleElectronLooseDQMPU  +    
+    process.topSingleElectronMediumDQMPU
 )
 process.endjob = cms.Path(
     process.endOfProcess

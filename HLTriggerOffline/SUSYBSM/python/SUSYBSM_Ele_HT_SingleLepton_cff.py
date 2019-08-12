@@ -3,7 +3,7 @@ from DQMServices.Core.DQMEDHarvester import DQMEDHarvester
 from copy import deepcopy
 
 from DQMServices.Core.DQMEDAnalyzer import DQMEDAnalyzer
-SUSY_HLT_Ele15_HT600_SingleLepton = DQMEDAnalyzer('SUSY_HLT_SingleLepton',
+SUSYHLTEle15HT600SingleLepton = DQMEDAnalyzer('SUSY_HLT_SingleLepton',
                                               electronCollection = cms.InputTag('gedGsfElectrons'),
                                               muonCollection = cms.InputTag(''),
                                               pfMetCollection = cms.InputTag('pfMet'),
@@ -53,7 +53,7 @@ SUSYoHLToEle15oHT600oSingleLeptonPOSTPROCESSING = DQMEDHarvester('DQMGenericClie
                                                              resolution = cms.vstring('')
                                                              )
 
-SUSY_HLT_Ele15_HT400_SingleLepton = DQMEDAnalyzer('SUSY_HLT_SingleLepton',
+SUSYHLTEle15HT400SingleLepton = DQMEDAnalyzer('SUSY_HLT_SingleLepton',
                                               electronCollection = cms.InputTag('gedGsfElectrons'),
                                               muonCollection = cms.InputTag(''),
                                               pfMetCollection = cms.InputTag('pfMet'),
@@ -103,7 +103,7 @@ SUSYoHLToEle15oHT400oSingleLeptonPOSTPROCESSING = DQMEDHarvester('DQMGenericClie
                                                              resolution = cms.vstring('')
                                                              )
 
-SUSY_HLT_Ele50_HT400_SingleLepton = DQMEDAnalyzer('SUSY_HLT_SingleLepton',
+SUSYHLTEle50HT400SingleLepton = DQMEDAnalyzer('SUSY_HLT_SingleLepton',
                                               electronCollection = cms.InputTag('gedGsfElectrons'),
                                               muonCollection = cms.InputTag(''),
                                               pfMetCollection = cms.InputTag('pfMet'),
@@ -155,13 +155,13 @@ SUSYoHLToEle50oHT400oSingleLeptonPOSTPROCESSING = DQMEDHarvester('DQMGenericClie
 
 # fastsim has no conversion collection (yet)
 from Configuration.Eras.Modifier_fastSim_cff import fastSim
-fastSim.toModify(SUSY_HLT_Ele15_HT600_SingleLepton,conversionCollection=cms.InputTag(''))
-fastSim.toModify(SUSY_HLT_Ele15_HT400_SingleLepton,conversionCollection=cms.InputTag(''))
-fastSim.toModify(SUSY_HLT_Ele50_HT400_SingleLepton,conversionCollection=cms.InputTag(''))
+fastSim.toModify(SUSYHLTEle15HT600SingleLepton,conversionCollection=cms.InputTag(''))
+fastSim.toModify(SUSYHLTEle15HT400SingleLepton,conversionCollection=cms.InputTag(''))
+fastSim.toModify(SUSYHLTEle50HT400SingleLepton,conversionCollection=cms.InputTag(''))
 
-SUSY_HLT_Ele_HT_SingleLepton = cms.Sequence( SUSY_HLT_Ele15_HT600_SingleLepton
-                                             + SUSY_HLT_Ele15_HT400_SingleLepton
-                                             + SUSY_HLT_Ele50_HT400_SingleLepton
+SUSY_HLT_Ele_HT_SingleLepton = cms.Sequence( SUSYHLTEle15HT600SingleLepton
+                                             + SUSYHLTEle15HT400SingleLepton
+                                             + SUSYHLTEle50HT400SingleLepton
 )
 
 SUSY_HLT_Ele_HT_SingleLepton_POSTPROCESSING = cms.Sequence( SUSYoHLToEle15oHT600oSingleLeptonPOSTPROCESSING

@@ -7,7 +7,7 @@ from TrackPropagation.SteppingHelixPropagator.SteppingHelixPropagatorAny_cfi imp
 DQMStore = cms.Service("DQMStore")
 
 from DQMServices.Core.DQMEDAnalyzer import DQMEDAnalyzer
-MuIsoValidation_inc = DQMEDAnalyzer('MuIsoValidation',
+MuIsoValidationinc = DQMEDAnalyzer('MuIsoValidation',
     Global_Muon_Label = cms.untracked.InputTag("muons"),
     requireCombinedMuon = cms.untracked.bool(False),
     ecalIsoDeposit_Label = cms.untracked.InputTag("muIsoDepositCalByAssociatorTowers","ecal"),
@@ -18,7 +18,7 @@ MuIsoValidation_inc = DQMEDAnalyzer('MuIsoValidation',
     directory = cms.untracked.string("Muons/MuonIsolationV_inc")                             
 )
 
-MuIsoValidation_global = DQMEDAnalyzer('MuIsoValidation',
+MuIsoValidationglobal = DQMEDAnalyzer('MuIsoValidation',
     Global_Muon_Label = cms.untracked.InputTag("muons"),
     requireCombinedMuon = cms.untracked.bool(True),
     ecalIsoDeposit_Label = cms.untracked.InputTag("muIsoDepositCalByAssociatorTowers","ecal"),
@@ -29,4 +29,4 @@ MuIsoValidation_global = DQMEDAnalyzer('MuIsoValidation',
     directory = cms.untracked.string("Muons/MuonIsolationV_global")
 )
 
-muIsoVal_seq = cms.Sequence(MuIsoValidation_inc+MuIsoValidation_global)
+muIsoVal_seq = cms.Sequence(MuIsoValidationinc+MuIsoValidationglobal)

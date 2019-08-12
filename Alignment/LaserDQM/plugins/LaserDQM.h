@@ -61,7 +61,7 @@ private:
   std::string theDQMFileName;
 
   // DQM Backend Interface
-  DQMStore *theDaqMonitorBEI;
+  std::unique_ptr<DQMStore> theDaqMonitorBEI;
 
   // DQM Monitor Elements
 

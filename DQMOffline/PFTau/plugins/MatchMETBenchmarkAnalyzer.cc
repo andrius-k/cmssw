@@ -20,7 +20,7 @@ MatchMETBenchmarkAnalyzer::MatchMETBenchmarkAnalyzer(const edm::ParameterSet &pa
   myMatchColl_ = consumes<View<MET>>(matchedInputLabel_);
 }
 
-void MatchMETBenchmarkAnalyzer::bookHistograms(DQMStore::IBooker &ibooker,
+void MatchMETBenchmarkAnalyzer::bookHistograms(dqm::reco::DQMStore::IBooker &ibooker,
                                                edm::Run const &iRun,
                                                edm::EventSetup const &iSetup) {
   BenchmarkAnalyzer::bookHistograms(ibooker, iRun, iSetup);

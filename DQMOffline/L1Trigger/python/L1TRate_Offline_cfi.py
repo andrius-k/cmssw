@@ -3,7 +3,7 @@ import FWCore.ParameterSet.Config as cms
 from DQMOffline.L1Trigger.L1TRateOfflineParams_cff import RateParams
 
 from DQMServices.Core.DQMEDAnalyzer import DQMEDAnalyzer
-l1tRate_Offline = DQMEDAnalyzer('L1TRate_Offline',
+l1tRateOffline = DQMEDAnalyzer('L1TRate_Offline',
 
   #-------------------------------------------------------
   #-------------------- ATTENTION-------------------------

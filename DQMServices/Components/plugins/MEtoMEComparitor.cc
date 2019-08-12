@@ -42,7 +42,7 @@ MEtoMEComparitor::MEtoMEComparitor(const edm::ParameterSet& iConfig)
   _dirDepth = iConfig.getParameter<unsigned int>("dirDepth");
   _overallgoodness = iConfig.getParameter<double>("OverAllgoodness");
 
-  _dbe = edm::Service<DQMStore>().operator->();
+  _dbe = std::make_unique<DQMStore>();
 }
 
 MEtoMEComparitor::~MEtoMEComparitor() = default;

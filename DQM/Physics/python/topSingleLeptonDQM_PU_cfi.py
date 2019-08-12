@@ -130,7 +130,7 @@ topSingleLeptonDQM = DQMEDAnalyzer('TopSingleLeptonDQM',
   )
 )
 
-topSingleMuonLooseDQM_PU = DQMEDAnalyzer('TopSingleLeptonDQM',
+topSingleMuonLooseDQMPU = DQMEDAnalyzer('TopSingleLeptonDQM',
   ## ------------------------------------------------------
   ## SETUP
   ##
@@ -290,7 +290,7 @@ topSingleMuonLooseDQM_PU = DQMEDAnalyzer('TopSingleLeptonDQM',
   )
 )
 
-topSingleMuonMediumDQM_PU = DQMEDAnalyzer('TopSingleLeptonDQM',
+topSingleMuonMediumDQMPU = DQMEDAnalyzer('TopSingleLeptonDQM',
   ## ------------------------------------------------------
   ## SETUP
   ##
@@ -443,7 +443,7 @@ topSingleMuonMediumDQM_PU = DQMEDAnalyzer('TopSingleLeptonDQM',
   )
 )
 
-topSingleElectronLooseDQM_PU = DQMEDAnalyzer('TopSingleLeptonDQM',
+topSingleElectronLooseDQMPU = DQMEDAnalyzer('TopSingleLeptonDQM',
   ## ------------------------------------------------------
   ## SETUP
   ##
@@ -605,7 +605,7 @@ topSingleElectronLooseDQM_PU = DQMEDAnalyzer('TopSingleLeptonDQM',
   )
 )
 
-topSingleElectronMediumDQM_PU = DQMEDAnalyzer('TopSingleLeptonDQM',
+topSingleElectronMediumDQMPU = DQMEDAnalyzer('TopSingleLeptonDQM',
   ## ------------------------------------------------------
   ## SETUP
   ##

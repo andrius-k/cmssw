@@ -15,100 +15,100 @@ from SimMuon.MCTruth.MuonAssociatorByHits_cfi import muonAssociatorByHitsCommonP
 muonAssociatorByHitsNoSimHitsHelperTrk = muonAssociatorByHitsNoSimHitsHelper.clone()
 muonAssociatorByHitsNoSimHitsHelperTrk.UseTracker = True
 muonAssociatorByHitsNoSimHitsHelperTrk.UseMuon  = False
-recoMuonVMuAssoc_trk = recoMuonValidator.clone()
-recoMuonVMuAssoc_trk.subDir = 'Muons/RecoMuonV/RecoMuon_MuonAssoc_Trk'
-recoMuonVMuAssoc_trk.muAssocLabel = 'muonAssociatorByHitsNoSimHitsHelperTrk'
-recoMuonVMuAssoc_trk.trackType = 'inner'
-recoMuonVMuAssoc_trk.selection = "isTrackerMuon"
+recoMuonVMuAssoctrk = recoMuonValidator.clone()
+recoMuonVMuAssoctrk.subDir = 'Muons/RecoMuonV/RecoMuon_MuonAssoc_Trk'
+recoMuonVMuAssoctrk.muAssocLabel = 'muonAssociatorByHitsNoSimHitsHelperTrk'
+recoMuonVMuAssoctrk.trackType = 'inner'
+recoMuonVMuAssoctrk.selection = "isTrackerMuon"
 
 #tracker and PF
 muonAssociatorByHitsNoSimHitsHelperTrkPF = muonAssociatorByHitsNoSimHitsHelper.clone()
 muonAssociatorByHitsNoSimHitsHelperTrkPF.UseTracker = True
 muonAssociatorByHitsNoSimHitsHelperTrkPF.UseMuon  = False
-recoMuonVMuAssoc_trkPF = recoMuonValidator.clone()
-recoMuonVMuAssoc_trkPF.subDir = 'Muons/RecoMuonV/RecoMuon_MuonAssoc_TrkPF'
-recoMuonVMuAssoc_trkPF.usePFMuon = True
-recoMuonVMuAssoc_trkPF.muAssocLabel = 'muonAssociatorByHitsNoSimHitsHelperTrkPF'
-recoMuonVMuAssoc_trkPF.trackType = 'inner'
-recoMuonVMuAssoc_trkPF.selection = "isTrackerMuon & isPFMuon"
+recoMuonVMuAssoctrkPF = recoMuonValidator.clone()
+recoMuonVMuAssoctrkPF.subDir = 'Muons/RecoMuonV/RecoMuon_MuonAssoc_TrkPF'
+recoMuonVMuAssoctrkPF.usePFMuon = True
+recoMuonVMuAssoctrkPF.muAssocLabel = 'muonAssociatorByHitsNoSimHitsHelperTrkPF'
+recoMuonVMuAssoctrkPF.trackType = 'inner'
+recoMuonVMuAssoctrkPF.selection = "isTrackerMuon & isPFMuon"
 
 #standalone
 muonAssociatorByHitsNoSimHitsHelperStandalone = muonAssociatorByHitsNoSimHitsHelper.clone()
 muonAssociatorByHitsNoSimHitsHelperStandalone.UseTracker = False
 muonAssociatorByHitsNoSimHitsHelperStandalone.UseMuon  = True
-recoMuonVMuAssoc_sta = recoMuonValidator.clone()
-recoMuonVMuAssoc_sta.subDir = 'Muons/RecoMuonV/RecoMuon_MuonAssoc_Sta'
-recoMuonVMuAssoc_sta.muAssocLabel = 'muonAssociatorByHitsNoSimHitsHelperStandalone'
-recoMuonVMuAssoc_sta.trackType = 'outer'
-recoMuonVMuAssoc_sta.selection = "isStandAloneMuon"
+recoMuonVMuAssocsta = recoMuonValidator.clone()
+recoMuonVMuAssocsta.subDir = 'Muons/RecoMuonV/RecoMuon_MuonAssoc_Sta'
+recoMuonVMuAssocsta.muAssocLabel = 'muonAssociatorByHitsNoSimHitsHelperStandalone'
+recoMuonVMuAssocsta.trackType = 'outer'
+recoMuonVMuAssocsta.selection = "isStandAloneMuon"
 
 #seed of StandAlone
 muonAssociatorByHitsNoSimHitsHelperSeedStandalone = muonAssociatorByHitsNoSimHitsHelper.clone()
 muonAssociatorByHitsNoSimHitsHelperSeedStandalone.UseTracker = False
 muonAssociatorByHitsNoSimHitsHelperSeedStandalone.UseMuon  = True
-recoMuonVMuAssoc_seedSta = recoMuonValidator.clone()
-recoMuonVMuAssoc_seedSta.subDir = 'Muons/RecoMuonV/RecoMuon_MuonAssoc_SeedSta'
-recoMuonVMuAssoc_seedSta.muAssocLabel = 'muonAssociatorByHitsNoSimHitsHelperStandalone'
-recoMuonVMuAssoc_seedSta.trackType = 'outer'
-recoMuonVMuAssoc_seedSta.selection = ""
+recoMuonVMuAssocseedSta = recoMuonValidator.clone()
+recoMuonVMuAssocseedSta.subDir = 'Muons/RecoMuonV/RecoMuon_MuonAssoc_SeedSta'
+recoMuonVMuAssocseedSta.muAssocLabel = 'muonAssociatorByHitsNoSimHitsHelperStandalone'
+recoMuonVMuAssocseedSta.trackType = 'outer'
+recoMuonVMuAssocseedSta.selection = ""
 
 #standalone and PF
 muonAssociatorByHitsNoSimHitsHelperStandalonePF = muonAssociatorByHitsNoSimHitsHelper.clone()
 muonAssociatorByHitsNoSimHitsHelperStandalonePF.UseTracker = False
 muonAssociatorByHitsNoSimHitsHelperStandalonePF.UseMuon  = True
-recoMuonVMuAssoc_staPF = recoMuonValidator.clone()
-recoMuonVMuAssoc_staPF.subDir = 'Muons/RecoMuonV/RecoMuon_MuonAssoc_StaPF'
-recoMuonVMuAssoc_staPF.usePFMuon = True
-recoMuonVMuAssoc_staPF.muAssocLabel = 'muonAssociatorByHitsNoSimHitsHelperStandalonePF'
-recoMuonVMuAssoc_staPF.trackType = 'outer'
-recoMuonVMuAssoc_staPF.selection = "isStandAloneMuon & isPFMuon"
+recoMuonVMuAssocstaPF = recoMuonValidator.clone()
+recoMuonVMuAssocstaPF.subDir = 'Muons/RecoMuonV/RecoMuon_MuonAssoc_StaPF'
+recoMuonVMuAssocstaPF.usePFMuon = True
+recoMuonVMuAssocstaPF.muAssocLabel = 'muonAssociatorByHitsNoSimHitsHelperStandalonePF'
+recoMuonVMuAssocstaPF.trackType = 'outer'
+recoMuonVMuAssocstaPF.selection = "isStandAloneMuon & isPFMuon"
 
 #global
 muonAssociatorByHitsNoSimHitsHelperGlobal = muonAssociatorByHitsNoSimHitsHelper.clone()
 muonAssociatorByHitsNoSimHitsHelperGlobal.UseTracker = True
 muonAssociatorByHitsNoSimHitsHelperGlobal.UseMuon  = True
-recoMuonVMuAssoc_glb = recoMuonValidator.clone()
-recoMuonVMuAssoc_glb.subDir = 'Muons/RecoMuonV/RecoMuon_MuonAssoc_Glb'
-recoMuonVMuAssoc_glb.muAssocLabel = 'muonAssociatorByHitsNoSimHitsHelperGlobal'
-recoMuonVMuAssoc_glb.trackType = 'global'
-recoMuonVMuAssoc_glb.selection = "isGlobalMuon"
+recoMuonVMuAssocglb = recoMuonValidator.clone()
+recoMuonVMuAssocglb.subDir = 'Muons/RecoMuonV/RecoMuon_MuonAssoc_Glb'
+recoMuonVMuAssocglb.muAssocLabel = 'muonAssociatorByHitsNoSimHitsHelperGlobal'
+recoMuonVMuAssocglb.trackType = 'global'
+recoMuonVMuAssocglb.selection = "isGlobalMuon"
 
 #global and PF
 muonAssociatorByHitsNoSimHitsHelperGlobalPF = muonAssociatorByHitsNoSimHitsHelper.clone()
 muonAssociatorByHitsNoSimHitsHelperGlobalPF.UseTracker = True
 muonAssociatorByHitsNoSimHitsHelperGlobalPF.UseMuon  = True
-recoMuonVMuAssoc_glbPF = recoMuonValidator.clone()
-recoMuonVMuAssoc_glbPF.subDir = 'Muons/RecoMuonV/RecoMuon_MuonAssoc_GlbPF'
-recoMuonVMuAssoc_glbPF.usePFMuon = True
-recoMuonVMuAssoc_glbPF.muAssocLabel = 'muonAssociatorByHitsNoSimHitsHelperGlobalPF'
-recoMuonVMuAssoc_glbPF.trackType = 'global'
-recoMuonVMuAssoc_glbPF.selection = "isGlobalMuon & isPFMuon"
+recoMuonVMuAssocglbPF = recoMuonValidator.clone()
+recoMuonVMuAssocglbPF.subDir = 'Muons/RecoMuonV/RecoMuon_MuonAssoc_GlbPF'
+recoMuonVMuAssocglbPF.usePFMuon = True
+recoMuonVMuAssocglbPF.muAssocLabel = 'muonAssociatorByHitsNoSimHitsHelperGlobalPF'
+recoMuonVMuAssocglbPF.trackType = 'global'
+recoMuonVMuAssocglbPF.selection = "isGlobalMuon & isPFMuon"
 
 #tight
 muonAssociatorByHitsNoSimHitsHelperTight = muonAssociatorByHitsNoSimHitsHelper.clone()
 muonAssociatorByHitsNoSimHitsHelperTight.UseTracker = True
 muonAssociatorByHitsNoSimHitsHelperTight.UseMuon  = True
-recoMuonVMuAssoc_tgt = recoMuonValidator.clone()
-recoMuonVMuAssoc_tgt.subDir = 'Muons/RecoMuonV/RecoMuon_MuonAssoc_Tgt'
-recoMuonVMuAssoc_tgt.muAssocLabel = 'muonAssociatorByHitsNoSimHitsHelperTight'
-recoMuonVMuAssoc_tgt.trackType = 'global'
-recoMuonVMuAssoc_tgt.selection = 'isGlobalMuon'
-recoMuonVMuAssoc_tgt.wantTightMuon = True
-recoMuonVMuAssoc_tgt.beamSpot = 'offlineBeamSpot'
-recoMuonVMuAssoc_tgt.primaryVertex = 'offlinePrimaryVertices'
+recoMuonVMuAssoctgt = recoMuonValidator.clone()
+recoMuonVMuAssoctgt.subDir = 'Muons/RecoMuonV/RecoMuon_MuonAssoc_Tgt'
+recoMuonVMuAssoctgt.muAssocLabel = 'muonAssociatorByHitsNoSimHitsHelperTight'
+recoMuonVMuAssoctgt.trackType = 'global'
+recoMuonVMuAssoctgt.selection = 'isGlobalMuon'
+recoMuonVMuAssoctgt.wantTightMuon = True
+recoMuonVMuAssoctgt.beamSpot = 'offlineBeamSpot'
+recoMuonVMuAssoctgt.primaryVertex = 'offlinePrimaryVertices'
 
 ##########################################################################
 # Muon validation sequence using RecoMuonValidator
 #
 
 muonValidationRMV_seq = cms.Sequence(
-    muonAssociatorByHitsNoSimHitsHelperTrk +recoMuonVMuAssoc_trk
-    +muonAssociatorByHitsNoSimHitsHelperStandalone +recoMuonVMuAssoc_sta
-    +muonAssociatorByHitsNoSimHitsHelperGlobal +recoMuonVMuAssoc_glb
-    +muonAssociatorByHitsNoSimHitsHelperTight +recoMuonVMuAssoc_tgt
+    muonAssociatorByHitsNoSimHitsHelperTrk +recoMuonVMuAssoctrk
+    +muonAssociatorByHitsNoSimHitsHelperStandalone +recoMuonVMuAssocsta
+    +muonAssociatorByHitsNoSimHitsHelperGlobal +recoMuonVMuAssocglb
+    +muonAssociatorByHitsNoSimHitsHelperTight +recoMuonVMuAssoctgt
     # 
-    #    +muonAssociatorByHitsNoSimHitsHelperTrkPF +recoMuonVMuAssoc_trkPF
-    #    +muonAssociatorByHitsNoSimHitsHelperStandalonePF +recoMuonVMuAssoc_staPF
-    #    +muonAssociatorByHitsNoSimHitsHelperGlobalPF +recoMuonVMuAssoc_glbPF
+    #    +muonAssociatorByHitsNoSimHitsHelperTrkPF +recoMuonVMuAssoctrkPF
+    #    +muonAssociatorByHitsNoSimHitsHelperStandalonePF +recoMuonVMuAssocstaPF
+    #    +muonAssociatorByHitsNoSimHitsHelperGlobalPF +recoMuonVMuAssocglbPF
     )
 

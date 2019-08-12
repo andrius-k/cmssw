@@ -34,8 +34,6 @@ EcalCondDBWriter::EcalCondDBWriter(edm::ParameterSet const &_ps)
   if (verbosity_ > 0)
     edm::LogInfo("EcalDQM") << "Initializing DQMStore from input ROOT files";
 
-  DQMStore &dqmStore(*edm::Service<DQMStore>());
-
   for (unsigned iF(0); iF < inputRootFiles.size(); ++iF) {
     std::string &fileName(inputRootFiles[iF]);
 
@@ -52,7 +50,7 @@ EcalCondDBWriter::EcalCondDBWriter(edm::ParameterSet const &_ps)
     else if (TString(matches->At(1)->GetName()).Atoi() != runNumber_)
       throw cms::Exception("Configuration") << "Input files disagree in run number";
 
-    dqmStore.open(fileName, false, "", "", DQMStore::StripRunDirs);
+    dqmstore_->open(fileName, false, "", "", DQMStore::StripRunDirs);
   }
 
   std::string DBName(_ps.getUntrackedParameter<std::string>("DBName"));

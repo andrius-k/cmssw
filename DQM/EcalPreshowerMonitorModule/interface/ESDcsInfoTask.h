@@ -39,7 +39,7 @@ protected:
   void cleanup(void);
 
 private:
-  DQMStore* dqmStore_;
+  std::unique_ptr<DQMStore> dqmStore_;
 
   std::string prefixME_;
 

@@ -1,5 +1,4 @@
 #include "DQMServices/Core/interface/DQMNet.h"
-#include "DQMServices/Core/interface/DQMDefinitions.h"
 #include "DQMServices/Core/src/DQMError.h"
 #include "classlib/iobase/InetServerSocket.h"
 #include "classlib/iobase/LocalServerSocket.h"

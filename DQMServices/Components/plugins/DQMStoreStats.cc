@@ -653,7 +653,7 @@ std::pair<unsigned int, unsigned int> DQMStoreStats::readMemoryEntry() const {
 //==================================================================//
 void DQMStoreStats::beginJob() {
   ////---- get DQM store interface
-  dbe_ = Service<DQMStore>().operator->();
+  dbe_ = std::make_unique<DQMStore>();
 
   // access the proc/ folder for memory information
   procFileName_ << "/proc/" << getpid() << "/status";

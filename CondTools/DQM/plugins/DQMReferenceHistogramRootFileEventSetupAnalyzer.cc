@@ -77,11 +77,11 @@ namespace edmtest {
       output.write((const char*)&(*tb)[0], tb->size());
       output.close();
 
-      DQMStore* dqm = &*edm::Service<DQMStore>();
+      std::unique_ptr<DQMStore> dqm = std::make_unique<DQMStore>();
       dqm->open(outfile, false, "", "Reference");
       remove(outfile.c_str());
 
-      std::vector<MonitorElement*> mes = dqm->getAllContents("");
+      //std::vector<MonitorElement*> mes = dqm->getAllContents("");
       // for (std::vector<MonitorElement *>::iterator i = mes.begin(), e = mes.end(); i != e; ++i)
       //  std::cout << "ME '" << (*i)->getFullname() << "'\n";
 

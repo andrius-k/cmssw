@@ -56,7 +56,7 @@ private:
   edm::InputTag hltInputTag_;
   float minVtxDoF_;
 
-  DQMStore* dbe_;
+  std::unique_ptr<DQMStore> dbe_;
   HLTConfigProvider hltConfig_;
 
   struct PixelMEs {

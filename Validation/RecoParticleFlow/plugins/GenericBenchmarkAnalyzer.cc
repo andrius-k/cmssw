@@ -66,7 +66,7 @@ GenericBenchmarkAnalyzer::~GenericBenchmarkAnalyzer() {}
 
 void GenericBenchmarkAnalyzer::beginJob() {
   // get ahold of back-end interface
-  dbe_ = edm::Service<DQMStore>().operator->();
+  dbe_ = std::make_unique<DQMStore>();
 
   if (dbe_) {
     // dbe_->setVerbose(1);
@@ -77,7 +77,7 @@ void GenericBenchmarkAnalyzer::beginJob() {
     else
       path += "Gen";
     dbe_->setCurrentFolder(path);
-    setup(dbe_, plotAgainstRecoQuantities_, minDeltaEt_, maxDeltaEt_, minDeltaPhi_, maxDeltaPhi_, doMetPlots_);
+    setup(&*dbe_, plotAgainstRecoQuantities_, minDeltaEt_, maxDeltaEt_, minDeltaPhi_, maxDeltaPhi_, doMetPlots_);
   }
 }
 

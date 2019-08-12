@@ -66,7 +66,7 @@ hltTauValIdealMonitorPF = hltTauValIdealMonitorMC.clone(
     ),
 )
 
-from DQMOffline.Trigger.HLTTauDQMOffline_cfi import hltTauOfflineMonitor_TagAndProbe
+from DQMOffline.Trigger.HLTTauDQMOffline_cfi import hltTauOfflineMonitorTagAndProbe
 hltTauValTagAndProbe = hltTauValIdealMonitorMC.clone(
     DQMBaseFolder = cms.untracked.string("HLT/TAU/RelVal/TagAndProbe"),
     Matching = cms.PSet(
@@ -90,7 +90,7 @@ hltTauValTagAndProbe = hltTauValIdealMonitorMC.clone(
                                     ),
                                 ),
     ),
-    TagAndProbe = hltTauOfflineMonitor_TagAndProbe.TagAndProbe
+    TagAndProbe = hltTauOfflineMonitorTagAndProbe.TagAndProbe
 )
 
 #hltTauValIdeal = cms.Sequence(hltTauValIdealMonitorMC+hltTauValIdealMonitorPF)

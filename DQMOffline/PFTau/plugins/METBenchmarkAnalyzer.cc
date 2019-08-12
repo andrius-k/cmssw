@@ -26,7 +26,7 @@ METBenchmarkAnalyzer::METBenchmarkAnalyzer(const edm::ParameterSet &parameterSet
   myColl_ = consumes<View<MET>>(inputLabel_);
 }
 
-void METBenchmarkAnalyzer::bookHistograms(DQMStore::IBooker &ibooker,
+void METBenchmarkAnalyzer::bookHistograms(dqm::reco::DQMStore::IBooker &ibooker,
                                           edm::Run const &iRun,
                                           edm::EventSetup const &iSetup) {
   BenchmarkAnalyzer::bookHistograms(ibooker, iRun, iSetup);

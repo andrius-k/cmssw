@@ -53,7 +53,7 @@ void DQMDaqInfo::beginLuminosityBlock(const edm::LuminosityBlock& lumiBlock, con
 
 void DQMDaqInfo::beginJob() {
   dbe_ = nullptr;
-  dbe_ = edm::Service<DQMStore>().operator->();
+  dbe_ = std::make_unique<DQMStore>();
 
   std::string commonFolder = "/EventInfo/DAQContents";
   std::string subsystFolder;

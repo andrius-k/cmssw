@@ -2,7 +2,7 @@ import FWCore.ParameterSet.Config as cms
 from DQMServices.Core.DQMEDHarvester import DQMEDHarvester
 
 from DQMServices.Core.DQMEDAnalyzer import DQMEDAnalyzer
-SUSY_HLT_PhotonMET_pt36 = DQMEDAnalyzer('SUSY_HLT_PhotonMET',
+SUSYHLTPhotonMETpt36 = DQMEDAnalyzer('SUSY_HLT_PhotonMET',
    trigSummary = cms.InputTag("hltTriggerSummaryAOD",'', 'HLT'),
    pfMETCollection = cms.InputTag("pfMet"),
    photonCollection = cms.InputTag("gedPhotons"),
@@ -14,7 +14,7 @@ SUSY_HLT_PhotonMET_pt36 = DQMEDAnalyzer('SUSY_HLT_PhotonMET',
    metThrOffline = cms.untracked.double(100),
 )
 
-SUSY_HLT_PhotonMET_pt50 = DQMEDAnalyzer('SUSY_HLT_PhotonMET',
+SUSYHLTPhotonMETpt50 = DQMEDAnalyzer('SUSY_HLT_PhotonMET',
    trigSummary = cms.InputTag("hltTriggerSummaryAOD",'', 'HLT'),
    pfMETCollection = cms.InputTag("pfMet"),
    photonCollection = cms.InputTag("gedPhotons"),
@@ -26,7 +26,7 @@ SUSY_HLT_PhotonMET_pt50 = DQMEDAnalyzer('SUSY_HLT_PhotonMET',
    metThrOffline = cms.untracked.double(100),
 )
 
-SUSY_HLT_PhotonMET_pt75 = DQMEDAnalyzer('SUSY_HLT_PhotonMET',
+SUSYHLTPhotonMETpt75 = DQMEDAnalyzer('SUSY_HLT_PhotonMET',
    trigSummary = cms.InputTag("hltTriggerSummaryAOD",'', 'HLT'),
    pfMETCollection = cms.InputTag("pfMet"),
    photonCollection = cms.InputTag("gedPhotons"),

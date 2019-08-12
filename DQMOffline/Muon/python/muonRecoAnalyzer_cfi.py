@@ -48,7 +48,7 @@ muonRecoAnalyzer = DQMEDAnalyzer('MuonRecoAnalyzer',
                                   tunePMax = cms.double(1.0),
                                   folder = cms.string("Muons/MuonRecoAnalyzer")
                                   )
-muonRecoAnalyzer_miniAOD = DQMEDAnalyzer('MuonRecoAnalyzer',
+muonRecoAnalyzerminiAOD = DQMEDAnalyzer('MuonRecoAnalyzer',
                                           MuonServiceProxy, 
                                           MuonCollection = cms.InputTag("slimmedMuons"),
                                           inputTagVertex       = cms.InputTag("offlinePrimaryVertices"),

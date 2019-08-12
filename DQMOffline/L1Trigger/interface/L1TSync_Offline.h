@@ -27,8 +27,8 @@
 #include <unistd.h>
 
 // User include files
+#include "DQMServices/Core/interface/DQMOneEDAnalyzer.h"
 #include "FWCore/Framework/interface/Frameworkfwd.h"
-#include "FWCore/Framework/interface/EDAnalyzer.h"
 #include "FWCore/Framework/interface/ESHandle.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/LuminosityBlock.h"
@@ -44,8 +44,6 @@
 #include "DQMOffline/L1Trigger/interface/L1TBeamConfiguration.h"
 #include "DataFormats/L1GlobalTrigger/interface/L1GlobalTriggerReadoutRecord.h"
 #include "DataFormats/L1GlobalTrigger/interface/L1GlobalTriggerEvmReadoutRecord.h"
-
-#include "DQMServices/Core/interface/DQMEDAnalyzer.h"
 
 #include "L1Trigger/GlobalTriggerAnalyzer/interface/L1GtUtils.h"
 
@@ -64,7 +62,7 @@ namespace ltso {
     bool lsIsValid = true;
   };
 }  // namespace ltso
-class L1TSync_Offline : public one::DQMEDAnalyzer<edm::LuminosityBlockCache<ltso::LSValid>> {
+class L1TSync_Offline : public DQMOneEDAnalyzer<edm::LuminosityBlockCache<ltso::LSValid>> {
 public:
   enum BeamMode {
     NOMODE = 1,

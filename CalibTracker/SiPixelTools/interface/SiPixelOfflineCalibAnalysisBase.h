@@ -121,7 +121,7 @@ protected:
 
 private:
   SiPixelFolderOrganizer* folderMaker_;
-  DQMStore* daqBE_;
+  std::unique_ptr<DQMStore> daqBE_;
   SiPixelHistogramId* theHistogramIdWorker_;
   std::string outputFileName_;
   bool createOutputFile_;

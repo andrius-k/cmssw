@@ -47,7 +47,7 @@ private:
 
   edm::ParameterSet parameters_;
 
-  DQMStore* dbe_;
+  std::unique_ptr<DQMStore> dbe_;
 
   // ---------- member data ----------
 

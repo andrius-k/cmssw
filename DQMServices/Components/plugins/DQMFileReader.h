@@ -32,7 +32,7 @@ private:
   void analyze(const edm::Event &, const edm::EventSetup &) override;
   void endJob() override;
 
-  DQMStore *dbe_;
+  std::unique_ptr<DQMStore> dbe_;
   edm::ParameterSet pset_;
 
   std::vector<std::string> filenames_;

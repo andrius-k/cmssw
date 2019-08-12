@@ -163,7 +163,7 @@ void SiStripLAProfileBooker::beginRun(const edm::Run&, const edm::EventSetup& c)
   // create SiStripFolderOrganizer
   SiStripFolderOrganizer folder_organizer;
 
-  dbe_ = edm::Service<DQMStore>().operator->();
+  dbe_ = std::make_unique<DQMStore>();
 
   //get all detids
 

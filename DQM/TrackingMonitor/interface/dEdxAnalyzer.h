@@ -39,14 +39,13 @@ public:
   static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
 
   void analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) override;
-  void endJob() override;
+  void endJob() /* never called */;
   double mass(double P, double I);
 
   void bookHistograms(DQMStore::IBooker&, edm::Run const&, edm::EventSetup const&) override;
 
 private:
   // ----------member data ---------------------------
-  DQMStore* dqmStore_;
   edm::ParameterSet fullconf_;
   edm::ParameterSet conf_;
 

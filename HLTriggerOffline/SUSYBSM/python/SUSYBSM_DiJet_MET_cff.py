@@ -2,7 +2,7 @@ import FWCore.ParameterSet.Config as cms
 from DQMServices.Core.DQMEDHarvester import DQMEDHarvester
 
 from DQMServices.Core.DQMEDAnalyzer import DQMEDAnalyzer
-SUSY_HLT_DiJet_MET = DQMEDAnalyzer('SUSY_HLT_DiJet_MET',
+SUSYHLTDiJetMET = DQMEDAnalyzer('SUSYHLTDiJetMET',
   trigSummary = cms.InputTag("hltTriggerSummaryAOD",'', 'HLT'), 
   pfMETCollection = cms.InputTag("pfMet"),
   caloMETCollection = cms.InputTag("caloMet"),

@@ -58,7 +58,7 @@ process.DQMOfflinePrePOG.remove(process.produceDenoms)
 process.DQMOfflinePrePOG.remove(process.pfTauRunDQMValidation)
 
 process.l1TriggerDqmOffline.remove(process.l1TriggerOffline)
-process.l1TriggerDqmOffline.remove(process.l1tSync_Offline)
+process.l1TriggerDqmOffline.remove(process.l1tSyncOffline)
 process.l1TriggerDqmOffline.remove(process.l1tEfficiencyMuons_offline)
 process.l1TriggerDqmOffline.remove(process.l1TriggerEmulatorOffline)
 

@@ -33,9 +33,9 @@ SiPixelTrackResidualSource.saveFile = False
 SiPixelTrackResidualSource.TrackCandidateProducer = cms.string('newTrackCandidateMaker')
 SiPixelTrackResidualSource.trajectoryInput = cms.InputTag('generalTracks')
 from DQM.SiPixelMonitorTrack.SiPixelMonitorTrack_Cosmics_cfi import *
-SiPixelTrackResidualSource_Cosmics.saveFile = False
-SiPixelTrackResidualSource_Cosmics.TrackCandidateProducer = cms.string('ckfTrackCandidatesP5')
-SiPixelTrackResidualSource_Cosmics.trajectoryInput = cms.string('ctfWithMaterialTracksP5')
+SiPixelTrackResidualSourceCosmics.saveFile = False
+SiPixelTrackResidualSourceCosmics.TrackCandidateProducer = cms.string('ckfTrackCandidatesP5')
+SiPixelTrackResidualSourceCosmics.trajectoryInput = cms.string('ctfWithMaterialTracksP5')
 from DQM.SiPixelMonitorTrack.SiPixelMonitorEfficiency_cfi import *
 SiPixelHitEfficiencySource.saveFile = False
 SiPixelHitEfficiencySource.trajectoryInput = cms.InputTag('generalTracks') 
@@ -88,13 +88,13 @@ SiPixelTrackResidualSource.phiOn = False
 SiPixelTrackResidualSource.bladeOn = False
 SiPixelTrackResidualSource.diskOn = False
 SiPixelTrackResidualSource.ringOn = False
-SiPixelTrackResidualSource_Cosmics.modOn = True
-SiPixelTrackResidualSource_Cosmics.ladOn = False
-SiPixelTrackResidualSource_Cosmics.layOn = False
-SiPixelTrackResidualSource_Cosmics.phiOn = False	
-SiPixelTrackResidualSource_Cosmics.bladeOn = False
-SiPixelTrackResidualSource_Cosmics.diskOn = False
-SiPixelTrackResidualSource_Cosmics.ringOn = False
+SiPixelTrackResidualSourceCosmics.modOn = True
+SiPixelTrackResidualSourceCosmics.ladOn = False
+SiPixelTrackResidualSourceCosmics.layOn = False
+SiPixelTrackResidualSourceCosmics.phiOn = False	
+SiPixelTrackResidualSourceCosmics.bladeOn = False
+SiPixelTrackResidualSourceCosmics.diskOn = False
+SiPixelTrackResidualSourceCosmics.ringOn = False
 SiPixelHitEfficiencySource.modOn = True
 SiPixelHitEfficiencySource.ladOn = False
 SiPixelHitEfficiencySource.layOn = False
@@ -106,13 +106,13 @@ SiPixelHitEfficiencySource.ringOn = False
 #HI track modules
 hiTracks = "hiGlobalPrimTracks"
 
-SiPixelTrackResidualSource_HeavyIons = SiPixelTrackResidualSource.clone(
+SiPixelTrackResidualSourceHeavyIons = SiPixelTrackResidualSource.clone(
     TrackCandidateProducer = 'hiPrimTrackCandidates',
     trajectoryInput = hiTracks,
     vtxsrc='hiSelectedVertex'
     )
 
-SiPixelHitEfficiencySource_HeavyIons = SiPixelHitEfficiencySource.clone(
+SiPixelHitEfficiencySourceHeavyIons = SiPixelHitEfficiencySource.clone(
     trajectoryInput = hiTracks,
     vtxsrc='hiSelectedVertex'
     )
@@ -129,8 +129,8 @@ SiPixelHLTSource.DirName = cms.untracked.string('Pixel/FEDIntegrity/')
 
 siPixelP5DQM_source = cms.Sequence(SiPixelRawDataErrorSource + SiPixelDigiSource + SiPixelRecHitSource + SiPixelClusterSource + SiPixelTrackResidualSource + SiPixelHitEfficiencySource + SiPixelMonitorTrackResiduals + dqmInfo)
 
-siPixelP5DQM_cosmics_source = cms.Sequence(SiPixelRawDataErrorSource + SiPixelDigiSource + SiPixelRecHitSource + SiPixelClusterSource + SiPixelTrackResidualSource_Cosmics + dqmInfo)
+siPixelP5DQM_cosmics_source = cms.Sequence(SiPixelRawDataErrorSource + SiPixelDigiSource + SiPixelRecHitSource + SiPixelClusterSource + SiPixelTrackResidualSourceCosmics + dqmInfo)
 
-siPixelP5DQM_heavyions_source = cms.Sequence(SiPixelHLTSource + SiPixelRawDataErrorSource + SiPixelDigiSource + SiPixelRecHitSource + SiPixelClusterSource + SiPixelTrackResidualSource_HeavyIons + SiPixelHitEfficiencySource_HeavyIons + dqmInfo)
+siPixelP5DQM_heavyions_source = cms.Sequence(SiPixelHLTSource + SiPixelRawDataErrorSource + SiPixelDigiSource + SiPixelRecHitSource + SiPixelClusterSource + SiPixelTrackResidualSourceHeavyIons + SiPixelHitEfficiencySourceHeavyIons + dqmInfo)
 
 siPixelP5DQM_source_woTrack = cms.Sequence(SiPixelRawDataErrorSource + SiPixelDigiSource + SiPixelRecHitSource + SiPixelClusterSource + dqmInfo)

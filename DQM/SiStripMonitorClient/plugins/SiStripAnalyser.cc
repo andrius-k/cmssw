@@ -85,8 +85,8 @@ void SiStripAnalyser::beginRun(edm::Run const& run, edm::EventSetup const& eSetu
   }
   condDataMon_.beginRun(run.run(), eSetup);
   if (globalStatusFilling_) {
-    auto& dqm_store = *edm::Service<DQMStore>{};
-    actionExecutor_.createStatus(dqm_store);
+    dqm_store = std::make_unique<DQMStore>();
+    actionExecutor_.createStatus(*dqm_store);
   }
 }
 
@@ -102,10 +102,9 @@ void SiStripAnalyser::analyze(edm::Event const& e, edm::EventSetup const& eSetup
       actionExecutor_.fillDummyStatus();
       actionExecutor_.createDummyShiftReport();
     } else {
-      auto& dqm_store = *edm::Service<DQMStore>{};
-      actionExecutor_.fillStatus(dqm_store, detCabling_, eSetup);
+      actionExecutor_.fillStatus(*dqm_store, detCabling_, eSetup);
       if (shiftReportFrequency_ != -1)
-        actionExecutor_.createShiftReport(dqm_store);
+        actionExecutor_.createShiftReport(*dqm_store);
     }
   }
 }
@@ -125,15 +124,14 @@ void SiStripAnalyser::endLuminosityBlock(edm::LuminosityBlock const& lumiSeg, ed
   std::cout << " ===> Iteration # " << nLumiSecs_ << " " << lumiSeg.luminosityBlock() << std::endl;
   std::cout << "====================================================== " << std::endl;
 
-  auto& dqm_store = *edm::Service<DQMStore>{};
   // Fill Global Status
   if (globalStatusFilling_ > 0) {
-    actionExecutor_.fillStatus(dqm_store, detCabling_, eSetup);
+    actionExecutor_.fillStatus(*dqm_store, detCabling_, eSetup);
   }
   // -- Create summary monitor elements according to the frequency
   if (summaryFrequency_ != -1 && nLumiSecs_ > 0 && nLumiSecs_ % summaryFrequency_ == 0) {
     std::cout << " Creating Summary " << std::endl;
-    actionExecutor_.createSummary(dqm_store);
+    actionExecutor_.createSummary(*dqm_store);
   }
   endLumiAnalysisOn_ = false;
 }
@@ -146,8 +144,7 @@ void SiStripAnalyser::endJob() {
   edm::LogInfo("SiStripAnalyser") << "SiStripAnalyser:: endjob called!";
   if (printFaultyModuleList_) {
     std::ostringstream str_val;
-    auto& dqm_store = *edm::Service<DQMStore>{};
-    actionExecutor_.printFaultyModuleList(dqm_store, str_val);
+    actionExecutor_.printFaultyModuleList(*dqm_store, str_val);
     std::cout << str_val.str() << std::endl;
   }
 }

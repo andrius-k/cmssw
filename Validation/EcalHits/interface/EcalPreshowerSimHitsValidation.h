@@ -49,12 +49,6 @@ protected:
   /// Analyze
   void analyze(const edm::Event &e, const edm::EventSetup &c) override;
 
-  // BeginJob
-  void beginJob() override;
-
-  // EndJob
-  void endJob(void) override;
-
 private:
   std::string HepMCLabel;
   std::string g4InfoLabel;
@@ -67,7 +61,7 @@ private:
 
   bool verbose_;
 
-  DQMStore *dbe_;
+  std::unique_ptr<DQMStore> dbe_;
 
   std::string outputFile_;
 

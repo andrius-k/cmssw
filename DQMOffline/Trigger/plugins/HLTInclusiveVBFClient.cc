@@ -9,7 +9,7 @@ using namespace edm;
 
 HLTInclusiveVBFClient::HLTInclusiveVBFClient(const edm::ParameterSet& iConfig) : conf_(iConfig) {
   //
-  dbe_ = Service<DQMStore>().operator->();
+  dbe_ = std::make_unique<DQMStore>();
 
   //
   if (!dbe_) {

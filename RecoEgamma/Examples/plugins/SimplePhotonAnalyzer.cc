@@ -58,7 +58,7 @@ void SimplePhotonAnalyzer::beginJob() {
   //========================================================================
 
   dbe_ = nullptr;
-  dbe_ = edm::Service<DQMStore>().operator->();
+  dbe_ = std::make_unique<DQMStore>();
 
   float hiE = 0;
   float loE = 0;
