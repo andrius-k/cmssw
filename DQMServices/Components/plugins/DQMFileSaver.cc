@@ -70,6 +70,7 @@ static std::string onlineOfflineFileName(const std::string &fileBaseName,
 }
 
 void DQMFileSaver::saveForOfflinePB(const std::string &workflow, int run) const {
+  return;
   char suffix[64];
   sprintf(suffix, "R%09d", run);
   std::string filename = onlineOfflineFileName(fileBaseName_, std::string(suffix), workflow, child_, PB);
@@ -77,6 +78,7 @@ void DQMFileSaver::saveForOfflinePB(const std::string &workflow, int run) const 
 }
 
 void DQMFileSaver::saveForOffline(const std::string &workflow, int run, int lumi) const {
+  return;
   std::cout << "DQMFileSaver::saveForOffline" << std::endl;
   char suffix[64];
   sprintf(suffix, "R%09d", run);
@@ -164,6 +166,7 @@ static void doSaveForOnline(DQMFileSaver::DQMStore *store,
                             int saveRefQMin,
                             const std::string &filterName,
                             DQMFileSaver::FileFormat fileFormat) {
+  return;
   // TODO(rovere): fix the online case. so far we simply rely on the
   // fact that we assume we will not run multithreaded in online.
   if (fileFormat == DQMFileSaver::ROOT)
@@ -173,6 +176,7 @@ static void doSaveForOnline(DQMFileSaver::DQMStore *store,
 }
 
 void DQMFileSaver::saveForOnlinePB(int run, const std::string &suffix) const {
+  return;
   // The file name contains the Online workflow name,
   // as we do not want to look inside the DQMStore,
   // and the @a suffix, defined in the run/lumi transitions.
@@ -268,6 +272,7 @@ void DQMFileSaver::saveForFilterUnit(const std::string &rewrite,
                                      int run,
                                      int lumi,
                                      const DQMFileSaver::FileFormat fileFormat) const {
+  return;
   // get from DAQ2 services where to store the files according to their format
   namespace bpt = boost::property_tree;
 
@@ -335,6 +340,7 @@ void DQMFileSaver::saveForFilterUnit(const std::string &rewrite,
 }
 
 void DQMFileSaver::saveJobReport(const std::string &filename) const {
+   return;
   // Report the file to job report service.
   edm::Service<edm::JobReport> jr;
   if (jr.isAvailable()) {
@@ -371,8 +377,7 @@ DQMFileSaver::DQMFileSaver(const edm::ParameterSet &ps)
       nlumi_(0),
       irun_(0),
       fms_(nullptr) {
-        std::cout << "This is piece of shit!" << std::endl;
-        consumesMany<MonitorElementCollection, edm::InRun>();
+  consumesMany<MonitorElementCollection, edm::InRun>();
   // Determine the file saving convention, and adjust defaults accordingly.
   std::string convention = ps.getUntrackedParameter<std::string>("convention", "Offline");
   fakeFilterUnitMode_ = ps.getUntrackedParameter<bool>("fakeFilterUnitMode", false);
@@ -530,6 +535,7 @@ void DQMFileSaver::beginJob() {
 }
 
 std::shared_ptr<saverDetails::NoCache> DQMFileSaver::globalBeginRun(const edm::Run &r, const edm::EventSetup &) const {
+  return nullptr;
   ++nrun_;
 
   // For Filter Unit, create an empty ini file:
@@ -559,6 +565,7 @@ void DQMFileSaver::analyze(edm::StreamID, const edm::Event &e, const edm::EventS
 }
 
 void DQMFileSaver::globalEndLuminosityBlock(const edm::LuminosityBlock &iLS, const edm::EventSetup &) const {
+  return;
   int ilumi = iLS.id().luminosityBlock();
   int irun = iLS.id().run();
   if (ilumi > 0 && saveByLumiSection_ > 0) {
@@ -627,7 +634,12 @@ void DQMFileSaver::globalEndRun(const edm::Run &iRun, const edm::EventSetup &) c
   iRun.getManyByType(meCollections);
   TRACE(meCollections.size());
 
-  std::string filename = "legacy.root"; //onlineOfflineFileName(fileBaseName_, std::string(suffix), workflow, child_, ROOT);
+  //std::string filename = "legacy.root"; //onlineOfflineFileName(fileBaseName_, std::string(suffix), workflow, child_, ROOT);
+  char suffix[64];
+  sprintf(suffix, "R%09d", iRun.run());
+  // workflow_ = "TestingLegacyOutputModule1";
+  // child_ = "DQMIO";
+  std::string filename = onlineOfflineFileName(fileBaseName_, std::string(suffix), "/Legacy/Output/Module1", "DQMIO", ROOT);
   TFileNoSync *file = new TFileNoSync(filename.c_str(), "RECREATE"); // open file
 
   // Traverse all MEs
@@ -635,42 +647,52 @@ void DQMFileSaver::globalEndRun(const edm::Run &iRun, const edm::EventSetup &) c
     for (unsigned i = 0; i < collection->size(); i++) {
       MonitorElementData const* meData = &(*collection.product())[i];
 
-      // Thread safe access to MonitorElementData Value
-      MonitorElementData::Value::Access value(meData->value_);
-
       if (meData->key_.kind_ == MonitorElement::Kind::INVALID) {
         assert(!"Invalid monitor element found when saving legacy DQM format.");
       }
-      else if(meData->key_.kind_ == MonitorElement::Kind::INT || meData->key_.kind_ == MonitorElement::Kind::REAL || meData->key_.kind_ == MonitorElement::Kind::STRING) {
-        TRACE("SCALAR IS HERE");
-        createDirectoryIfNeededAndCd(meData->key_.path_.getDirname());
 
-        TNamed str(meData->key_.path_.getObjectname(), value.scalar.str);
-        // TNamed str("key", "value234");
+      // Modify dirname to comply with DQM GUI format. Change:
+      // A/B/C/plot
+      // into:
+      // DQMData/Run X/A/Run summary/B/C/plot
+      std::string dirName = meData->key_.path_.getDirname();
+      int firstSlashPos = dirName.find("/");
+      dirName = dirName.substr(0, firstSlashPos) + "/Run summary" + dirName.substr(firstSlashPos, dirName.size());
+      dirName = "DQMData/Run " + std::to_string(iRun.run()) + "/" + dirName;
+      
+      std::string const* objectName = &meData->key_.path_.getObjectname();
 
-        // Write string
+      // Create dir if it doesn't exist and cd into it
+      createDirectoryIfNeededAndCd(dirName);
+      
+      // Thread safe access to MonitorElementData Value
+      MonitorElementData::Value::Access value(meData->value_);
+
+      // INTs are saved as strings in this format: <objectName>i=value</objectName>
+      // REALs are saved as strings in this format: <objectName>f=value</objectName>
+      // STRINGs are saved as strings in this format: <objectName>s="value"</objectName>
+      if(meData->key_.kind_ == MonitorElement::Kind::INT) {
+        std::string content = "<" + *objectName + ">i=" + std::to_string(value.scalar.num) + "</" + *objectName + ">";
+        TObjString str(content.c_str());
+        str.Write();
+      }
+      else if(meData->key_.kind_ == MonitorElement::Kind::REAL) {
+        std::string content = "<" + *objectName + ">f=" + std::to_string(value.scalar.real) + "</" + *objectName + ">";
+        TObjString str(content.c_str());
+        str.Write();
+      }
+      else if(meData->key_.kind_ == MonitorElement::Kind::STRING) {
+        std::string content = "<" + *objectName + ">s=\"" + value.scalar.str.c_str() + "\"</" + *objectName + ">";
+        TObjString str(content.c_str());
         str.Write();
       }
       else {
-        createDirectoryIfNeededAndCd(meData->key_.path_.getDirname());
-
-        // Write histogram
+        // Write a histogram
         value.object->Write();
-
-        // Get back to root directory
-        gDirectory->cd("/");
       }
 
-      // &(collection.product())[i].fuck();
-    // for(MonitorElementData const* meData : collection.product()) {
-      
-      // if(collection->value_type[i]->value_.object_ != nullptr) {
-      //   // Save a histogram
-
-      // }
-      // else {
-      //   // Save a scalar value
-      // }
+      // Go back to the root directory
+      gDirectory->cd("/");
     }
   }
   
@@ -754,9 +776,9 @@ void DQMFileSaver::endJob() {
   }
 }
 
-/// Use this for saving monitoring objects in ROOT files with dir structure;
-/// cds into directory (creates it first if it doesn't exist);
-/// returns success flag
+// Use this for saving monitoring objects in ROOT files with dir structure;
+// cds into directory (creates it first if it doesn't exist);
+// returns a success flag
 bool DQMFileSaver::createDirectoryIfNeededAndCd(const std::string &path) const {
   assert(!path.empty());
 
