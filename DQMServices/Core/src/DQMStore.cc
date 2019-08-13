@@ -181,11 +181,11 @@ namespace dqm {
     }
     template <class ME, class STORE>
     ME* IBooker<ME, STORE>::bookFloat(TString const& name) {
-      return bookME(name, MonitorElementData::Kind::INT, nullptr);
+      return bookME(name, MonitorElementData::Kind::REAL, nullptr);
     }
     template <class ME, class STORE>
     ME* IBooker<ME, STORE>::bookString(TString const& name, TString const& value) {
-      return bookME(name, MonitorElementData::Kind::INT, nullptr);
+      return bookME(name, MonitorElementData::Kind::STRING, nullptr);
     }
     template <class ME, class STORE>
     ME* IBooker<ME, STORE>::book1D(
