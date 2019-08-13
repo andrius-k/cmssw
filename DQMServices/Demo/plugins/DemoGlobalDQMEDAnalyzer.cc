@@ -28,7 +28,9 @@
 struct Histograms_Demo2 {
   typedef dqm::reco::MonitorElement MonitorElement;
   MonitorElement* histo_;
-  MonitorElement* scalar_;
+  MonitorElement* int_;
+  MonitorElement* real_;
+  MonitorElement* string_;
 };
 
 class DemoGlobalDQMEDAnalyzer : public DQMGlobalEDAnalyzer<Histograms_Demo2> {
@@ -61,7 +63,10 @@ void DemoGlobalDQMEDAnalyzer::dqmAnalyze(edm::Event const& iEvent,
                                          edm::EventSetup const& iSetup,
                                          Histograms_Demo2 const& histos) const {
   histos.histo_->Fill(5);
-  // histos.scalar_->Fill("This is the value of the string!!!");
+  histos.int_->Fill(23);
+  histos.real_->Fill(123.456789123);
+  std::string s = "This is the value of the string!!!";
+  histos.string_->Fill(s);
 }
 
 void DemoGlobalDQMEDAnalyzer::bookHistograms(DQMStore::IBooker& ibook,
@@ -70,7 +75,9 @@ void DemoGlobalDQMEDAnalyzer::bookHistograms(DQMStore::IBooker& ibook,
                                              Histograms_Demo2& histos) const {
   ibook.setCurrentFolder(folder_);
   histos.histo_ = ibook.book1D("EXAMPLE/labas2", "EXAMPLE title here", 10, 0., 10.);
-  histos.scalar_ = ibook.bookString("someStringName", "someStringValue 123");
+  histos.int_ = ibook.bookInt("integerValue");
+  histos.real_ = ibook.bookFloat("realValue");
+  histos.string_ = ibook.bookString("someStringName", "someStringValue 123");
 }
 
 // ------------ method fills 'descriptions' with the allowed parameters for the module  ------------
