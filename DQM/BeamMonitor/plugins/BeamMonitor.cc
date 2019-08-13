@@ -231,7 +231,7 @@ void BeamMonitor::bookHistograms(DQMStore::IBooker& iBooker, edm::Run const& iRu
   h_nVtx_lumi->setAxisTitle("Num of Vtx for Fit", 2);
 
   h_nVtx_lumi_all = iBooker.book1D("nVtx_lumi_all", "Num. of selected Vtx vs lumi (Fit) all", 20, 0.5, 20.5);
-  h_nVtx_lumi_all->getTH1()->SetCanExtend(TH1::kAllAxes);
+  h_nVtx_lumi_all->setCanExtend(TH1::kAllAxes);
   h_nVtx_lumi_all->setAxisTitle("Lumisection", 1);
   h_nVtx_lumi_all->setAxisTitle("Num of Vtx for Fit", 2);
 
@@ -243,7 +243,7 @@ void BeamMonitor::bookHistograms(DQMStore::IBooker& iBooker, edm::Run const& iRu
   h_vx_vy = iBooker.book2D(
       "trk_vx_vy", "Vertex (PCA) position of selected tracks", vxBin_, vxMin_, vxMax_, vxBin_, vxMin_, vxMax_);
   h_vx_vy->setOption("COLZ");
-  //   h_vx_vy->getTH1()->SetCanExtend(TH1::kAllAxes);
+  //   h_vx_vy->setCanExtend(TH1::kAllAxes);
   h_vx_vy->setAxisTitle("x coordinate of input track at PCA (cm)", 1);
   h_vx_vy->setAxisTitle("y coordinate of input track at PCA (cm)", 2);
 
@@ -333,7 +333,7 @@ void BeamMonitor::bookHistograms(DQMStore::IBooker& iBooker, edm::Run const& iRu
         histTitle += " all";
         tmpHs = iBooker.book1D(histName, histTitle, 40, 0.5, 40.5);
         hs.push_back(tmpHs);
-        tmpHs->getTH1()->SetCanExtend(TH1::kAllAxes);
+        tmpHs->setCanExtend(TH1::kAllAxes);
         tmpHs->setAxisTitle(xtitle, 1);
         tmpHs->setAxisTitle(ytitle, 2);
         tmpHs->getTH1()->SetOption("E1");
@@ -368,27 +368,27 @@ void BeamMonitor::bookHistograms(DQMStore::IBooker& iBooker, edm::Run const& iRu
 
   h_x0 = iBooker.book1D("BeamMonitorFeedBack_x0", "x coordinate of beam spot (Fit)", 100, -0.01, 0.01);
   h_x0->setAxisTitle("x_{0} (cm)", 1);
-  h_x0->getTH1()->SetCanExtend(TH1::kAllAxes);
+  h_x0->setCanExtend(TH1::kAllAxes);
 
   h_y0 = iBooker.book1D("BeamMonitorFeedBack_y0", "y coordinate of beam spot (Fit)", 100, -0.01, 0.01);
   h_y0->setAxisTitle("y_{0} (cm)", 1);
-  h_y0->getTH1()->SetCanExtend(TH1::kAllAxes);
+  h_y0->setCanExtend(TH1::kAllAxes);
 
   h_z0 = iBooker.book1D("BeamMonitorFeedBack_z0", "z coordinate of beam spot (Fit)", dzBin_, dzMin_, dzMax_);
   h_z0->setAxisTitle("z_{0} (cm)", 1);
-  h_z0->getTH1()->SetCanExtend(TH1::kAllAxes);
+  h_z0->setCanExtend(TH1::kAllAxes);
 
   h_sigmaX0 = iBooker.book1D("BeamMonitorFeedBack_sigmaX0", "sigma x0 of beam spot (Fit)", 100, 0, 0.05);
   h_sigmaX0->setAxisTitle("#sigma_{X_{0}} (cm)", 1);
-  h_sigmaX0->getTH1()->SetCanExtend(TH1::kAllAxes);
+  h_sigmaX0->setCanExtend(TH1::kAllAxes);
 
   h_sigmaY0 = iBooker.book1D("BeamMonitorFeedBack_sigmaY0", "sigma y0 of beam spot (Fit)", 100, 0, 0.05);
   h_sigmaY0->setAxisTitle("#sigma_{Y_{0}} (cm)", 1);
-  h_sigmaY0->getTH1()->SetCanExtend(TH1::kAllAxes);
+  h_sigmaY0->setCanExtend(TH1::kAllAxes);
 
   h_sigmaZ0 = iBooker.book1D("BeamMonitorFeedBack_sigmaZ0", "sigma z0 of beam spot (Fit)", 100, 0, 10);
   h_sigmaZ0->setAxisTitle("#sigma_{Z_{0}} (cm)", 1);
-  h_sigmaZ0->getTH1()->SetCanExtend(TH1::kAllAxes);
+  h_sigmaZ0->setCanExtend(TH1::kAllAxes);
 
   // Histograms of all reco tracks (without cuts):
   h_trkPt = iBooker.book1D("trkPt", "p_{T} of all reco'd tracks (no selection)", 200, 0., 50.);
@@ -427,22 +427,22 @@ void BeamMonitor::bookHistograms(DQMStore::IBooker& iBooker, edm::Run const& iRu
   // Monitor only the PV with highest sum pt of assoc. trks:
   h_PVx[0] = iBooker.book1D("PVX", "x coordinate of Primary Vtx", 50, -0.01, 0.01);
   h_PVx[0]->setAxisTitle("PVx (cm)", 1);
-  h_PVx[0]->getTH1()->SetCanExtend(TH1::kAllAxes);
+  h_PVx[0]->setCanExtend(TH1::kAllAxes);
 
   h_PVy[0] = iBooker.book1D("PVY", "y coordinate of Primary Vtx", 50, -0.01, 0.01);
   h_PVy[0]->setAxisTitle("PVy (cm)", 1);
-  h_PVy[0]->getTH1()->SetCanExtend(TH1::kAllAxes);
+  h_PVy[0]->setCanExtend(TH1::kAllAxes);
 
   h_PVz[0] = iBooker.book1D("PVZ", "z coordinate of Primary Vtx", dzBin_, dzMin_, dzMax_);
   h_PVz[0]->setAxisTitle("PVz (cm)", 1);
 
   h_PVx[1] = iBooker.book1D("PVXFit", "x coordinate of Primary Vtx (Last Fit)", 50, -0.01, 0.01);
   h_PVx[1]->setAxisTitle("PVx (cm)", 1);
-  h_PVx[1]->getTH1()->SetCanExtend(TH1::kAllAxes);
+  h_PVx[1]->setCanExtend(TH1::kAllAxes);
 
   h_PVy[1] = iBooker.book1D("PVYFit", "y coordinate of Primary Vtx (Last Fit)", 50, -0.01, 0.01);
   h_PVy[1]->setAxisTitle("PVy (cm)", 1);
-  h_PVy[1]->getTH1()->SetCanExtend(TH1::kAllAxes);
+  h_PVy[1]->setCanExtend(TH1::kAllAxes);
 
   h_PVz[1] = iBooker.book1D("PVZFit", "z coordinate of Primary Vtx (Last Fit)", dzBin_, dzMin_, dzMax_);
   h_PVz[1]->setAxisTitle("PVz (cm)", 1);

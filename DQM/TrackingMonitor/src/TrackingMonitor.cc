@@ -345,19 +345,19 @@ void TrackingMonitor::bookHistograms(DQMStore::IBooker& ibooker, edm::Run const&
 
     histname = "NumberOfTracksVsLS_" + CategoryName;
     NumberOfTracksVsLS = ibooker.bookProfile(histname, histname, LSBin, LSMin, LSMax, TKNoMin, TKNoMax * 3., "");
-    NumberOfTracksVsLS->getTH1()->SetCanExtend(TH1::kAllAxes);
+    NumberOfTracksVsLS->setCanExtend(TH1::kAllAxes);
     NumberOfTracksVsLS->setAxisTitle("#Lumi section", 1);
     NumberOfTracksVsLS->setAxisTitle("Number of  Tracks", 2);
 
     histname = "NumberOfRecHitsPerTrackVsLS_" + CategoryName;
     NumberOfRecHitsPerTrackVsLS = ibooker.bookProfile(histname, histname, LSBin, LSMin, LSMax, 0., 200., "");
-    NumberOfRecHitsPerTrackVsLS->getTH1()->SetCanExtend(TH1::kAllAxes);
+    NumberOfRecHitsPerTrackVsLS->setCanExtend(TH1::kAllAxes);
     NumberOfRecHitsPerTrackVsLS->setAxisTitle("#Lumi section", 1);
     NumberOfRecHitsPerTrackVsLS->setAxisTitle("Mean number of Valid RecHits per track", 2);
 
     histname = "NumberEventsVsLS_" + CategoryName;
     NumberEventsOfVsLS = ibooker.book1D(histname, histname, LSBin, LSMin, LSMax);
-    NumberEventsOfVsLS->getTH1()->SetCanExtend(TH1::kAllAxes);
+    NumberEventsOfVsLS->setCanExtend(TH1::kAllAxes);
     NumberEventsOfVsLS->setAxisTitle("#Lumi section", 1);
     NumberEventsOfVsLS->setAxisTitle("Number of events", 2);
 
@@ -367,7 +367,7 @@ void TrackingMonitor::bookHistograms(DQMStore::IBooker& ibooker, edm::Run const&
     histname = "NumberOfGoodPVtxVsLS_" + CategoryName;
     NumberOfGoodPVtxVsLS =
         ibooker.bookProfile(histname, histname, LSBin, LSMin, LSMax, GoodPVtxMin, 3. * GoodPVtxMax, "");
-    NumberOfGoodPVtxVsLS->getTH1()->SetCanExtend(TH1::kAllAxes);
+    NumberOfGoodPVtxVsLS->setCanExtend(TH1::kAllAxes);
     NumberOfGoodPVtxVsLS->setAxisTitle("#Lumi section", 1);
     NumberOfGoodPVtxVsLS->setAxisTitle("Mean number of good PV", 2);
 
@@ -380,7 +380,7 @@ void TrackingMonitor::bookHistograms(DQMStore::IBooker& ibooker, edm::Run const&
     if (doFractionPlot_) {
       histname = "GoodTracksFractionVsLS_" + CategoryName;
       GoodTracksFractionVsLS = ibooker.bookProfile(histname, histname, LSBin, LSMin, LSMax, 0, 1.1, "");
-      GoodTracksFractionVsLS->getTH1()->SetCanExtend(TH1::kAllAxes);
+      GoodTracksFractionVsLS->setCanExtend(TH1::kAllAxes);
       GoodTracksFractionVsLS->setAxisTitle("#Lumi section", 1);
       GoodTracksFractionVsLS->setAxisTitle("Fraction of Good Tracks", 2);
     }
@@ -629,7 +629,7 @@ void TrackingMonitor::bookHistograms(DQMStore::IBooker& ibooker, edm::Run const&
           histname, histname, histoBin[i], histoMin[i], histoMax[i], TKNoSeedBin, TKNoSeedMin, TKNoSeedMax)));
       SeedsVsClusters[i]->setAxisTitle("Number of Clusters", 1);
       SeedsVsClusters[i]->setAxisTitle("Number of Seeds", 2);
-      SeedsVsClusters[i]->getTH2F()->SetCanExtend(TH1::kAllAxes);
+      SeedsVsClusters[i]->setCanExtend(TH1::kAllAxes);
     }
   }
 
@@ -711,7 +711,7 @@ void TrackingMonitor::bookHistograms(DQMStore::IBooker& ibooker, edm::Run const&
         title = "# of Clusters in (Pixel+Strip) Detectors";
       NumberOfTrkVsClusters[i]->setAxisTitle(title, 1);
       NumberOfTrkVsClusters[i]->setAxisTitle("Number of Tracks", 2);
-      NumberOfTrkVsClusters[i]->getTH1()->SetCanExtend(TH1::kXaxis);
+      NumberOfTrkVsClusters[i]->setCanExtend(TH1::kXaxis);
     }
   }
 

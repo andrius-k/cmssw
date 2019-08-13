@@ -87,7 +87,7 @@ void BeamSpotProblemMonitor::bookHistograms(DQMStore::IBooker& iB, const edm::Ru
   histName += "_all";
   histTitle += " all";
   beamSpotStatusLumiAll_ = iB.book1D(histName, histTitle, 40, 0.5, 40.5);
-  beamSpotStatusLumiAll_->getTH1()->SetCanExtend(TH1::kAllAxes);
+  beamSpotStatusLumiAll_->setCanExtend(TH1::kAllAxes);
   beamSpotStatusLumiAll_->setAxisTitle(xtitle, 1);
   beamSpotStatusLumiAll_->setAxisTitle(ytitle, 2);
 

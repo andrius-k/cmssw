@@ -216,7 +216,7 @@ void V0Monitor::bookHistograms(DQMStore::IBooker& ibooker, edm::Run const& iRun,
 
   n_vs_LS_ = bookHisto1D(ibooker, "n_vs_LS", "# events vs LS", "LS", "# events", ls_binning_);
   v0_N_vs_LS_ = bookProfile(ibooker, "v0_N_vs_LS", "# v0 vs LS", "LS", "# v0", ls_binning_, N_binning);
-  v0_N_vs_LS_->getTH1()->SetCanExtend(TH1::kAllAxes);
+  v0_N_vs_LS_->setCanExtend(TH1::kAllAxes);
 
   // Initialize the GenericTriggerEventFlag
   if (genTriggerEventFlag_->on())

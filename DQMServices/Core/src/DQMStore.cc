@@ -52,16 +52,12 @@ namespace dqm {
       {
         MonitorElementData::Value::Access value(data->value_);
         value.object = std::unique_ptr<TH1>(object);
-        object = nullptr;
-
-        if(value.object != nullptr) {
-          // Make sure the name of an object does not contain (part of) the path
-          value.object->SetName(data->key_.path_.getObjectname().c_str());
-        }
       }
 
       std::unique_ptr<ME> me = std::make_unique<ME>(data, /* is_owned */ true, /* is_readonly */ false);
+      assert(me);
       ME* me_ptr = store_->putME(std::move(me));
+      assert(me_ptr);
       return me_ptr;
     }
 
@@ -551,8 +547,6 @@ namespace dqm {
             assert(localMe == nullptr);
           }
 
-          TRACE(meData->key_.path_.getDirname() << " " << meData->key_.path_.getObjectname() << " "
-                                                << (void*)meData->key_.path_.getObjectname().c_str());
           product.push_back(std::move(meData));
           //std::raise(SIGINT);
         } else {

@@ -341,6 +341,16 @@ namespace dqm {
       virtual void disableAlphanumeric() const;
       virtual void setOption(const char* option) const;
 
+      // new operations to reduce usage of getTH*
+      virtual double getAxisMin(int axis = 1);
+      virtual double getAxisMax(int axis = 1);
+      // We should avoid extending histograms in general, and if the behaviour
+      // is actually needed, provide a more specific interface rather than
+      // relying on the ROOT behaviour.
+      DQM_DEPRECATED
+      virtual void setCanExtend(unsigned int value);
+
+
       // these should be non-const, since they are potentially not thread-safe
       virtual TObject* getRootObject() const;
       virtual TH1* getTH1() const;
@@ -448,9 +458,9 @@ namespace dqm {
       BAN(virtual double getEntries() const)
       BAN(virtual double getBinEntries(int bin) const)
 
-      BAN(virtual void setBinContent(int binx, double content))
-      BAN(virtual void setBinContent(int binx, int biny, double content))
-      BAN(virtual void setBinContent(int binx, int biny, int binz, double content))
+      //BAN(virtual void setBinContent(int binx, double content))
+      //BAN(virtual void setBinContent(int binx, int biny, double content))
+      //BAN(virtual void setBinContent(int binx, int biny, int binz, double content))
       BAN(virtual void setBinError(int binx, double error))
       BAN(virtual void setBinError(int binx, int biny, double error))
       BAN(virtual void setBinError(int binx, int biny, int binz, double error))

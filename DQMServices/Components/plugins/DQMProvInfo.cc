@@ -87,7 +87,7 @@ void DQMProvInfo::bookHistogramsLhcInfo(DQMStore::IBooker& iBooker) {
   hBeamMode_ = iBooker.book1D("beamMode", "beamMode", MAX_LUMIS, 1., MAX_LUMIS + 1);
   hBeamMode_->getTH1F()->GetYaxis()->Set(21, 0.5, 21.5);
   hBeamMode_->getTH1F()->SetMaximum(21.5);
-  hBeamMode_->getTH1F()->SetCanExtend(TH1::kAllAxes);
+  hBeamMode_->setCanExtend(TH1::kAllAxes);
   hBeamMode_->setBinContent(0., 22.);  // Not clear, remove when testable
 
   hBeamMode_->setAxisTitle("Luminosity Section", 1);
@@ -117,23 +117,23 @@ void DQMProvInfo::bookHistogramsLhcInfo(DQMStore::IBooker& iBooker) {
   hIntensity1_ = iBooker.book1D("intensity1", "Intensity Beam 1", MAX_LUMIS, 1., MAX_LUMIS + 1);
   hIntensity1_->setAxisTitle("Luminosity Section", 1);
   hIntensity1_->setAxisTitle("N [E10]", 2);
-  hIntensity1_->getTH1F()->SetCanExtend(TH1::kAllAxes);
+  hIntensity1_->setCanExtend(TH1::kAllAxes);
 
   // Element: intensity2
   hIntensity2_ = iBooker.book1D("intensity2", "Intensity Beam 2", MAX_LUMIS, 1., MAX_LUMIS + 1);
   hIntensity2_->setAxisTitle("Luminosity Section", 1);
   hIntensity2_->setAxisTitle("N [E10]", 2);
-  hIntensity2_->getTH1F()->SetCanExtend(TH1::kAllAxes);
+  hIntensity2_->setCanExtend(TH1::kAllAxes);
 
   // Element: lhcFill
   hLhcFill_ = iBooker.book1D("lhcFill", "LHC Fill Number", MAX_LUMIS, 1., MAX_LUMIS + 1);
   hLhcFill_->setAxisTitle("Luminosity Section", 1);
-  hLhcFill_->getTH1F()->SetCanExtend(TH1::kAllAxes);
+  hLhcFill_->setCanExtend(TH1::kAllAxes);
 
   // Element: momentum
   hMomentum_ = iBooker.book1D("momentum", "Beam Energy [GeV]", MAX_LUMIS, 1., MAX_LUMIS + 1);
   hMomentum_->setAxisTitle("Luminosity Section", 1);
-  hMomentum_->getTH1F()->SetCanExtend(TH1::kAllAxes);
+  hMomentum_->setCanExtend(TH1::kAllAxes);
 }
 
 void DQMProvInfo::bookHistogramsEventInfo(DQMStore::IBooker& iBooker) {
@@ -150,7 +150,7 @@ void DQMProvInfo::bookHistogramsEventInfo(DQMStore::IBooker& iBooker) {
                                      0.,
                                      MAX_VBINS);
   reportSummaryMap_->setAxisTitle("Luminosity Section");
-  reportSummaryMap_->getTH2F()->SetCanExtend(TH1::kAllAxes);
+  reportSummaryMap_->setCanExtend(TH1::kAllAxes);
 
   reportSummaryMap_->setBinLabel(VBIN_CSC_P, "CSC+", 2);
   reportSummaryMap_->setBinLabel(VBIN_CSC_M, "CSC-", 2);
