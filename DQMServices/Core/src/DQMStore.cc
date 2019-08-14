@@ -52,6 +52,12 @@ namespace dqm {
       {
         MonitorElementData::Value::Access value(data->value_);
         value.object = std::unique_ptr<TH1>(object);
+        object = nullptr;
+
+        if(value.object != nullptr) {
+          // Make sure the name of an object does not contain (part of) the path
+          value.object->SetName(data->key_.path_.getObjectname().c_str());
+        }
       }
 
       std::unique_ptr<ME> me = std::make_unique<ME>(data, /* is_owned */ true, /* is_readonly */ false);
