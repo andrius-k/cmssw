@@ -26,6 +26,7 @@
 
 // user include files
 #include "FWCore/Framework/interface/InputSource.h"
+#include "FWCore/Sources/interface/PuttableSourceBase.h"
 #include "FWCore/Catalog/interface/InputFileCatalog.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "DQMServices/Core/interface/DQMStore.h"
@@ -65,8 +66,8 @@
 #include "format.h"
 
 namespace {
-  typedef dqm::legacy::MonitorElement MonitorElement;
-  typedef dqm::legacy::DQMStore DQMStore;
+  typedef dqm::harvesting::MonitorElement MonitorElement;
+  typedef dqm::harvesting::DQMStore DQMStore;
 
   //adapter functions
   MonitorElement* createElement(DQMStore& iStore, const char* iName, TH1F* iHist) {
@@ -297,7 +298,7 @@ namespace {
 
 }  // namespace
 
-class DQMRootSource : public edm::InputSource {
+class DQMRootSource : public edm::PuttableSourceBase {
 public:
   DQMRootSource(edm::ParameterSet const&, const edm::InputSourceDescription&);
   ~DQMRootSource() override;
@@ -351,6 +352,13 @@ private:
     unsigned int run_;
     unsigned int lumi_;
   };
+
+  void beginRun(edm::Run& run) {
+    TRACE_;
+  }
+  void beginLuminosityBlock(edm::LuminosityBlock& lumi) {
+    TRACE_;
+  }
 
   edm::InputSource::ItemType getNextItemType() override;
   //NOTE: the following is really read next run auxiliary
@@ -433,7 +441,8 @@ void DQMRootSource::fillDescriptions(edm::ConfigurationDescriptions& description
 // constructors and destructor
 //
 DQMRootSource::DQMRootSource(edm::ParameterSet const& iPSet, const edm::InputSourceDescription& iDesc)
-    : edm::InputSource(iPSet, iDesc),
+    : edm::PuttableSourceBase(iPSet, iDesc),
+      m_store(std::make_unique<DQMStore>()),
       m_catalog(iPSet.getUntrackedParameter<std::vector<std::string> >("fileNames"),
                 iPSet.getUntrackedParameter<std::string>("overrideCatalog")),
       m_nextItemType(edm::InputSource::IsFile),
@@ -474,6 +483,7 @@ DQMRootSource::DQMRootSource(edm::ParameterSet const& iPSet, const edm::InputSou
     m_treeReaders[kTProfileIndex].reset(new TreeObjectReader<TProfile>());
     m_treeReaders[kTProfile2DIndex].reset(new TreeObjectReader<TProfile2D>());
   }
+  produces<MonitorElementCollection, edm::Transition::EndRun>("DQMGenerationRecoRun");
 }
 
 // DQMRootSource::DQMRootSource(const DQMRootSource& rhs)
