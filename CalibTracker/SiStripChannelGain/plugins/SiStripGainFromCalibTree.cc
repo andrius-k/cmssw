@@ -130,7 +130,7 @@ private:
   std::unique_ptr<SiStripApvGain> getNewObject() override;
 
   TFileService* tfs;
-  DQMStore* dbe;
+  std::unique_ptr<DQMStore> dbe;
   double MagFieldCurrentTh;
   double MinNrEntries;
   double MaxMPVError;
@@ -393,7 +393,7 @@ SiStripGainFromCalibTree::SiStripGainFromCalibTree(const edm::ParameterSet& iCon
   doChargeMonitorPerPlane = iConfig.getUntrackedParameter<bool>("doChargeMonitorPerPlane", false);
 
   // Gather DQM Service
-  dbe = edm::Service<DQMStore>().operator->();
+  dbe = std::make_unique<DQMStore>();
   dbe->setVerbose(10);
 
   //Set the monitoring element tag and store

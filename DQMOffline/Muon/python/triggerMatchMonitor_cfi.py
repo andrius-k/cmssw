@@ -3,7 +3,7 @@ import FWCore.ParameterSet.Config as cms
 from RecoMuon.TrackingTools.MuonServiceProxy_cff import *
 
 from DQMServices.Core.DQMEDAnalyzer import DQMEDAnalyzer
-triggerMatchMonitor_miniAOD = DQMEDAnalyzer('TriggerMatchMonitor',
+triggerMatchMonitorminiAOD = DQMEDAnalyzer('TriggerMatchMonitor',
                                               MuonServiceProxy,
                                               offlineBeamSpot = cms.untracked.InputTag("offlineBeamSpot"),
                                               offlinePrimaryVertices = cms.untracked.InputTag("offlinePrimaryVertices"),

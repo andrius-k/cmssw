@@ -58,7 +58,7 @@ BeamMonitorBx::BeamMonitorBx(const ParameterSet& ps) : countBx_(0), countEvt_(0)
   fitNLumi_ = parameters_.getUntrackedParameter<int>("fitEveryNLumi", -1);
   resetFitNLumi_ = parameters_.getUntrackedParameter<int>("resetEveryNLumi", -1);
 
-  dbe_ = Service<DQMStore>().operator->();
+  dbe_ = std::make_unique<DQMStore>();
 
   if (!monitorName_.empty())
     monitorName_ = monitorName_ + "/";
@@ -295,7 +295,7 @@ void BeamMonitorBx::BookTrendHistos(
       if (createHisto) {
         edm::LogInfo("BX|BeamMonitorBx") << "histName = " << histName << "; histTitle = " << histTitle << std::endl;
         hst[histName] = dbe_->book1D(histName, histTitle, 40, 0.5, 40.5);
-        hst[histName]->getTH1()->SetCanExtend(TH1::kAllAxes);
+        hst[histName]->setCanExtend(TH1::kAllAxes);
         hst[histName]->setAxisTitle(xtitle, 1);
         hst[histName]->setAxisTitle(ytitle, 2);
         hst[histName]->getTH1()->SetOption("E1");
@@ -324,7 +324,7 @@ void BeamMonitorBx::BookTrendHistos(
 
   hst[histName] = dbe_->book1D(histName, "Number of Good Reconstructed Vertices", 40, 0.5, 40.5);
   hst[histName]->setAxisTitle(xtitle, 1);
-  hst[histName]->getTH1()->SetCanExtend(TH1::kAllAxes);
+  hst[histName]->setCanExtend(TH1::kAllAxes);
   hst[histName]->getTH1()->SetOption("E1");
 }
 

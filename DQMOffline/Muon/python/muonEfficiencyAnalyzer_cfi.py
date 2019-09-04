@@ -31,7 +31,7 @@ TightMuonEfficiencyAnalyzer = DQMEDAnalyzer('EfficiencyAnalyzer',
                                              ID = cms.string("Tight"),
                                              folder = cms.string("Muons/EfficiencyAnalyzer/")
                                              )
-TightMuonEfficiencyAnalyzer_miniAOD = DQMEDAnalyzer('EfficiencyAnalyzer',
+TightMuonEfficiencyAnalyzerminiAOD = DQMEDAnalyzer('EfficiencyAnalyzer',
                                                      MuonServiceProxy,
                                                      MuonCollection  = cms.InputTag("slimmedMuons"),
                                                      TrackCollection = cms.InputTag("generalTracks"),
@@ -90,7 +90,7 @@ LooseMuonEfficiencyAnalyzer = DQMEDAnalyzer('EfficiencyAnalyzer',
                                              folder = cms.string("Muons/EfficiencyAnalyzer/")
                                              
                                              )
-LooseMuonEfficiencyAnalyzer_miniAOD = DQMEDAnalyzer('EfficiencyAnalyzer',
+LooseMuonEfficiencyAnalyzerminiAOD = DQMEDAnalyzer('EfficiencyAnalyzer',
                                                      MuonServiceProxy,
                                                      MuonCollection  = cms.InputTag("slimmedMuons"),
                                                      TrackCollection = cms.InputTag("generalTracks"),
@@ -149,7 +149,7 @@ MediumMuonEfficiencyAnalyzer = DQMEDAnalyzer('EfficiencyAnalyzer',
                                               ID = cms.string("Medium"),
                                               folder = cms.string("Muons/EfficiencyAnalyzer/")
                                               )
-MediumMuonEfficiencyAnalyzer_miniAOD = DQMEDAnalyzer('EfficiencyAnalyzer',
+MediumMuonEfficiencyAnalyzerminiAOD = DQMEDAnalyzer('EfficiencyAnalyzer',
                                                       MuonServiceProxy,
                                                       MuonCollection  = cms.InputTag("slimmedMuons"),
                                                       TrackCollection = cms.InputTag("generalTracks"),

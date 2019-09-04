@@ -3,7 +3,7 @@ from DQMServices.Core.DQMEDHarvester import DQMEDHarvester
 from copy import deepcopy
 
 from DQMServices.Core.DQMEDAnalyzer import DQMEDAnalyzer
-SUSY_HLT_Ele15_HT350_MET50_SingleLepton = DQMEDAnalyzer('SUSY_HLT_SingleLepton',
+SUSYHLTEle15HT350MET50SingleLepton = DQMEDAnalyzer('SUSY_HLT_SingleLepton',
                                                   electronCollection = cms.InputTag('gedGsfElectrons'),
                                                   muonCollection = cms.InputTag(''),
                                                   pfMetCollection = cms.InputTag('pfMet'),
@@ -54,7 +54,7 @@ SUSYoHLToEle15oHT350oMET50oSingleLeptonPOSTPROCESSING = DQMEDHarvester('DQMGener
                                                                  resolution = cms.vstring('')
                                                                  )
 
-SUSY_HLT_Ele15_HT400_MET50_SingleLepton = DQMEDAnalyzer('SUSY_HLT_SingleLepton',
+SUSYHLTEle15HT400MET50SingleLepton = DQMEDAnalyzer('SUSY_HLT_SingleLepton',
                                                   electronCollection = cms.InputTag('gedGsfElectrons'),
                                                   muonCollection = cms.InputTag(''),
                                                   pfMetCollection = cms.InputTag('pfMet'),
@@ -108,11 +108,11 @@ SUSYoHLToEle15oHT400oMET50oSingleLeptonPOSTPROCESSING = DQMEDHarvester('DQMGener
 
 # fastsim has no conversion collection (yet)
 from Configuration.Eras.Modifier_fastSim_cff import fastSim
-fastSim.toModify(SUSY_HLT_Ele15_HT350_MET50_SingleLepton,conversionCollection=cms.InputTag(''))
-fastSim.toModify(SUSY_HLT_Ele15_HT400_MET50_SingleLepton,conversionCollection=cms.InputTag(''))
+fastSim.toModify(SUSYHLTEle15HT350MET50SingleLepton,conversionCollection=cms.InputTag(''))
+fastSim.toModify(SUSYHLTEle15HT400MET50SingleLepton,conversionCollection=cms.InputTag(''))
 
-SUSY_HLT_Ele_HT_MET_SingleLepton = cms.Sequence( SUSY_HLT_Ele15_HT350_MET50_SingleLepton
-                                                 + SUSY_HLT_Ele15_HT400_MET50_SingleLepton
+SUSY_HLT_Ele_HT_MET_SingleLepton = cms.Sequence( SUSYHLTEle15HT350MET50SingleLepton
+                                                 + SUSYHLTEle15HT400MET50SingleLepton
 )
 
 SUSY_HLT_Ele_HT_MET_SingleLepton_POSTPROCESSING = cms.Sequence( SUSYoHLToEle15oHT350oMET50oSingleLeptonPOSTPROCESSING

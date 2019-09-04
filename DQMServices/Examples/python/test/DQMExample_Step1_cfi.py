@@ -1,7 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 
 from DQMServices.Core.DQMEDAnalyzer import DQMEDAnalyzer
-DQMExample_Step1 = DQMEDAnalyzer('DQMExample_Step1',
+DQMExampleStep1 = DQMEDAnalyzer('DQMExampleStep1',
     electronCollection       = cms.InputTag("gedGsfElectrons"),
     caloJetCollection        = cms.InputTag("ak4CaloJets"),
     pfMETCollection          = cms.InputTag("pfMet"),

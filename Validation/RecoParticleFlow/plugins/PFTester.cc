@@ -50,7 +50,7 @@ PFTester::~PFTester() {}
 
 void PFTester::beginJob() {
   // get ahold of back-end interface
-  dbe_ = edm::Service<DQMStore>().operator->();
+  dbe_ = std::make_unique<DQMStore>();
 
   if (dbe_) {
     dbe_->setCurrentFolder("PFTask/PFCandidates");

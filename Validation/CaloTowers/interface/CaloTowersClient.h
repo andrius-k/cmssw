@@ -48,7 +48,6 @@ public:
   explicit CaloTowersClient(const edm::ParameterSet &);
   ~CaloTowersClient() override;
 
-  void beginJob(void) override;
   void dqmEndJob(DQMStore::IBooker &, DQMStore::IGetter &) override;  //performed in the endJob
 
   int CaloTowersEndjob(const std::vector<MonitorElement *> &hcalMEs);

@@ -32,7 +32,7 @@ PFCandidateManagerAnalyzer::PFCandidateManagerAnalyzer(const edm::ParameterSet &
   myMatchColl_ = consumes<View<Candidate>>(matchLabel_);
 }
 
-void PFCandidateManagerAnalyzer::bookHistograms(DQMStore::IBooker &ibooker,
+void PFCandidateManagerAnalyzer::bookHistograms(dqm::reco::DQMStore::IBooker &ibooker,
                                                 edm::Run const &iRun,
                                                 edm::EventSetup const &iSetup) {
   BenchmarkAnalyzer::bookHistograms(ibooker, iRun, iSetup);

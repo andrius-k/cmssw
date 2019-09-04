@@ -14,7 +14,6 @@
 #include <TH1F.h>
 
 // CMSSW headers
-#include "DQMServices/Core/interface/ConcurrentMonitorElement.h"
 #include "DataFormats/Provenance/interface/EventID.h"
 #include "DataFormats/Provenance/interface/ModuleDescription.h"
 #include "DataFormats/Provenance/interface/Timestamp.h"
@@ -44,8 +43,8 @@ public:
   static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
 
 private:
-  ConcurrentMonitorElement m_sourced_events;
-  ConcurrentMonitorElement m_retired_events;
+  dqm::reco::MonitorElement const* m_sourced_events;
+  dqm::reco::MonitorElement const* m_retired_events;
 
   std::chrono::steady_clock::time_point m_startup;
 
@@ -56,6 +55,7 @@ private:
   // DQM service-related data members
   std::string m_dqm_path;
   const bool m_dqm_bynproc;
+  std::unique_ptr<DQMStore> m_dqmstore;
 };
 
 #endif  // ! ThroughputService_h

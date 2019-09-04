@@ -63,10 +63,6 @@ void L1TStage2uGTCaloLayer2Comp::bookHistograms(DQMStore::IBooker& ibooker, edm:
   comparisonDenum->setBinLabel(TAUS2, "# taus");
   comparisonDenum->setBinLabel(TAUS3, "# taus");
   comparisonDenum->setBinLabel(SUMS, "# sums");
-  // Setting canExtend to false is needed to get the correct behaviour when running multithreaded.
-  // Otherwise, when merging the histgrams of the threads, TH1::Merge sums bins that have the same label in one bin.
-  // This needs to come after the calls to setBinLabel.
-  comparisonDenum->getTH1F()->GetXaxis()->SetCanExtend(false);
 }
 void L1TStage2uGTCaloLayer2Comp::analyze(const edm::Event& e, const edm::EventSetup& c) {
   // define collections to hold lists of objects in event

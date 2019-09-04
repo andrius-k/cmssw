@@ -7,7 +7,7 @@ from DQMOffline.Trigger.RazorMonitor_Client_cff import *
 from DQMOffline.Trigger.SoftMuHardJetMETSUSYMonitor_Client_cff import *
 
 #george
-double_soft_muon_muonpt_efficiency = DQMEDHarvester("DQMGenericClient",
+doublesoftmuonmuonptefficiency = DQMEDHarvester("DQMGenericClient",
     subDirs        = cms.untracked.vstring("HLT/SUSY/SOS/Muon/*"),
     verbose        = cms.untracked.uint32(0), # Set to 2 for all messages 
     resolution     = cms.vstring(),
@@ -27,7 +27,7 @@ double_soft_muon_muonpt_efficiency = DQMEDHarvester("DQMGenericClient",
         ),
 )
 
-double_soft_muon_metpt_efficiency = DQMEDHarvester("DQMGenericClient",
+doublesoftmuonmetptefficiency = DQMEDHarvester("DQMGenericClient",
     subDirs        = cms.untracked.vstring("HLT/SUSY/SOS/MET/*"),
     verbose        = cms.untracked.uint32(0), # Set to 2 for all messages 
     resolution     = cms.vstring(),
@@ -37,7 +37,7 @@ double_soft_muon_metpt_efficiency = DQMEDHarvester("DQMGenericClient",
         ),
 )
 
-double_soft_muon_mll_efficiency = DQMEDHarvester("DQMGenericClient",
+doublesoftmuonmllefficiency = DQMEDHarvester("DQMGenericClient",
     subDirs        = cms.untracked.vstring("HLT/SUSY/SOS/Mll/*"),
     verbose        = cms.untracked.uint32(0), # Set to 2 for all messages 
     resolution     = cms.vstring(),
@@ -48,7 +48,7 @@ double_soft_muon_mll_efficiency = DQMEDHarvester("DQMGenericClient",
         ),
 )
 
-double_soft_muon_mhtpt_efficiency = DQMEDHarvester("DQMGenericClient",
+doublesoftmuonmhtptefficiency = DQMEDHarvester("DQMGenericClient",
     subDirs        = cms.untracked.vstring("HLT/SUSY/SOS/MHT/*"),
     verbose        = cms.untracked.uint32(0), # Set to 2 for all messages 
     resolution     = cms.vstring(),
@@ -59,7 +59,7 @@ double_soft_muon_mhtpt_efficiency = DQMEDHarvester("DQMGenericClient",
         ),
 )
 #backup1
-double_soft_muon_backup_70_metpt_efficiency = DQMEDHarvester("DQMGenericClient",
+doublesoftmuonbackup70metptefficiency = DQMEDHarvester("DQMGenericClient",
     subDirs        = cms.untracked.vstring("HLT/SUSY/SOS/backup70/MET/*"),
     verbose        = cms.untracked.uint32(0), # Set to 2 for all messages 
     resolution     = cms.vstring(),
@@ -68,7 +68,7 @@ double_soft_muon_backup_70_metpt_efficiency = DQMEDHarvester("DQMGenericClient",
 
         ),
 )
-double_soft_muon_backup_70_mhtpt_efficiency = DQMEDHarvester("DQMGenericClient",
+doublesoftmuonbackup70mhtptefficiency = DQMEDHarvester("DQMGenericClient",
     subDirs        = cms.untracked.vstring("HLT/SUSY/SOS/backup70/MHT/*"),
     verbose        = cms.untracked.uint32(0), # Set to 2 for all messages 
     resolution     = cms.vstring(),
@@ -80,7 +80,7 @@ double_soft_muon_backup_70_mhtpt_efficiency = DQMEDHarvester("DQMGenericClient",
 )
 
 #backup1
-double_soft_muon_backup_90_metpt_efficiency = DQMEDHarvester("DQMGenericClient",
+doublesoftmuonbackup90metptefficiency = DQMEDHarvester("DQMGenericClient",
     subDirs        = cms.untracked.vstring("HLT/SUSY/SOS/backup90/MET/*"),
     verbose        = cms.untracked.uint32(0), # Set to 2 for all messages 
     resolution     = cms.vstring(),
@@ -89,7 +89,7 @@ double_soft_muon_backup_90_metpt_efficiency = DQMEDHarvester("DQMGenericClient",
 
         ),
 )
-double_soft_muon_backup_90_mhtpt_efficiency = DQMEDHarvester("DQMGenericClient",
+doublesoftmuonbackup90mhtptefficiency = DQMEDHarvester("DQMGenericClient",
     subDirs        = cms.untracked.vstring("HLT/SUSY/SOS/backup90/MHT/*"),
     verbose        = cms.untracked.uint32(0), # Set to 2 for all messages 
     resolution     = cms.vstring(),
@@ -99,7 +99,7 @@ double_soft_muon_backup_90_mhtpt_efficiency = DQMEDHarvester("DQMGenericClient",
 
         ),
 )
-triple_muon_mupt_efficiency = DQMEDHarvester("DQMGenericClient",
+triplemuonmuptefficiency = DQMEDHarvester("DQMGenericClient",
     subDirs        = cms.untracked.vstring("HLT/SUSY/SOS/TripleMu/Muon/*"),
     verbose        = cms.untracked.uint32(0), # Set to 2 for all messages 
     resolution     = cms.vstring(),
@@ -117,7 +117,7 @@ triple_muon_mupt_efficiency = DQMEDHarvester("DQMGenericClient",
         ),
 )
 #triple dca
-triple_muon_dca_mupt_efficiency = DQMEDHarvester("DQMGenericClient",
+triplemuondcamuptefficiency = DQMEDHarvester("DQMGenericClient",
     subDirs        = cms.untracked.vstring("HLT/SUSY/SOS/TripleMu/DCA/Muon/*"),
     verbose        = cms.untracked.uint32(0), # Set to 2 for all messages 
     resolution     = cms.vstring(),
@@ -136,7 +136,7 @@ triple_muon_dca_mupt_efficiency = DQMEDHarvester("DQMGenericClient",
 )
 
 #dca double muon
-double_soft_dca_muonpt_efficiency = DQMEDHarvester("DQMGenericClient",
+doublesoftdcamuonptefficiency = DQMEDHarvester("DQMGenericClient",
     subDirs        = cms.untracked.vstring("HLT/SUSY/SOS/DCA/Muon/*"),
     verbose        = cms.untracked.uint32(0), # Set to 2 for all messages 
     resolution     = cms.vstring(),
@@ -156,7 +156,7 @@ double_soft_dca_muonpt_efficiency = DQMEDHarvester("DQMGenericClient",
         ),
 )
 
-double_soft_dca_metpt_efficiency = DQMEDHarvester("DQMGenericClient",
+doublesoftdcametptefficiency = DQMEDHarvester("DQMGenericClient",
     subDirs        = cms.untracked.vstring("HLT/SUSY/SOS/DCA/MET/*"),
     verbose        = cms.untracked.uint32(0), # Set to 2 for all messages 
     resolution     = cms.vstring(),
@@ -171,17 +171,17 @@ susyClient = cms.Sequence(
     vbfsusyClient
   + LepHTClient
   + susyHLTEleCaloJetsClient
-  + double_soft_muon_muonpt_efficiency
-  + double_soft_muon_metpt_efficiency
-  + double_soft_muon_mll_efficiency
-  + double_soft_muon_mhtpt_efficiency
-  + double_soft_muon_backup_70_metpt_efficiency
-  + double_soft_muon_backup_70_mhtpt_efficiency
-  + double_soft_muon_backup_90_metpt_efficiency
-  + double_soft_muon_backup_90_mhtpt_efficiency
-  + double_soft_dca_muonpt_efficiency
-  + double_soft_dca_metpt_efficiency
+  + doublesoftmuonmuonptefficiency
+  + doublesoftmuonmetptefficiency
+  + doublesoftmuonmllefficiency
+  + doublesoftmuonmhtptefficiency
+  + doublesoftmuonbackup70metptefficiency
+  + doublesoftmuonbackup70mhtptefficiency
+  + doublesoftmuonbackup90metptefficiency
+  + doublesoftmuonbackup90mhtptefficiency
+  + doublesoftdcamuonptefficiency
+  + doublesoftdcametptefficiency
   + susyHLTRazorClient
-  + triple_muon_mupt_efficiency
+  + triplemuonmuptefficiency
   + susyHLTSoftMuHardJetMETClient
 )

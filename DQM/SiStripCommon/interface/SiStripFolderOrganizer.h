@@ -26,11 +26,9 @@
 class TrackerTopology;
 class SiStripFolderOrganizer {
 public:
-  typedef dqm::legacy::DQMStore DQMStore;
-
   static unsigned short const all_ = 65535;
 
-  SiStripFolderOrganizer();
+  SiStripFolderOrganizer(dqm::implementation::NavigatorBase* dbe);
   virtual ~SiStripFolderOrganizer();
 
   // top folder
@@ -95,6 +93,9 @@ public:
 
 private:
   std::string TopFolderName;
-  DQMStore* dbe_;
+  // It would be perferrable to not depend on internal dqm::implementation 
+  // classes. However, for now this is the base class that is present on
+  // anything that supports `setCurrentFolder`.
+  dqm::implementation::NavigatorBase* dbe_;
 };
 #endif

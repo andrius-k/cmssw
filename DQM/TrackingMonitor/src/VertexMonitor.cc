@@ -227,38 +227,38 @@ void VertexMonitor::initHisto(DQMStore::IBooker& ibooker) {
 
     histname = "NumberOfPVtxVsBXlumi_" + label_;
     NumberOfPVtxVsBXlumi = ibooker.bookProfile(histname, histname, BXlumiBin, BXlumiMin, BXlumiMax, 0., 60., "");
-    NumberOfPVtxVsBXlumi->getTH1()->SetCanExtend(TH1::kAllAxes);
+    NumberOfPVtxVsBXlumi->setCanExtend(TH1::kAllAxes);
     NumberOfPVtxVsBXlumi->setAxisTitle("lumi BX [10^{30}Hzcm^{-2}]", 1);
     NumberOfPVtxVsBXlumi->setAxisTitle("Mean number of PV", 2);
 
     histname = "NumberOfGoodPVtxVsBXlumi_" + label_;
     NumberOfGoodPVtxVsBXlumi = ibooker.bookProfile(histname, histname, BXlumiBin, BXlumiMin, BXlumiMax, 0., 60., "");
-    NumberOfGoodPVtxVsBXlumi->getTH1()->SetCanExtend(TH1::kAllAxes);
+    NumberOfGoodPVtxVsBXlumi->setCanExtend(TH1::kAllAxes);
     NumberOfGoodPVtxVsBXlumi->setAxisTitle("lumi BX [10^{30}Hzcm^{-2}]", 1);
     NumberOfGoodPVtxVsBXlumi->setAxisTitle("Mean number of PV", 2);
 
     histname = "FractionOfGoodPVtxVsBXlumi_" + label_;
     FractionOfGoodPVtxVsBXlumi = ibooker.bookProfile(histname, histname, BXlumiBin, BXlumiMin, BXlumiMax, 0., 1.5, "");
-    FractionOfGoodPVtxVsBXlumi->getTH1()->SetCanExtend(TH1::kAllAxes);
+    FractionOfGoodPVtxVsBXlumi->setCanExtend(TH1::kAllAxes);
     FractionOfGoodPVtxVsBXlumi->setAxisTitle("lumi BX [10^{30}Hzcm^{-2}]", 1);
     FractionOfGoodPVtxVsBXlumi->setAxisTitle("Mean number of PV", 2);
 
     histname = "NumberOfBADndofPVtxVsBXlumi_" + label_;
     NumberOfBADndofPVtxVsBXlumi = ibooker.bookProfile(histname, histname, BXlumiBin, BXlumiMin, BXlumiMax, 0., 60., "");
-    NumberOfBADndofPVtxVsBXlumi->getTH1()->SetCanExtend(TH1::kAllAxes);
+    NumberOfBADndofPVtxVsBXlumi->setCanExtend(TH1::kAllAxes);
     NumberOfBADndofPVtxVsBXlumi->setAxisTitle("BADndof #PV", 1);
     NumberOfBADndofPVtxVsBXlumi->setAxisTitle("Number of Events", 2);
 
     histname = "GoodPVtxSumPtVsBXlumi_" + label_;
     GoodPVtxSumPtVsBXlumi = ibooker.bookProfile(histname, histname, BXlumiBin, BXlumiMin, BXlumiMax, 0., 500., "");
-    GoodPVtxSumPtVsBXlumi->getTH1()->SetCanExtend(TH1::kAllAxes);
+    GoodPVtxSumPtVsBXlumi->setCanExtend(TH1::kAllAxes);
     GoodPVtxSumPtVsBXlumi->setAxisTitle("lumi BX [10^{30}Hzcm^{-2}]", 1);
     GoodPVtxSumPtVsBXlumi->setAxisTitle("Mean pv #Sum p_{T}^{2} [GeV^{2}/c]^{2}", 2);
 
     histname = "GoodPVtxNumberOfTracksVsBXlumi_" + label_;
     GoodPVtxNumberOfTracksVsBXlumi =
         ibooker.bookProfile(histname, histname, BXlumiBin, BXlumiMin, BXlumiMax, 0., 100., "");
-    GoodPVtxNumberOfTracksVsBXlumi->getTH1()->SetCanExtend(TH1::kAllAxes);
+    GoodPVtxNumberOfTracksVsBXlumi->setCanExtend(TH1::kAllAxes);
     GoodPVtxNumberOfTracksVsBXlumi->setAxisTitle("lumi BX [10^{30}Hzcm^{-2}]", 1);
     GoodPVtxNumberOfTracksVsBXlumi->setAxisTitle("Mean pv number of tracks", 2);
 
@@ -272,28 +272,28 @@ void VertexMonitor::initHisto(DQMStore::IBooker& ibooker) {
     histname = "Chi2oNDFVsBXlumi_" + label_;
     Chi2oNDFVsBXlumi =
         ibooker.bookProfile(histname, histname, BXlumiBin, BXlumiMin, BXlumiMax, Chi2NDFMin, Chi2NDFMax, "");
-    Chi2oNDFVsBXlumi->getTH1()->SetCanExtend(TH1::kAllAxes);
+    Chi2oNDFVsBXlumi->setCanExtend(TH1::kAllAxes);
     Chi2oNDFVsBXlumi->setAxisTitle("lumi BX [10^{30}Hzcm^{-2}]", 1);
     Chi2oNDFVsBXlumi->setAxisTitle("Mean #chi^{2}/ndof", 2);
 
     histname = "Chi2ProbVsBXlumi_" + label_;
     Chi2ProbVsBXlumi =
         ibooker.bookProfile(histname, histname, BXlumiBin, BXlumiMin, BXlumiMax, Chi2ProbMin, Chi2ProbMax, "");
-    Chi2ProbVsBXlumi->getTH1()->SetCanExtend(TH1::kAllAxes);
+    Chi2ProbVsBXlumi->setCanExtend(TH1::kAllAxes);
     Chi2ProbVsBXlumi->setAxisTitle("lumi BX [10^{30}Hzcm^{-2}]", 1);
     Chi2ProbVsBXlumi->setAxisTitle("Mean #chi^{2}/prob", 2);
 
     histname = "GoodPVtxChi2oNDFVsBXlumi_" + label_;
     GoodPVtxChi2oNDFVsBXlumi =
         ibooker.bookProfile(histname, histname, BXlumiBin, BXlumiMin, BXlumiMax, Chi2NDFMin, Chi2NDFMax, "");
-    GoodPVtxChi2oNDFVsBXlumi->getTH1()->SetCanExtend(TH1::kAllAxes);
+    GoodPVtxChi2oNDFVsBXlumi->setCanExtend(TH1::kAllAxes);
     GoodPVtxChi2oNDFVsBXlumi->setAxisTitle("lumi BX [10^{30}Hzcm^{-2}]", 1);
     GoodPVtxChi2oNDFVsBXlumi->setAxisTitle("Mean PV #chi^{2}/ndof", 2);
 
     histname = "GoodPVtxChi2ProbVsBXlumi_" + label_;
     GoodPVtxChi2ProbVsBXlumi =
         ibooker.bookProfile(histname, histname, BXlumiBin, BXlumiMin, BXlumiMax, Chi2ProbMin, Chi2ProbMax, "");
-    GoodPVtxChi2ProbVsBXlumi->getTH1()->SetCanExtend(TH1::kAllAxes);
+    GoodPVtxChi2ProbVsBXlumi->setCanExtend(TH1::kAllAxes);
     GoodPVtxChi2ProbVsBXlumi->setAxisTitle("lumi BX [10^{30}Hzcm^{-2}]", 1);
     GoodPVtxChi2ProbVsBXlumi->setAxisTitle("Mean PV #chi^{2}/prob", 2);
   }
@@ -304,42 +304,42 @@ void VertexMonitor::initHisto(DQMStore::IBooker& ibooker) {
     histname = "NumberOfPVtxVsGoodPVtx_" + label_;
     NumberOfPVtxVsGoodPVtx =
         ibooker.bookProfile(histname, histname, GoodPVtxBin, GoodPVtxMin, GoodPVtxMax, 0., 60., "");
-    NumberOfPVtxVsGoodPVtx->getTH1()->SetCanExtend(TH1::kAllAxes);
+    NumberOfPVtxVsGoodPVtx->setCanExtend(TH1::kAllAxes);
     NumberOfPVtxVsGoodPVtx->setAxisTitle("Number of Good PV", 1);
     NumberOfPVtxVsGoodPVtx->setAxisTitle("Mean number of PV", 2);
 
     histname = "FractionOfGoodPVtxVsGoodPVtx_" + label_;
     FractionOfGoodPVtxVsGoodPVtx =
         ibooker.bookProfile(histname, histname, GoodPVtxBin, GoodPVtxMin, GoodPVtxMax, 0., 60., "");
-    FractionOfGoodPVtxVsGoodPVtx->getTH1()->SetCanExtend(TH1::kAllAxes);
+    FractionOfGoodPVtxVsGoodPVtx->setCanExtend(TH1::kAllAxes);
     FractionOfGoodPVtxVsGoodPVtx->setAxisTitle("Number of Good PV", 1);
     FractionOfGoodPVtxVsGoodPVtx->setAxisTitle("Mean fraction of Good PV", 2);
 
     histname = "FractionOfGoodPVtxVsPVtx_" + label_;
     FractionOfGoodPVtxVsPVtx =
         ibooker.bookProfile(histname, histname, GoodPVtxBin, GoodPVtxMin, GoodPVtxMax, 0., 60., "");
-    FractionOfGoodPVtxVsPVtx->getTH1()->SetCanExtend(TH1::kAllAxes);
+    FractionOfGoodPVtxVsPVtx->setCanExtend(TH1::kAllAxes);
     FractionOfGoodPVtxVsPVtx->setAxisTitle("Number of Good PV", 1);
     FractionOfGoodPVtxVsPVtx->setAxisTitle("Mean number of Good PV", 2);
 
     histname = "NumberOfBADndofPVtxVsGoodPVtx_" + label_;
     NumberOfBADndofPVtxVsGoodPVtx =
         ibooker.bookProfile(histname, histname, GoodPVtxBin, GoodPVtxMin, GoodPVtxMax, 0., 60., "");
-    NumberOfBADndofPVtxVsGoodPVtx->getTH1()->SetCanExtend(TH1::kAllAxes);
+    NumberOfBADndofPVtxVsGoodPVtx->setCanExtend(TH1::kAllAxes);
     NumberOfBADndofPVtxVsGoodPVtx->setAxisTitle("Number of Good PV", 1);
     NumberOfBADndofPVtxVsGoodPVtx->setAxisTitle("Mean Number of BAD PV", 2);
 
     histname = "GoodPVtxSumPtVsGoodPVtx_" + label_;
     GoodPVtxSumPtVsGoodPVtx =
         ibooker.bookProfile(histname, histname, GoodPVtxBin, GoodPVtxMin, GoodPVtxMax, 0., 500., "");
-    GoodPVtxSumPtVsGoodPVtx->getTH1()->SetCanExtend(TH1::kAllAxes);
+    GoodPVtxSumPtVsGoodPVtx->setCanExtend(TH1::kAllAxes);
     GoodPVtxSumPtVsGoodPVtx->setAxisTitle("Number of Good PV", 1);
     GoodPVtxSumPtVsGoodPVtx->setAxisTitle("Mean pv #Sum p_{T}^{2} [GeV^{2}/c]^{2}", 2);
 
     histname = "GoodPVtxNumberOfTracksVsGoodPVtx_" + label_;
     GoodPVtxNumberOfTracksVsGoodPVtx =
         ibooker.bookProfile(histname, histname, GoodPVtxBin, GoodPVtxMin, GoodPVtxMax, 0., 100., "");
-    GoodPVtxNumberOfTracksVsGoodPVtx->getTH1()->SetCanExtend(TH1::kAllAxes);
+    GoodPVtxNumberOfTracksVsGoodPVtx->setCanExtend(TH1::kAllAxes);
     GoodPVtxNumberOfTracksVsGoodPVtx->setAxisTitle("Number of Good PV", 1);
     GoodPVtxNumberOfTracksVsGoodPVtx->setAxisTitle("Mean pv number of tracks", 2);
 
@@ -353,14 +353,14 @@ void VertexMonitor::initHisto(DQMStore::IBooker& ibooker) {
     histname = "GoodPVtxChi2oNDFVsGoodPVtx_" + label_;
     GoodPVtxChi2oNDFVsGoodPVtx =
         ibooker.bookProfile(histname, histname, GoodPVtxBin, GoodPVtxMin, GoodPVtxMax, Chi2NDFMin, Chi2NDFMax, "");
-    GoodPVtxChi2oNDFVsGoodPVtx->getTH1()->SetCanExtend(TH1::kAllAxes);
+    GoodPVtxChi2oNDFVsGoodPVtx->setCanExtend(TH1::kAllAxes);
     GoodPVtxChi2oNDFVsGoodPVtx->setAxisTitle("Number of Good PV", 1);
     GoodPVtxChi2oNDFVsGoodPVtx->setAxisTitle("Mean PV #chi^{2}/ndof", 2);
 
     histname = "GoodPVtxChi2ProbVsGoodPVtx_" + label_;
     GoodPVtxChi2ProbVsGoodPVtx =
         ibooker.bookProfile(histname, histname, GoodPVtxBin, GoodPVtxMin, GoodPVtxMax, Chi2ProbMin, Chi2ProbMax, "");
-    GoodPVtxChi2ProbVsGoodPVtx->getTH1()->SetCanExtend(TH1::kAllAxes);
+    GoodPVtxChi2ProbVsGoodPVtx->setCanExtend(TH1::kAllAxes);
     GoodPVtxChi2ProbVsGoodPVtx->setAxisTitle("Number of Good PV", 1);
     GoodPVtxChi2ProbVsGoodPVtx->setAxisTitle("Mean PV #chi^{2}/prob", 2);
   }

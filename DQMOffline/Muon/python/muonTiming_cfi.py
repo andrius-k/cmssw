@@ -37,7 +37,7 @@ muonTiming = DQMEDAnalyzer('MuonTiming',
                                   folder = cms.string("Muons/MuonTiming")
                            )
 
-muonTiming_miniAOD = DQMEDAnalyzer('MuonTiming',
+muonTimingminiAOD = DQMEDAnalyzer('MuonTiming',
                                   MuonServiceProxy,
                                   MuonCollection       = cms.InputTag("slimmedMuons"),
                                   # histograms parameters

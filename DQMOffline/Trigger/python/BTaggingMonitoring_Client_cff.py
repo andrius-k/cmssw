@@ -2,7 +2,7 @@ import FWCore.ParameterSet.Config as cms
 
 from DQMServices.Core.DQMEDHarvester import DQMEDHarvester
 
-BTVEfficiency_BTagMu_DiJet = DQMEDHarvester("DQMGenericClient",
+BTVEfficiencyBTagMuDiJet = DQMEDHarvester("DQMGenericClient",
     subDirs        = cms.untracked.vstring("HLT/BTV/BTagMu_DiJet/*"),
     verbose        = cms.untracked.uint32(0), # Set to 2 for all messages
     resolution     = cms.vstring(),
@@ -51,7 +51,7 @@ BTVEfficiency_BTagMu_DiJet = DQMEDHarvester("DQMGenericClient",
     ),
 )
 
-BTVEfficiency_BTagMu_Jet = DQMEDHarvester("DQMGenericClient",
+BTVEfficiencyBTagMuJet = DQMEDHarvester("DQMGenericClient",
     subDirs        = cms.untracked.vstring("HLT/BTV/BTagMu_Jet/*"),
     verbose        = cms.untracked.uint32(0), # Set to 2 for all messages
     resolution     = cms.vstring(),
@@ -93,7 +93,7 @@ BTVEfficiency_BTagMu_Jet = DQMEDHarvester("DQMGenericClient",
     ),
 )
 
-BTVEfficiency_BTagDiMu_Jet = DQMEDHarvester("DQMGenericClient",
+BTVEfficiencyBTagDiMuJet = DQMEDHarvester("DQMGenericClient",
     subDirs        = cms.untracked.vstring("HLT/BTV/BTagDiMu_Jet/*"),
     verbose        = cms.untracked.uint32(0), # Set to 2 for all messages
     resolution     = cms.vstring(),
@@ -142,7 +142,7 @@ BTVEfficiency_BTagDiMu_Jet = DQMEDHarvester("DQMGenericClient",
     ),
 )
 
-BTVEfficiency_PFJet = DQMEDHarvester("DQMGenericClient",
+BTVEfficiencyPFJet = DQMEDHarvester("DQMGenericClient",
     subDirs        = cms.untracked.vstring("HLT/BTV/PFJet/*"),
     verbose        = cms.untracked.uint32(0), # Set to 2 for all messages
     resolution     = cms.vstring(),
@@ -175,7 +175,7 @@ BTVEfficiency_PFJet = DQMEDHarvester("DQMGenericClient",
     ),
 )
 
-BTVEfficiency_TurnOnCurves = DQMEDHarvester("DQMGenericClient",
+BTVEfficiencyTurnOnCurves = DQMEDHarvester("DQMGenericClient",
     subDirs        = cms.untracked.vstring(
         "HLT/BTV/HLT_PFHT380_SixPFJet32_DoublePFBTagDeepCSV_*",
     ),
@@ -191,10 +191,10 @@ BTVEfficiency_TurnOnCurves = DQMEDHarvester("DQMGenericClient",
 
 btaggingClient = cms.Sequence(
 
-    BTVEfficiency_TurnOnCurves
-    + BTVEfficiency_BTagMu_DiJet
-    + BTVEfficiency_BTagMu_Jet
-    + BTVEfficiency_BTagDiMu_Jet
-    + BTVEfficiency_PFJet
+    BTVEfficiencyTurnOnCurves
+    + BTVEfficiencyBTagMuDiJet
+    + BTVEfficiencyBTagMuJet
+    + BTVEfficiencyBTagDiMuJet
+    + BTVEfficiencyPFJet
 
 )

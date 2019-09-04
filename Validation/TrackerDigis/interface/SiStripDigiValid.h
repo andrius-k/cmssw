@@ -22,7 +22,7 @@ public:
 protected:
   void analyze(const edm::Event &e, const edm::EventSetup &c) override;
   void bookHistograms(DQMStore::IBooker &ibooker, const edm::Run &run, const edm::EventSetup &es) override;
-  void endJob(void) override;
+  void endJob(void);  // TODO: endJob not allowed in DQMEDAnalyzer
 
 private:
   // TIB  ADC
@@ -167,7 +167,6 @@ private:
   MonitorElement *meNDigiTECWheelzp_[9];
 
   // Back-End Interface
-  DQMStore *dbe_;
   bool runStandalone;
   std::string outputFile_;
   edm::EDGetTokenT<edm::DetSetVector<SiStripDigi>> edmDetSetVector_SiStripDigi_Token_;

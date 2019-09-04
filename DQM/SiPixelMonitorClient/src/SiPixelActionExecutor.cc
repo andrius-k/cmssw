@@ -265,6 +265,8 @@ void SiPixelActionExecutor::bookDeviations(DQMStore::IBooker &iBooker, bool isUp
 }
 
 void SiPixelActionExecutor::fillDeviations(DQMStore::IGetter &iGetter) {
+  // TODO: References no longer supported.
+#if 0
   int n = 768;
   MonitorElement *me1;
   MonitorElement *me2;
@@ -416,6 +418,7 @@ void SiPixelActionExecutor::fillDeviations(DQMStore::IGetter &iGetter) {
           dev15->setBinContent(i, ref_value - new_value);
         }
   }
+#endif
 }
 
 //=============================================================================================================

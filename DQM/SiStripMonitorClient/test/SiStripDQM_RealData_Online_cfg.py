@@ -74,7 +74,7 @@ process.SiStripSources_Common = cms.Sequence(
 process.SiStripSources_Cosmics = cms.Sequence(
 	process.SiStripMonitorTrack_ckf*
 	process.MonitorTrackResiduals_ckf*
-	process.TrackMon_ckf
+	process.TrackMonckf
 )
 
 ## Client

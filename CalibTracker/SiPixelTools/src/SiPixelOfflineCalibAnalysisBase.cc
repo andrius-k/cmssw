@@ -38,7 +38,7 @@ SiPixelOfflineCalibAnalysisBase::SiPixelOfflineCalibAnalysisBase(const edm::Para
   siPixelCalibDigiProducer_ = iConfig.getParameter<edm::InputTag>("DetSetVectorSiPixelCalibDigiTag");
   createOutputFile_ = iConfig.getUntrackedParameter<bool>("saveFile", false);
   outputFileName_ = iConfig.getParameter<std::string>("outputFileName");
-  daqBE_ = &*edm::Service<DQMStore>();
+  daqBE_ = std::make_unique<DQMStore>();
   folderMaker_ = new SiPixelFolderOrganizer();
   tPixelCalibDigi = consumes<edm::DetSetVector<SiPixelCalibDigi> >(siPixelCalibDigiProducer_);
 }

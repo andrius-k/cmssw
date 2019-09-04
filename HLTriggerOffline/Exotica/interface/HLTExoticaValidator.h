@@ -51,7 +51,7 @@ private:
   /// Method called for each event.
   void analyze(const edm::Event &iEvent, const edm::EventSetup &iSetup) override;
   void endRun(const edm::Run &iRun, const edm::EventSetup &iSetup) override;
-  void endJob() override;
+  void endJob();  // TODO: endJob not allowed in DQMEDAnalyzer
 
   /// Copy (to be modified) of the input ParameterSet from configuration file.
   edm::ParameterSet _pset;

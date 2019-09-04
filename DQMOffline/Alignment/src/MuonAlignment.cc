@@ -65,7 +65,7 @@ void MuonAlignment::beginJob() {
     exit(1);
   }
 
-  dbe = edm::Service<DQMStore>().operator->();
+  dbe = std::make_unique<DQMStore>();
 
   if (doSummary) {
     if (doDT) {

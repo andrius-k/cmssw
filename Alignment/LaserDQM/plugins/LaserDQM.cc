@@ -539,7 +539,7 @@ void LaserDQM::analyze(edm::Event const &theEvent, edm::EventSetup const &theSet
 
 void LaserDQM::beginJob() {
   // get hold of DQM Backend interface
-  theDaqMonitorBEI = edm::Service<DQMStore>().operator->();
+  theDaqMonitorBEI = std::make_unique<DQMStore>();
 
   // initialize the Monitor Elements
   initMonitors();

@@ -37,7 +37,7 @@ BeamConditionsMonitor::BeamConditionsMonitor(const ParameterSet& ps)
 }
 
 //--------------------------------------------------------
-void BeamConditionsMonitor::bookHistograms(DQMStore::ConcurrentBooker& i,
+void BeamConditionsMonitor::bookHistograms(DQMStore::IBooker& i,
                                            const edm::Run& r,
                                            const edm::EventSetup& c,
                                            beamcond::RunCache& cache) const {
@@ -45,15 +45,17 @@ void BeamConditionsMonitor::bookHistograms(DQMStore::ConcurrentBooker& i,
   // create and cd into new folder
   i.setCurrentFolder(monitorName_ + "Conditions");
 
-  cache.h_x0_lumi = i.book1D("x0_lumi_cond", "x coordinate of beam spot vs lumi (Cond)", 10, 0, 10);
-  cache.h_x0_lumi.setAxisTitle("Lumisection", 1);
-  cache.h_x0_lumi.setAxisTitle("x_{0} (cm)", 2);
-  cache.h_x0_lumi.setOption("E1");
+  auto me = i.book1D("x0_lumi_cond", "x coordinate of beam spot vs lumi (Cond)", 10, 0, 10);
+  me->setAxisTitle("Lumisection", 1);
+  me->setAxisTitle("x_{0} (cm)", 2);
+  me->setOption("E1");
+  cache.h_x0_lumi = me;
 
-  cache.h_y0_lumi = i.book1D("y0_lumi_cond", "y coordinate of beam spot vs lumi (Cond)", 10, 0, 10);
-  cache.h_y0_lumi.setAxisTitle("Lumisection", 1);
-  cache.h_y0_lumi.setAxisTitle("y_{0} (cm)", 2);
-  cache.h_y0_lumi.setOption("E1");
+  me = i.book1D("y0_lumi_cond", "y coordinate of beam spot vs lumi (Cond)", 10, 0, 10);
+  me->setAxisTitle("Lumisection", 1);
+  me->setAxisTitle("y_{0} (cm)", 2);
+  me->setOption("E1");
+  cache.h_y0_lumi = me;
 }
 
 std::shared_ptr<void> BeamConditionsMonitor::globalBeginLuminosityBlock(const edm::LuminosityBlock& lumiSeg,
@@ -64,8 +66,8 @@ std::shared_ptr<void> BeamConditionsMonitor::globalBeginLuminosityBlock(const ed
 
   auto cache = runCache(lumiSeg.getRun().index());
   LogInfo("BeamConditions") << "[BeamConditionsMonitor]:" << condBeamSpot << endl;
-  cache->h_x0_lumi.shiftFillLast(condBeamSpot.GetX(), condBeamSpot.GetXError(), 1);
-  cache->h_y0_lumi.shiftFillLast(condBeamSpot.GetY(), condBeamSpot.GetYError(), 1);
+  cache->h_x0_lumi->ShiftFillLast(condBeamSpot.GetX(), condBeamSpot.GetXError(), 1);
+  cache->h_y0_lumi->ShiftFillLast(condBeamSpot.GetY(), condBeamSpot.GetYError(), 1);
 
   return std::shared_ptr<void>{};
 }

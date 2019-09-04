@@ -31,7 +31,8 @@ SiStripMonitorTrack::SiStripMonitorTrack(const edm::ParameterSet& conf)
       tracksCollection_in_EventTree(true),
       firstEvent(-1),
       genTriggerEventFlag_(new GenericTriggerEventFlag(
-          conf.getParameter<edm::ParameterSet>("genericTriggerEventPSet"), consumesCollector(), *this)) {
+          conf.getParameter<edm::ParameterSet>("genericTriggerEventPSet"), consumesCollector(), *this)),
+      folderOrganizer_(nullptr)  {
   Cluster_src_ = conf.getParameter<edm::InputTag>("Cluster_src");
   Mod_On_ = conf.getParameter<bool>("Mod_On");
   Trend_On_ = conf.getParameter<bool>("Trend_On");
@@ -185,7 +186,7 @@ void SiStripMonitorTrack::analyze(const edm::Event& e, const edm::EventSetup& es
 
 //------------------------------------------------------------------------
 void SiStripMonitorTrack::book(DQMStore::IBooker& ibooker, const TrackerTopology* tTopo, const TkDetMap* tkDetMap) {
-  SiStripFolderOrganizer folder_organizer;
+  SiStripFolderOrganizer folder_organizer(&ibooker);
   folder_organizer.setSiStripFolderName(topFolderName_);
   //******** TkHistoMaps
   if (TkHistoMap_On_) {
@@ -734,7 +735,7 @@ void SiStripMonitorTrack::bookSubDetMEs(DQMStore::IBooker& ibooker, std::string&
   axisName = "Number of on-track clusters in " + name;
   theSubDetMEs.nClustersOnTrack = bookME1D(ibooker, "TH1nClustersOn", completeName.c_str());
   theSubDetMEs.nClustersOnTrack->setAxisTitle(axisName);
-  theSubDetMEs.nClustersOnTrack->getTH1()->StatOverflows(kTRUE);
+  theSubDetMEs.nClustersOnTrack->setStatOverflows(kTRUE);
 
   // TotalNumber of Cluster OffTrack
   completeName = "Summary_TotalNumberOfClusters_OffTrack" + subdet_tag;
@@ -760,7 +761,7 @@ void SiStripMonitorTrack::bookSubDetMEs(DQMStore::IBooker& ibooker, std::string&
     theSubDetMEs.nClustersOffTrack->setAxisRange(0.0, xmaximum, 1);
   }
 
-  theSubDetMEs.nClustersOffTrack->getTH1()->StatOverflows(kTRUE);
+  theSubDetMEs.nClustersOffTrack->setStatOverflows(kTRUE);
 
   // Cluster Gain
   completeName = "Summary_ClusterGain" + subdet_tag;
@@ -908,7 +909,7 @@ SiStripMonitorTrack::MonitorElement* SiStripMonitorTrack::bookMETrend(DQMStore::
                                            0,
                                            "");
   if (me->kind() == MonitorElement::Kind::TPROFILE)
-    me->getTH1()->SetCanExtend(TH1::kAllAxes);
+    me->setCanExtend(TH1::kAllAxes);
 
   if (!me)
     return me;

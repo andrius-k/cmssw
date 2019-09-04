@@ -196,7 +196,7 @@ void DummyBookFillDQMStore::bookHistograms() {
 
   std::cout << "Booking" << std::endl;
 
-  edm::Service<DQMStore> dstore;
+  auto dstore = std::make_unique<DQMStore>();
 
   (*dstore).setCurrentFolder(folder_);
 

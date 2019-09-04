@@ -121,7 +121,7 @@ offlineHLTSourceOnAOD = cms.Sequence(
 offlineHLTSourceWithRECO = cms.Sequence(
     hltResults
     * egHLTOffDQMSource       ## NEEDED in VALIDATION, not really in MONITORING
-    * egHLTOffDQMSource_HEP17 ## NEEDED in VALIDATION, not really in MONITORING
+    * egHLTOffDQMSourceHEP17 ## NEEDED in VALIDATION, not really in MONITORING
     * jetMETHLTOfflineAnalyzer
     * b2gHLTDQMSourceWithRECO ## ak8PFJetsPuppiSoftDrop collection is not available in AOD, actually it is produced by the miniAOD step
 )

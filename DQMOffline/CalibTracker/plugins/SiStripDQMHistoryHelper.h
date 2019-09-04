@@ -19,7 +19,7 @@ protected:
   virtual uint32_t returnDetComponent(const MonitorElement* ME) const = 0;
   std::string sep() const { return m_sep; }
 
-  virtual void scanTreeAndFillSummary(const std::vector<MonitorElement*>& MEs,
+  virtual void scanTreeAndFillSummary(const std::vector<dqm::harvesting::MonitorElement*>& MEs,
                                       HDQMSummary* summary,
                                       const std::string& histoName,
                                       const std::vector<std::string>& Quantities) const;

@@ -247,10 +247,9 @@ protected:
   void analyze(const edm::Event& e, const edm::EventSetup& c) override;
   void bookHistograms(DQMStore::IBooker& ibooker, const edm::Run& run, const edm::EventSetup& es) override;
   const MagneticField* magfield2_;
-  void endJob() override;
+  void endJob();  // TODO: endJob not allowed in DQMEDAnalyzer
 
 private:
-  DQMStore* dbe_;
   bool runStandalone;
   bool outputMEsInRootFile;
   std::string outputFileName;

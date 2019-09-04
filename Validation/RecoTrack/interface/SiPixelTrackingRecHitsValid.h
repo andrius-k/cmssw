@@ -74,7 +74,7 @@ public:
   void analyze(const edm::Event& e, const edm::EventSetup& c) override;
   void bookHistograms(DQMStore::IBooker& ibooker, const edm::Run& run, const edm::EventSetup& es) override;
   void beginJob() override;
-  void endJob() override;
+  void endJob();  // TODO: endJob not allowed in DQMEDAnalyzer
 
   //xt std::pair<LocalPoint,LocalVector> projectHit( const PSimHit& hit, const StripGeomDetUnit* stripDet,const BoundPlane& plane);
   std::pair<LocalPoint, LocalVector> projectHit(const PSimHit& hit,
@@ -84,7 +84,6 @@ public:
 private:
   TrackerHitAssociator::Config trackerHitAssociatorConfig_;
   //TrackLocalAngle *anglefinder_;
-  DQMStore* dbe_;
   bool runStandalone;
   std::string outputFile_;
   std::string debugNtuple_;

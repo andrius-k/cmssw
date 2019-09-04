@@ -116,7 +116,7 @@ namespace hcaldqm {
     if (!_booked) {
       ib.setCurrentFolder(_subsystem + "/" + _taskname);
       _meNumEvents = ib.book1D("NumberOfEvents", "NumberOfEvents", 1000, 1, 1001);  // 1000 to start with
-      _meNumEvents->getTH1()->SetCanExtend(TH1::kXaxis);
+      _meNumEvents->setCanExtend(TH1::kXaxis);
 
       _cOccupancy_depth.book(ib, _emap, _subsystem);
       _booked = true;

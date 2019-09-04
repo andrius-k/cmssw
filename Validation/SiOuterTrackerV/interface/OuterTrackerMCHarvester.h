@@ -18,7 +18,6 @@ public:
 
 private:
   // ----------member data ---------------------------
-  DQMStore *dbe;
 };
 
 #endif

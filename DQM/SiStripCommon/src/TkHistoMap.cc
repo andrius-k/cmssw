@@ -13,9 +13,7 @@ TkHistoMap::TkHistoMap(
     : HistoNumber(35), MapName_(MapName) {
   LogTrace("TkHistoMap") << "TkHistoMap::constructor with parameters";
   load(tkDetMap, path, baseline, mechanicalView, false);
-  dqmStore_->meBookerGetter([this, &path, &baseline, mechanicalView](DQMStore::IBooker& ibooker, DQMStore::IGetter&) {
-    this->createTkHistoMap(ibooker, path, MapName_, baseline, mechanicalView);
-  });
+  this->createTkHistoMap(*dqmStore_, path, MapName_, baseline, mechanicalView);
 }
 
 TkHistoMap::TkHistoMap(const TkDetMap* tkDetMap,
@@ -27,9 +25,7 @@ TkHistoMap::TkHistoMap(const TkDetMap* tkDetMap,
     : HistoNumber(35), MapName_(MapName) {
   LogTrace("TkHistoMap") << "TkHistoMap::constructor with parameters";
   load(tkDetMap, path, baseline, mechanicalView, isTH2F);
-  dqmStore_->meBookerGetter([this, &path, &baseline, mechanicalView](DQMStore::IBooker& ibooker, DQMStore::IGetter&) {
-    this->createTkHistoMap(ibooker, path, MapName_, baseline, mechanicalView);
-  });
+  this->createTkHistoMap(*dqmStore_, path, MapName_, baseline, mechanicalView);
 }
 
 TkHistoMap::TkHistoMap(const TkDetMap* tkDetMap,
@@ -57,16 +53,7 @@ void TkHistoMap::load(const TkDetMap* tkDetMap,
   isTH2F_ = isTH2F;
 }
 
-void TkHistoMap::loadServices() {
-  if (!edm::Service<DQMStore>().isAvailable()) {
-    edm::LogError("TkHistoMap")
-        << "\n------------------------------------------"
-           "\nUnAvailable Service DQMStore: please insert in the configuration file an instance like"
-           "\n\tprocess.load(\"DQMServices.Core.DQMStore_cfg\")"
-           "\n------------------------------------------";
-  }
-  dqmStore_ = edm::Service<DQMStore>().operator->();
-}
+void TkHistoMap::loadServices() { dqmStore_ = std::make_shared<DQMStore>(); }
 
 void TkHistoMap::save(const std::string& filename) {
   // dqmStore_ only for saving
@@ -94,7 +81,7 @@ void TkHistoMap::loadTkHistoMap(const std::string& path, const std::string& MapN
 #endif
     }
   };
-  dqmStore_->meBookerGetter(loadMap);
+  loadMap(*dqmStore_, *dqmStore_);
 }
 
 void TkHistoMap::createTkHistoMap(DQMStore::IBooker& ibooker,
@@ -147,7 +134,7 @@ std::string TkHistoMap::folderDefinition(DQMStore::IBooker& ibooker,
   if (mechanicalView) {
     std::stringstream ss;
 
-    SiStripFolderOrganizer folderOrg;
+    SiStripFolderOrganizer folderOrg(&ibooker);
     folderOrg.setSiStripFolderName(folder);
 
     SiStripDetId::SubDetector subDet;
@@ -210,7 +197,7 @@ void TkHistoMap::setBinContent(DetId detid, float value) {
     tkHistoMap_[layer]->getTProfile2D()->SetBinContent(tkHistoMap_[layer]->getTProfile2D()->GetBin(xybin.ix, xybin.iy),
                                                        value);
   } else if (tkHistoMap_[layer]->kind() == MonitorElement::Kind::TH2F) {
-    tkHistoMap_[layer]->getTH2F()->SetBinContent(xybin.ix, xybin.iy, value);
+    tkHistoMap_[layer]->setBinContent(xybin.ix, xybin.iy, value);
   }
 
 #ifdef debug_TkHistoMap

@@ -350,8 +350,11 @@ HLTDEBUGEventContent = cms.PSet(
 #
 #
 DQMEventContent = cms.PSet(
-    outputCommands = cms.untracked.vstring('drop *',
-                                           'keep *_MEtoEDMConverter_*_*'),
+    outputCommands = cms.untracked.vstring('keep *_*_DQMGenerationRecoRun_*',
+                                           'keep *_*_DQMGenerationRecoLumi_*',
+                                           'keep *_*_DQMGenerationHarvestingRun_*',
+                                           'keep *_*_DQMGenerationHarvestingLumi_*',
+                                           ),
     splitLevel = cms.untracked.int32(0)
     )
 

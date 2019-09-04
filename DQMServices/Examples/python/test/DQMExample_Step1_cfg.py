@@ -42,7 +42,7 @@ process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:mc', '')  #for MC
 
 
 # Path and EndPath definitions
-process.dqmoffline_step = cms.Path(process.DQMExample_Step1)
+process.dqmoffline_step = cms.Path(process.DQMExampleStep1)
 #process.dqmsave_step = cms.Path(process.DQMSaver)
 process.DQMoutput_step = cms.EndPath(process.DQMoutput)
 

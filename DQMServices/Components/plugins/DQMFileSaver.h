@@ -81,7 +81,7 @@ private:
   std::string fileBaseName_;
   mutable std::atomic<int> fileUpdate_;
 
-  DQMStore *dbe_;
+  std::unique_ptr<DQMStore> dbe_;
   mutable std::atomic<int> nrun_;
   mutable std::atomic<int> nlumi_;
 

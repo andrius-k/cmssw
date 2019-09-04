@@ -52,7 +52,6 @@ public:
 
   void analyze(const edm::Event &, const edm::EventSetup &) override;
   void beginJob() override;
-  void endJob() override;
 
 private:
   float ecalEta(float EtaParticle, float Zvertex, float plane_Radius);

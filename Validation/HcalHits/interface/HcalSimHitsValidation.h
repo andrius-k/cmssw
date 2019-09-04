@@ -46,7 +46,7 @@ public:
   void bookHistograms(DQMStore::IBooker &, edm::Run const &, edm::EventSetup const &) override;
 
   void analyze(edm::Event const &ev, edm::EventSetup const &c) override;
-  void endJob() override;
+  void endJob();  // TODO: endJob not allowed in DQMEDAnalyzer
 
 private:
   double dR(double eta1, double phi1, double eta2, double phi2);

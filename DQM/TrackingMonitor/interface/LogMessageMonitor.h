@@ -59,7 +59,7 @@ public:
 private:
   //      virtual void beginJob() ;
   void analyze(const edm::Event&, const edm::EventSetup&) override;
-  void endJob() override;
+  void endJob() /* never called */;
 
   //      virtual void beginRun(edm::Run const&, edm::EventSetup const&);
   void endRun(edm::Run const&, edm::EventSetup const&) override;
@@ -71,7 +71,6 @@ private:
 
   std::string histname;  //for naming the histograms according to algorithm used
 
-  DQMStore* dqmStore_;
   edm::ParameterSet conf_;
 
   std::map<std::string, int> modulesMap;

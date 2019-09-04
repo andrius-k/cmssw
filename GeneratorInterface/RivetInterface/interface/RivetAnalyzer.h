@@ -66,7 +66,7 @@ private:
   std::vector<std::string> _weightNames;
   std::vector<std::string> _lheWeightNames;
 
-  DQMStore *dbe;
+  std::unique_ptr<DQMStore> dbe;
   std::vector<MonitorElement *> _mes;
 };
 

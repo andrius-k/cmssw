@@ -66,7 +66,7 @@ private:
   int resetFitNLumi_;
   bool debug_;
 
-  DQMStore* dbe_;
+  std::unique_ptr<DQMStore> dbe_;
   BeamFitter* theBeamFitter;
 
   unsigned int countBx_;

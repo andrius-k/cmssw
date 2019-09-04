@@ -30,7 +30,7 @@ PFDQMEventSelector::~PFDQMEventSelector() {}
 // -- BeginJob
 //
 void PFDQMEventSelector::beginJob() {
-  dqmStore_ = edm::Service<DQMStore>().operator->();
+  dqmStore_ = std::make_unique<DQMStore>();
   fileOpened_ = openInputFile();
 }
 //

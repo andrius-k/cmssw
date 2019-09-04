@@ -86,8 +86,9 @@ MEtoEDMConverter::~MEtoEDMConverter() = default;
 
 void MEtoEDMConverter::beginJob() {
   // Determine if we are running multithreading asking to the DQMStore. Not to be moved in the ctor
-  DQMStore* dbe = edm::Service<DQMStore>().operator->();
-  enableMultiThread_ = dbe->enableMultiThread_;
+  std::unique_ptr<DQMStore> dbe = std::make_unique<DQMStore>();
+  // TODO: Remove.
+  enableMultiThread_ = false;
 }
 
 void MEtoEDMConverter::endJob() {}
@@ -100,11 +101,13 @@ std::shared_ptr<meedm::Void> MEtoEDMConverter::globalBeginRun(edm::Run const& iR
 void MEtoEDMConverter::globalEndRun(edm::Run const& iRun, const edm::EventSetup& iSetup) {}
 
 void MEtoEDMConverter::endRunProduce(edm::Run& iRun, const edm::EventSetup& iSetup) {
-  DQMStore* store = edm::Service<DQMStore>().operator->();
+#if 0
+  std::unique_ptr<DQMStore> store = std::make_unique<DQMStore>();
   store->meBookerGetter([&](DQMStore::IBooker& b, DQMStore::IGetter& g) {
     store->scaleElements();
     putData(g, iRun, false, iRun.run(), 0);
   });
+#endif
 }
 
 std::shared_ptr<meedm::Void> MEtoEDMConverter::globalBeginLuminosityBlock(edm::LuminosityBlock const&,
@@ -113,14 +116,18 @@ std::shared_ptr<meedm::Void> MEtoEDMConverter::globalBeginLuminosityBlock(edm::L
 }
 
 void MEtoEDMConverter::endLuminosityBlockProduce(edm::LuminosityBlock& iLumi, const edm::EventSetup& iSetup) {
-  DQMStore* store = edm::Service<DQMStore>().operator->();
+#if 0
+  std::unique_ptr<DQMStore> store = std::make_unique<DQMStore>();
   store->meBookerGetter([&](DQMStore::IBooker& b, DQMStore::IGetter& g) {
     putData(g, iLumi, true, iLumi.run(), iLumi.id().luminosityBlock());
   });
+#endif
 }
 
 template <class T>
 void MEtoEDMConverter::putData(DQMStore::IGetter& iGetter, T& iPutTo, bool iLumiOnly, uint32_t run, uint32_t lumi) {
+  // TODO: figure out.
+#if 0
   std::string MsgLoggerCat = "MEtoEDMConverter_putData";
 
   if (verbosity > 0)
@@ -320,6 +327,7 @@ void MEtoEDMConverter::putData(DQMStore::IGetter& iGetter, T& iPutTo, bool iLumi
   iPutTo.put(std::move(pOut3), sName);
   iPutTo.put(std::move(pOutProf), sName);
   iPutTo.put(std::move(pOutProf2), sName);
+#endif
 }
 
 void MEtoEDMConverter::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {}

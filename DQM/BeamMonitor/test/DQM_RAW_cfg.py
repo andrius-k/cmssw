@@ -23,8 +23,8 @@ process.load("DQM.BeamMonitor.BeamMonitor_cff")
 process.dqmBeamMonitor.Debug = True
 process.dqmBeamMonitor.BeamFitter.Debug = True
 process.load("DQM.BeamMonitor.BeamMonitor_PixelLess_cff")
-process.dqmBeamMonitor_pixelless.Debug = True
-process.dqmBeamMonitor_pixelless.BeamFitter.Debug = True
+process.dqmBeamMonitorpixelless.Debug = True
+process.dqmBeamMonitorpixelless.BeamFitter.Debug = True
 
 process.dqmBeamMonitor.BeamFitter.WriteAscii = True
 process.dqmBeamMonitor.BeamFitter.AsciiFileName = 'BeamFitResults.txt'
@@ -83,7 +83,7 @@ process.RecoForDQM = cms.Sequence(process.pretracking_step*process.recopixelvert
 process.RecoForDQM_Pixelless = cms.Sequence(process.pretracking_step+process.ctfTracksPixelLess)
 process.RecoForDQM_ALL = cms.Sequence(process.pretracking_step+process.ckftracks+process.ctfTracksPixelLess)
 process.BeamMonitorDQM = cms.Sequence(process.dqmBeamMonitor+process.dqmEnv)
-process.BeamMonitorDQM_Pixelless = cms.Sequence(process.dqmBeamMonitor_pixelless+process.dqmEnvPixelLess)
+process.BeamMonitorDQM_Pixelless = cms.Sequence(process.dqmBeamMonitorpixelless+process.dqmEnvPixelLess)
 
 ## Change FirstStep default values
 # Step 0

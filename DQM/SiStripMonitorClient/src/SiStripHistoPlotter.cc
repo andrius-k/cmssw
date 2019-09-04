@@ -283,17 +283,18 @@ void SiStripHistoPlotter::createStaticPlot(MonitorElement* me, const std::string
     setDrawingOption(hist1);
     hist1->Draw();
     std::string name = hist1->GetName();
-    if (me->getRefRootObject()) {
-      TH1* hist1_ref = me->getRefTH1();
-      if (hist1_ref) {
-        hist1_ref->SetLineColor(3);
-        hist1_ref->SetMarkerColor(3);
-        if (name.find("Summary") != std::string::npos)
-          hist1_ref->Draw("same");
-        else
-          hist1_ref->DrawNormalized("same", hist1->GetEntries());
-      }
-    }
+    // TODO: Reference Histograms not supported any more.
+    //if (me->getRefRootObject()) {
+    //  TH1* hist1_ref = me->getRefTH1();
+    //  if (hist1_ref) {
+    //    hist1_ref->SetLineColor(3);
+    //    hist1_ref->SetMarkerColor(3);
+    //    if (name.find("Summary") != std::string::npos)
+    //      hist1_ref->Draw("same");
+    //    else
+    //      hist1_ref->DrawNormalized("same", hist1->GetEntries());
+    //  }
+    //}
   }
   canvas->Update();
   std::string command = "rm -f " + file_name;

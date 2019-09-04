@@ -281,8 +281,6 @@ void ContainmentCorrectionAnalyzer::analyze(const Event &evt, const EventSetup &
   }  // loop over reco photons
 }
 
-void ContainmentCorrectionAnalyzer::endJob() {}
-
 float ContainmentCorrectionAnalyzer::ecalEta(float EtaParticle, float Zvertex, float plane_Radius) {
   const float R_ECAL = 136.5;
   const float Z_Endcap = 328.0;

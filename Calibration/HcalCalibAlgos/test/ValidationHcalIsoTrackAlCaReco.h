@@ -74,7 +74,7 @@ public:
   ~ValidationHcalIsoTrackAlCaReco();
 
 private:
-  DQMStore* dbe_;
+  std::unique_ptr<DQMStore> dbe_;
 
   virtual void beginJob();
   virtual void analyze(const edm::Event&, const edm::EventSetup&);

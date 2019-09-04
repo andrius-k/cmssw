@@ -32,7 +32,7 @@ public:
   void findAllSubdirectories(const std::string& dir, std::set<std::string>* myList, TString pattern);
 
 private:
-  DQMStore* dqmStore;
+  std::unique_ptr<DQMStore> dqmStore;
   TFile* plots;
   vstring subDirs;
   std::string myDQMrootFolder;
@@ -56,7 +56,7 @@ DQMGenericTnPClient::DQMGenericTnPClient(const edm::ParameterSet& pset)
 void DQMGenericTnPClient::endRun(const edm::Run& run, const edm::EventSetup& setup) {
   TPRegexp metacharacters("[\\^\\$\\.\\*\\+\\?\\|\\(\\)\\{\\}\\[\\]]");
 
-  dqmStore = Service<DQMStore>().operator->();
+  dqmStore = std::make_unique<DQMStore>();
   if (!dqmStore) {
     LogError("DQMGenericTnPClient") << "Could not find DQMStore service\n";
     return;

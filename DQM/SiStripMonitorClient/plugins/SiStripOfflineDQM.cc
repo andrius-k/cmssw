@@ -67,6 +67,7 @@ SiStripOfflineDQM::SiStripOfflineDQM(edm::ParameterSet const& pSet)
 }
 
 void SiStripOfflineDQM::beginJob() {
+  dqm_store = std::make_unique<DQMStore>();
   // Essential: reads xml file to get the histogram names to create summary
   // Read the summary configuration file
   if (createSummary_) {
@@ -96,14 +97,13 @@ void SiStripOfflineDQM::beginRun(edm::Run const& run, edm::EventSetup const& eSe
       }
     }
   }
-  auto& dqm_store = *edm::Service<DQMStore>{};
   trackerFEDsFound_ = (nFEDs > 0);
   if (!usedWithEDMtoMEConverter_) {
-    if (!openInputFile(dqm_store))
+    if (!openInputFile(*dqm_store))
       createSummary_ = false;
   }
   if (globalStatusFilling_ > 0) {
-    actionExecutor_.createStatus(dqm_store);
+    actionExecutor_.createStatus(*dqm_store);
   }
 }
 
@@ -113,8 +113,7 @@ void SiStripOfflineDQM::endLuminosityBlock(edm::LuminosityBlock const& lumiSeg, 
   edm::LogInfo("EndLumiBlock") << "SiStripOfflineDQM::endLuminosityBlock";
   if (trackerFEDsFound_) {
     if (globalStatusFilling_ > 0) {
-      auto& dqm_store = *edm::Service<DQMStore>{};
-      actionExecutor_.fillStatusAtLumi(dqm_store);
+      actionExecutor_.fillStatusAtLumi(*dqm_store);
     }
   }
 }
@@ -126,15 +125,14 @@ void SiStripOfflineDQM::endRun(edm::Run const& run, edm::EventSetup const& eSetu
   edm::ESHandle<SiStripDetCabling> det_cabling;
   eSetup.get<SiStripDetCablingRcd>().get(det_cabling);
 
-  auto& dqm_store = *edm::Service<DQMStore>{};
   if (globalStatusFilling_ > 0) {
-    actionExecutor_.createStatus(dqm_store);
+    actionExecutor_.createStatus(*dqm_store);
     if (!trackerFEDsFound_) {
       actionExecutor_.fillDummyStatus();
       return;
     }
     // Fill Global Status
-    actionExecutor_.fillStatus(dqm_store, det_cabling, eSetup);
+    actionExecutor_.fillStatus(*dqm_store, det_cabling, eSetup);
   }
 
   if (usedWithEDMtoMEConverter_)
@@ -142,7 +140,7 @@ void SiStripOfflineDQM::endRun(edm::Run const& run, edm::EventSetup const& eSetu
 
   // create Summary Plots
   if (createSummary_)
-    actionExecutor_.createSummaryOffline(dqm_store);
+    actionExecutor_.createSummaryOffline(*dqm_store);
 
   // Create TrackerMap
   bool const create_tkmap = configPar_.getUntrackedParameter<bool>("CreateTkMap", false);
@@ -156,10 +154,10 @@ void SiStripOfflineDQM::endRun(edm::Run const& run, edm::EventSetup const& eSetu
         map_names.push_back(map_type);
         tkMapPSet.augment(configPar_.getUntrackedParameter<edm::ParameterSet>("TkmapParameters"));
         edm::LogInfo("TkMapParameters") << tkMapPSet;
-        actionExecutor_.createOfflineTkMap(tkMapPSet, dqm_store, map_type, eSetup);
+        actionExecutor_.createOfflineTkMap(tkMapPSet, *dqm_store, map_type, eSetup);
       }
       if (createTkInfoFile_) {
-        actionExecutor_.createTkInfoFile(map_names, tkinfoTree_, dqm_store);
+        actionExecutor_.createTkInfoFile(map_names, tkinfoTree_, *dqm_store);
       }
     }
   }
@@ -172,8 +170,7 @@ void SiStripOfflineDQM::endJob() {
 
   if (printFaultyModuleList_) {
     std::ostringstream str_val;
-    auto& dqm_store = *edm::Service<DQMStore>{};
-    actionExecutor_.printFaultyModuleList(dqm_store, str_val);
+    actionExecutor_.printFaultyModuleList(*dqm_store, str_val);
     std::cout << str_val.str() << std::endl;
   }
 }

@@ -22,7 +22,7 @@ photonEfficiency = DQMEDHarvester("DQMGenericClient",
     ),
 )
 
-photonVBF_jetMETEfficiency = DQMEDHarvester("DQMGenericClient",
+photonVBFjetMETEfficiency = DQMEDHarvester("DQMGenericClient",
 #    subDirs        = cms.untracked.vstring("HLT/Photon/Photon50_R9Id90_HE10_IsoM_EBOnly_PFJetsMJJ300DEta3_PFMET50", "HLT/Photon/Photon75_R9Id90_HE10_IsoM_EBOnly_PFJetsMJJ300DEta3"),
     subDirs        = cms.untracked.vstring("HLT/EXO/Photon/Photon50_R9Id90_HE10_IsoM_EBOnly_PFJetsMJJ300DEta3_PFMET50", "HLT/EXO/Photon/Photon75_R9Id90_HE10_IsoM_EBOnly_PFJetsMJJ300DEta3"),
     verbose        = cms.untracked.uint32(0), # Set to 2 for all messages
@@ -108,7 +108,7 @@ METplusTrackEfficiency = DQMEDHarvester("DQMGenericClient",
 
 )
 
-DisplacedJet_htEfficiency = DQMEDHarvester("DQMGenericClient",
+DisplacedJethtEfficiency = DQMEDHarvester("DQMGenericClient",
     subDirs        = cms.untracked.vstring("HLT/EXO/DisplacedJet/HT/*"),
     verbose        = cms.untracked.uint32(0), # Set to 2 for all messages
     resolution     = cms.vstring(),
@@ -123,7 +123,7 @@ DisplacedJet_htEfficiency = DQMEDHarvester("DQMGenericClient",
 
 )
 
-DisplacedJet_jetEfficiency = DQMEDHarvester("DQMGenericClient",
+DisplacedJetjetEfficiency = DQMEDHarvester("DQMGenericClient",
      subDirs        = cms.untracked.vstring("HLT/EXO/DisplacedJet/Jet/*"),
      verbose        = cms.untracked.uint32(0), # Set to 2 for all messages
      resolution     = cms.vstring(),
@@ -202,7 +202,7 @@ DisplacedJet_jetEfficiency = DQMEDHarvester("DQMGenericClient",
 
 )
 
-DisplacedJet_jetRatioHemHep17 = DQMEDHarvester("DQMGenericClient",
+DisplacedJetjetRatioHemHep17 = DQMEDHarvester("DQMGenericClient",
     subDirs =  cms.untracked.vstring("HLT/EXO/DisplacedJet/Jet/*"),
     verbose = cms.untracked.uint32(0),
     resolution = cms.vstring(),
@@ -224,9 +224,9 @@ exoticaClient = cms.Sequence(
     NoBPTXEfficiency
   + DiDispStaMuonEfficiency
   + photonEfficiency
-  + photonVBF_jetMETEfficiency
-  + DisplacedJet_htEfficiency
-  + (DisplacedJet_jetEfficiency*DisplacedJet_jetRatioHemHep17)
+  + photonVBFjetMETEfficiency
+  + DisplacedJethtEfficiency
+  + (DisplacedJetjetEfficiency*DisplacedJetjetRatioHemHep17)
   + htClient
   + metClient
   + METplusTrackEfficiency

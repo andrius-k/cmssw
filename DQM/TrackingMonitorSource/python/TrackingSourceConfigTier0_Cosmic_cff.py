@@ -11,11 +11,11 @@ TrackMon_cosmicTk.doSeedParameterHistos            = True
 
 # Clone for CKF Tracks
 import DQM.TrackingMonitor.TrackerCosmicsTrackingMonitor_cfi
-TrackMon_ckf = DQM.TrackingMonitor.TrackerCosmicsTrackingMonitor_cfi.TrackerCosmicTrackMon.clone()
-TrackMon_ckf.TrackProducer                         = 'ctfWithMaterialTracksP5'
-TrackMon_ckf.AlgoName                              = 'CKFTk'
-TrackMon_ckf.FolderName                            = 'Tracking/TrackParameters'
-TrackMon_ckf.doSeedParameterHistos                 = True
+TrackMonckf = DQM.TrackingMonitor.TrackerCosmicsTrackingMonitor_cfi.TrackerCosmicTrackMon.clone()
+TrackMonckf.TrackProducer                         = 'ctfWithMaterialTracksP5'
+TrackMonckf.AlgoName                              = 'CKFTk'
+TrackMonckf.FolderName                            = 'Tracking/TrackParameters'
+TrackMonckf.doSeedParameterHistos                 = True
 
 # Clone for Road Search  Tracks
 #import DQM.TrackingMonitor.TrackerCosmicsTrackingMonitor_cfi
@@ -76,8 +76,8 @@ dqmInfoTracking = DQMEDAnalyzer('DQMEventInfo',
 # Sequences 
 TrackingDQMTier0_cosmicTk = cms.Sequence(TrackMon_cosmicTk*TrackEffMon_cosmicTk)
 
-TrackingDQMTier0_ckf = cms.Sequence(TrackMon_ckf*TrackEffMon_ckf)
+TrackingDQMTier0_ckf = cms.Sequence(TrackMonckf*TrackEffMon_ckf)
 
 #TrackingDQMTier0_rs = cms.Sequence(TrackMon_rs*TrackEffMon_rs)
 
-TrackingDQMTier0 = cms.Sequence(TrackMon_cosmicTk*TrackMon_ckf*TrackEffMon_ckf*TrackSplitMonitor*dqmInfoTracking)
+TrackingDQMTier0 = cms.Sequence(TrackMon_cosmicTk*TrackMonckf*TrackEffMon_ckf*TrackSplitMonitor*dqmInfoTracking)

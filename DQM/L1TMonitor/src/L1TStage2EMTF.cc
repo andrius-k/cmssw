@@ -76,7 +76,6 @@ void L1TStage2EMTF::bookHistograms(DQMStore::IBooker& ibooker, const edm::Run&, 
     cscDQMOccupancy->setBinLabel(ybin, "ME-" + suffix_label[ybin - 1], 2);
     cscDQMOccupancy->setBinLabel(21 - ybin, "ME+" + suffix_label[ybin - 1], 2);
   }
-  cscDQMOccupancy->getTH2F()->GetXaxis()->SetCanExtend(false);  // Needed to stop multi-thread summing
 
   mpcLinkErrors = ibooker.book2D("mpcLinkErrors", "MPC Link Errors", 54, 1, 55, 12, -6, 6);
   mpcLinkErrors->setAxisTitle("Sector (CSCID 1-9 Unlabelled)", 1);
@@ -118,7 +117,6 @@ void L1TStage2EMTF::bookHistograms(DQMStore::IBooker& ibooker, const edm::Run&, 
     rpcHitOccupancy->setBinLabel(bin, "RE-" + rpc_label[bin - 1], 2);
     rpcHitOccupancy->setBinLabel(13 - bin, "RE+" + rpc_label[bin - 1], 2);
   }
-  rpcHitOccupancy->getTH2F()->GetXaxis()->SetCanExtend(false);  // Needed to stop multi-thread summing
 
   // Track Monitor Elements
   emtfnTracks = ibooker.book1D("emtfnTracks", "Number of EMTF Tracks per Event", 11, 0, 11);
@@ -341,9 +339,6 @@ void L1TStage2EMTF::bookHistograms(DQMStore::IBooker& ibooker, const edm::Run&, 
       if (hist == 0)
         cscTimingTot->setBinLabel(21 - ybin, "ME+" + suffix_label[ybin - 1], 2);
     }
-    if (hist == 0)
-      cscTimingTot->getTH2F()->GetXaxis()->SetCanExtend(false);      // Needed to stop multi-thread summing
-    cscLCTTiming[hist]->getTH2F()->GetXaxis()->SetCanExtend(false);  // Needed to stop multi-thread summing
 
     rpcHitTiming[hist] =
         ibooker.book2D("rpcHitTiming" + nameBX[hist], "RPC Chamber Occupancy " + labelBX[hist], 42, 1, 43, 12, 0, 12);
@@ -354,7 +349,6 @@ void L1TStage2EMTF::bookHistograms(DQMStore::IBooker& ibooker, const edm::Run&, 
       rpcHitTiming[hist]->setBinLabel(bin, "RE-" + rpc_label[bin - 1], 2);
       rpcHitTiming[hist]->setBinLabel(13 - bin, "RE+" + rpc_label[bin - 1], 2);
     }
-    rpcHitTiming[hist]->getTH2F()->GetXaxis()->SetCanExtend(false);  // Needed to stop multi-thread summing
     if (hist == 0) {
       for (int bin = 1; bin < 7; ++bin) {
         rpcHitTimingTot->setBinLabel(bin * 7 - 6, std::to_string(bin), 1);
@@ -362,7 +356,6 @@ void L1TStage2EMTF::bookHistograms(DQMStore::IBooker& ibooker, const edm::Run&, 
         rpcHitTimingTot->setBinLabel(bin, "RE-" + rpc_label[bin - 1], 2);
         rpcHitTimingTot->setBinLabel(13 - bin, "RE+" + rpc_label[bin - 1], 2);
       }
-      rpcHitTimingTot->getTH2F()->GetXaxis()->SetCanExtend(false);  // Needed to stop multi-thread summing
     }
     //if (hist == 4) continue; // Don't book for BX = 0
 
@@ -382,7 +375,6 @@ void L1TStage2EMTF::bookHistograms(DQMStore::IBooker& ibooker, const edm::Run&, 
       cscLCTTimingFrac[hist]->setBinLabel(ybin, "ME-" + suffix_label[ybin - 1], 2);
       cscLCTTimingFrac[hist]->setBinLabel(21 - ybin, "ME+" + suffix_label[ybin - 1], 2);
     }
-    cscLCTTimingFrac[hist]->getTH2F()->GetXaxis()->SetCanExtend(false);  // Needed to stop multi-thread summing
 
     rpcHitTimingFrac[hist] = ibooker.book2D(
         "rpcHitTimingFrac" + nameBX[hist], "RPC Chamber Fraction in " + labelBX[hist], 42, 1, 43, 12, 0, 12);
@@ -665,7 +657,7 @@ void L1TStage2EMTF::analyze(const edm::Event& e, const edm::EventSetup& c) {
 
   int nTracks = TrackCollection->size();
 
-  emtfnTracks->Fill(std::min(nTracks, emtfnTracks->getTH1F()->GetNbinsX() - 1));
+  emtfnTracks->Fill(std::min(nTracks, emtfnTracks->getNbinsX() - 1));
 
   for (auto Track = TrackCollection->begin(); Track != TrackCollection->end(); ++Track) {
     int endcap = Track->Endcap();
@@ -827,10 +819,13 @@ void L1TStage2EMTF::analyze(const edm::Event& e, const edm::EventSetup& c) {
   }  // End loop: for (auto Track = TrackCollection->begin(); Track != TrackCollection->end(); ++Track)
 
   // CSC LCT and RPC Hit Timing Efficieny
+  // TODO: this is very unsafe/illegal to do in analyze()
+#if 0
   for (int hist_index = 0; hist_index < 5; ++hist_index) {
     cscLCTTimingFrac[hist_index]->getTH2F()->Divide(cscLCTTiming[hist_index]->getTH2F(), cscTimingTot->getTH2F());
     rpcHitTimingFrac[hist_index]->getTH2F()->Divide(rpcHitTiming[hist_index]->getTH2F(), rpcHitTimingTot->getTH2F());
   }
+#endif
 
   // Regional Muon Candidates
   edm::Handle<l1t::RegionalMuonCandBxCollection> MuonBxCollection;

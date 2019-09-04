@@ -4,7 +4,7 @@ from RecoMuon.MuonIsolationProducers.muIsoDeposits_cff import *
 from TrackPropagation.SteppingHelixPropagator.SteppingHelixPropagatorAny_cfi import *
 
 from DQMServices.Core.DQMEDAnalyzer import DQMEDAnalyzer
-MuIsoDQM_trk = DQMEDAnalyzer('MuonIsolationDQM',
+MuIsoDQMtrk = DQMEDAnalyzer('MuonIsolationDQM',
                               Global_Muon_Label = cms.untracked.InputTag("muons"),
                               requireTRKMuon = cms.untracked.bool(True),
                               requireSTAMuon = cms.untracked.bool(False),
@@ -18,7 +18,7 @@ MuIsoDQM_trk = DQMEDAnalyzer('MuonIsolationDQM',
                               directory = cms.string("Muons/Isolation/tracker")                             
                               )
 
-MuIsoDQM_sta = DQMEDAnalyzer('MuonIsolationDQM',
+MuIsoDQMsta = DQMEDAnalyzer('MuonIsolationDQM',
                               Global_Muon_Label = cms.untracked.InputTag("muons"),
                               requireTRKMuon = cms.untracked.bool(False),
                               requireSTAMuon = cms.untracked.bool(True),
@@ -32,7 +32,7 @@ MuIsoDQM_sta = DQMEDAnalyzer('MuonIsolationDQM',
                               directory = cms.string("Muons/Isolation/standalone")
                               )
 
-MuIsoDQM_glb = DQMEDAnalyzer('MuonIsolationDQM',
+MuIsoDQMglb = DQMEDAnalyzer('MuonIsolationDQM',
                               Global_Muon_Label = cms.untracked.InputTag("muons"),
                               requireTRKMuon = cms.untracked.bool(False),
                               requireSTAMuon = cms.untracked.bool(False),
@@ -45,11 +45,11 @@ MuIsoDQM_glb = DQMEDAnalyzer('MuonIsolationDQM',
                               vertexLabel = cms.untracked.InputTag("offlinePrimaryVertices"),
                               directory = cms.string("Muons/Isolation/global")
                               )
-muIsoDQM_seq = cms.Sequence(MuIsoDQM_trk+MuIsoDQM_sta+MuIsoDQM_glb)
+muIsoDQM_seq = cms.Sequence(MuIsoDQMtrk+MuIsoDQMsta+MuIsoDQMglb)
 
 
 
-MuIsoDQM_trk_miniAOD = DQMEDAnalyzer('MuonIsolationDQM',
+MuIsoDQMtrkminiAOD = DQMEDAnalyzer('MuonIsolationDQM',
                                       Global_Muon_Label = cms.untracked.InputTag("slimmedMuons"),
                                       requireTRKMuon = cms.untracked.bool(True),
                                       requireSTAMuon = cms.untracked.bool(False),
@@ -63,7 +63,7 @@ MuIsoDQM_trk_miniAOD = DQMEDAnalyzer('MuonIsolationDQM',
                                       directory = cms.string("Muons_miniAOD/Isolation/tracker")                             
                                       )
 
-MuIsoDQM_sta_miniAOD = DQMEDAnalyzer('MuonIsolationDQM',
+MuIsoDQMstaminiAOD = DQMEDAnalyzer('MuonIsolationDQM',
                                       Global_Muon_Label = cms.untracked.InputTag("slimmedMuons"),
                                       requireTRKMuon = cms.untracked.bool(False),
                                       requireSTAMuon = cms.untracked.bool(True),
@@ -77,7 +77,7 @@ MuIsoDQM_sta_miniAOD = DQMEDAnalyzer('MuonIsolationDQM',
                                       directory = cms.string("Muons_miniAOD/Isolation/standalone")
                                       )
 
-MuIsoDQM_glb_miniAOD = DQMEDAnalyzer('MuonIsolationDQM',
+MuIsoDQMglbminiAOD = DQMEDAnalyzer('MuonIsolationDQM',
                                       Global_Muon_Label = cms.untracked.InputTag("slimmedMuons"),
                                       requireTRKMuon = cms.untracked.bool(False),
                                       requireSTAMuon = cms.untracked.bool(False),
@@ -90,4 +90,4 @@ MuIsoDQM_glb_miniAOD = DQMEDAnalyzer('MuonIsolationDQM',
                                       vertexLabel = cms.untracked.InputTag("offlinePrimaryVertices"),
                                       directory = cms.string("Muons_miniAOD/Isolation/global")
                                       )
-muIsoDQM_seq_miniAOD = cms.Sequence(MuIsoDQM_trk_miniAOD+MuIsoDQM_sta_miniAOD+MuIsoDQM_glb_miniAOD)
+muIsoDQM_seq_miniAOD = cms.Sequence(MuIsoDQMtrkminiAOD+MuIsoDQMstaminiAOD+MuIsoDQMglbminiAOD)

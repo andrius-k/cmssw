@@ -3,7 +3,7 @@
 
 SiStripDQMHistoryHelper::~SiStripDQMHistoryHelper() {}
 
-void SiStripDQMHistoryHelper::scanTreeAndFillSummary(const std::vector<MonitorElement*>& MEs,
+void SiStripDQMHistoryHelper::scanTreeAndFillSummary(const std::vector<dqm::harvesting::MonitorElement*>& MEs,
                                                      HDQMSummary* summary,
                                                      const std::string& keyName,
                                                      const std::vector<std::string>& Quantities) const {
@@ -97,7 +97,7 @@ bool SiStripDQMHistoryHelper::setDBLabelsForStat(const std::string& keyName,
 }
 
 bool SiStripDQMHistoryHelper::setDBValuesForLandau(const MonitorElement* me, HDQMSummary::InputVector& values) const {
-  m_fitME.doLanGaussFit(const_cast<MonitorElement*>(me));
+  m_fitME.doLanGaussFit(dynamic_cast<dqm::harvesting::MonitorElement*>(const_cast<MonitorElement*>(me)));
   values.push_back(m_fitME.getLanGaussPar("mpv"));
   values.push_back(m_fitME.getLanGaussParErr("mpv"));
   values.push_back(m_fitME.getLanGaussConv("fwhm"));
@@ -109,7 +109,7 @@ bool SiStripDQMHistoryHelper::setDBValuesForLandau(const MonitorElement* me, HDQ
 }
 
 bool SiStripDQMHistoryHelper::setDBValuesForGauss(const MonitorElement* me, HDQMSummary::InputVector& values) const {
-  m_fitME.doGaussFit(const_cast<MonitorElement*>(me));
+  m_fitME.doGaussFit(dynamic_cast<dqm::harvesting::MonitorElement*>(const_cast<MonitorElement*>(me)));
   values.push_back(m_fitME.getGaussPar("mean"));
   values.push_back(m_fitME.getGaussPar("sigma"));
   if (m_fitME.getFitnDof() != 0)

@@ -29,7 +29,7 @@ public:
 
 private:
   // DAQ Tools
-  DQMStore *dbe_;
+  std::unique_ptr<DQMStore> dbe_;
   std::map<std::string, MonitorElement *> me;
 
   // Inputs from Configuration File

@@ -63,7 +63,7 @@ EcalLocalRecoTask::EcalLocalRecoTask(const edm::ParameterSet& ps) {
   dbe_ = 0;
 
   // get hold of back-end interface
-  dbe_ = edm::Service<DQMStore>().operator->();
+  dbe_ = std::make_unique<DQMStore>();
 
   if (dbe_) {
     if (verbose_) {

@@ -42,7 +42,7 @@ void MonitorTrackResidualsBase<pixel_or_strip>::bookHistograms(DQMStore::IBooker
     this->createMEs(ibooker, iSetup);
   }
   std::string topFolderName_ = "SiStrip";
-  SiStripFolderOrganizer folder_organizer;
+  SiStripFolderOrganizer folder_organizer(&ibooker);
   folder_organizer.setSiStripFolderName(topFolderName_);
   edm::ESHandle<TkDetMap> tkDetMapHandle;
   iSetup.get<TrackerTopologyRcd>().get(tkDetMapHandle);
@@ -120,7 +120,7 @@ void MonitorTrackResidualsBase<pixel_or_strip>::createMEs(DQMStore::IBooker &ibo
   // use SistripHistoId for producing histogram id (and title)
   SiStripHistoId hidmanager;
 
-  SiStripFolderOrganizer strip_organizer;
+  SiStripFolderOrganizer strip_organizer(&ibooker);
   auto pixel_organizer = SiPixelFolderOrganizer(false);
 
   // Collect list of modules from Tracker Geometry

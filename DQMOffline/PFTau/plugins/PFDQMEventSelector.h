@@ -27,7 +27,7 @@ private:
   std::string inputFileName_;
   bool fileOpened_;
 
-  DQMStore *dqmStore_;
+  std::unique_ptr<DQMStore> dqmStore_;
 };
 
 #endif
