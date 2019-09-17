@@ -203,12 +203,22 @@ namespace {
     unsigned int m_type;                  //A value in TypeIndex
   };
 
+  // struct MonitorElementFromFile {
+  //   unsigned int m_run, m_lumi;
+  //   MonitorElementData* m_meData;
+  // };
+  // using MonitorElementsFromFile = std::vector<MonitorElementFromFile>;
+
+  // Maps (run, lumi) to a vector of ME data. Lumi is 0 for per run MEs.
+  using MonitorElementsFromFile = std::map<std::tuple<int, int>, std::vector<MonitorElementData*>>;
+
   class TreeReaderBase {
   public:
     TreeReaderBase() {}
     virtual ~TreeReaderBase() {}
 
     MonitorElement* read(ULong64_t iIndex, DQMStore& iStore, bool iIsLumi) { return doRead(iIndex, iStore, iIsLumi); }
+    void read(ULong64_t iIndex, MonitorElementsFromFile& mesFromFile, bool iIsLumi, int run, int lumi) { doRead(iIndex, mesFromFile, iIsLumi, run, lumi); }
     virtual void setTree(TTree* iTree) = 0;
 
   protected:
@@ -216,6 +226,7 @@ namespace {
 
   private:
     virtual MonitorElement* doRead(ULong64_t iIndex, DQMStore& iStore, bool iIsLumi) = 0;
+    virtual void doRead(ULong64_t iIndex, MonitorElementsFromFile& mesFromFile, bool iIsLumi, int run, int lumi) = 0;
   };
 
   template <class T>
@@ -223,29 +234,61 @@ namespace {
   public:
     TreeObjectReader() : m_tree(nullptr), m_fullName(nullptr), m_buffer(nullptr), m_tag(0) {}
     MonitorElement* doRead(ULong64_t iIndex, DQMStore& iStore, bool iIsLumi) override {
+      return nullptr;
+      // m_tree->GetEntry(iIndex);
+      // MonitorElement* element = iStore.get(*m_fullName);
+      // try {
+      //   if (nullptr == element) {
+      //     std::string path;
+      //     const char* name;
+      //     splitName(*m_fullName, path, name);
+      //     iStore.setCurrentFolder(path);
+      //     element = createElement(iStore, name, m_buffer);
+      //     if (iIsLumi) {
+      //       // element->setLumiFlag();
+      //     }
+      //   } else {
+      //     mergeWithElement(element, m_buffer);
+      //   }
+      //   if (0 != m_tag) {
+      //     // iStore.tag(element, m_tag);
+      //   }
+      // } catch (cms::Exception& e) {
+      //   e.addContext(std::string("While reading element ") + *m_fullName);
+      //   e.raise();
+      // }
+      // return element;
+    }
+    void doRead(ULong64_t iIndex, MonitorElementsFromFile& mesFromFile, bool iIsLumi, int run, int lumi) override {
       m_tree->GetEntry(iIndex);
-      MonitorElement* element = iStore.get(*m_fullName);
-      try {
-        if (nullptr == element) {
-          std::string path;
-          const char* name;
-          splitName(*m_fullName, path, name);
-          iStore.setCurrentFolder(path);
-          element = createElement(iStore, name, m_buffer);
-          if (iIsLumi) {
-            element->setLumiFlag();
-          }
-        } else {
-          mergeWithElement(element, m_buffer);
-        }
-        if (0 != m_tag) {
-          iStore.tag(element, m_tag);
-        }
-      } catch (cms::Exception& e) {
-        e.addContext(std::string("While reading element ") + *m_fullName);
-        e.raise();
+
+      // auto me = std::make_unique<dqm::harvesting::MonitorElement>(&meData, /* is_owned */ false, /* is_readonly */ true);
+
+      MonitorElementData* meData = new MonitorElementData();
+      MonitorElementData::Key key;
+      // key.kind_ = kind; // TODO: make this work
+      key.path_.set(*m_fullName, MonitorElementData::Path::Type::DIR_AND_NAME);
+      key.scope_ = iIsLumi ? MonitorElementData::Scope::LUMI : MonitorElementData::Scope::RUN;
+      meData->key_ = key;
+      {
+        MonitorElementData::Value::Access value(meData->value_);
+        value.object = std::unique_ptr<T>((T*)(m_buffer->Clone()));
       }
-      return element;
+
+      // std::unique_ptr<MonitorElementFromFile> meFromFile = std::unique_ptr<MonitorElementFromFile>(new MonitorElementFromFile());
+      // MonitorElementFromFile meFromFile;
+      // meFromFile.m_run = run;
+      // meFromFile.m_lumi = lumi;
+      // meFromFile.m_meData = meData;
+      
+      // mesFromFile.push_back(std::move(meFromFile));
+      // mesFromFile.push_back(meFromFile);
+      // std::map<tuple<int, int>, MonitorElementCollection>
+      //mesFromFile[std::make_tuple(run, lumi)].push_back(meData);
+      mesFromFile[std::make_tuple(run, lumi)].push_back(meData);
+
+      
+      // TRACE(*m_fullName)
     }
     void setTree(TTree* iTree) override {
       m_tree = iTree;
@@ -261,29 +304,129 @@ namespace {
     uint32_t m_tag;
   };
 
+  class TreeStringReader : public TreeReaderBase {
+  public:
+    TreeStringReader() : m_tree(nullptr), m_fullName(nullptr), m_value(nullptr), m_tag(0) {}
+    MonitorElement* doRead(ULong64_t iIndex, DQMStore& iStore, bool iIsLumi) override {
+      return nullptr;
+      // m_tree->GetEntry(iIndex);
+      // MonitorElement* element = iStore.get(*m_fullName);
+      // try {
+      //   if (nullptr == element) {
+      //     std::string path;
+      //     const char* name;
+      //     splitName(*m_fullName, path, name);
+      //     iStore.setCurrentFolder(path);
+      //     element = createElement(iStore, name, m_buffer);
+      //     if (iIsLumi) {
+      //       // element->setLumiFlag();
+      //     }
+      //   } else {
+      //     mergeWithElement(element, m_buffer);
+      //   }
+      //   if (0 != m_tag) {
+      //     // iStore.tag(element, m_tag);
+      //   }
+      // } catch (cms::Exception& e) {
+      //   e.addContext(std::string("While reading element ") + *m_fullName);
+      //   e.raise();
+      // }
+      // return element;
+    }
+    void doRead(ULong64_t iIndex, MonitorElementsFromFile& mesFromFile, bool iIsLumi, int run, int lumi) override {
+      return;
+      m_tree->GetEntry(iIndex);
+
+      // auto me = std::make_unique<dqm::harvesting::MonitorElement>(&meData, /* is_owned */ false, /* is_readonly */ true);
+
+      // TODO: Fill all metadata to meData
+      MonitorElementData* meData = new MonitorElementData();
+      MonitorElementData::Key key;
+      key.kind_ = MonitorElementData::Kind::STRING;
+      key.path_.set(*m_fullName, MonitorElementData::Path::Type::DIR_AND_NAME);
+      key.scope_ = iIsLumi ? MonitorElementData::Scope::LUMI : MonitorElementData::Scope::RUN;
+      meData->key_ = key;
+      {
+        MonitorElementData::Value::Access value(meData->value_);
+        value.scalar.str = *m_value;
+      }
+
+      // std::unique_ptr<MonitorElementFromFile> meFromFile = std::unique_ptr<MonitorElementFromFile>(new MonitorElementFromFile());
+      // MonitorElementFromFile meFromFile;
+      // meFromFile.m_run = run;
+      // meFromFile.m_lumi = lumi;
+      // meFromFile.m_meData = meData;
+
+      // // mesFromFile.push_back(std::move(meFromFile));
+      // mesFromFile.push_back(meFromFile);
+
+      mesFromFile[std::make_tuple(run, lumi)].push_back(std::move(meData));
+    }
+    void setTree(TTree* iTree) override {
+      m_tree = iTree;
+      m_tree->SetBranchAddress(kFullNameBranch, &m_fullName);
+      m_tree->SetBranchAddress(kFlagBranch, &m_tag);
+      m_tree->SetBranchAddress(kValueBranch, &m_value);
+    }
+
+  private:
+    TTree* m_tree;
+    std::string* m_fullName;
+    std::string* m_value;
+    uint32_t m_tag;
+  };
+
   template <class T>
   class TreeSimpleReader : public TreeReaderBase {
   public:
     TreeSimpleReader() : m_tree(nullptr), m_fullName(nullptr), m_buffer(0), m_tag(0) {}
     MonitorElement* doRead(ULong64_t iIndex, DQMStore& iStore, bool iIsLumi) override {
+      return nullptr;
+      // m_tree->GetEntry(iIndex);
+      // MonitorElement* element = iStore.get(*m_fullName);
+      // if (nullptr == element) {
+      //   std::string path;
+      //   const char* name;
+      //   splitName(*m_fullName, path, name);
+      //   iStore.setCurrentFolder(path);
+      //   element = createElement(iStore, name, m_buffer);
+      //   if (iIsLumi) {
+      //     // element->setLumiFlag();
+      //   }
+      // } else {
+      //   mergeWithElement(element, m_buffer);
+      // }
+      // if (0 != m_tag) {
+      //   // iStore.tag(element, m_tag);
+      // }
+      // return element;
+    }
+    void doRead(ULong64_t iIndex, MonitorElementsFromFile& mesFromFile, bool iIsLumi, int run, int lumi) override {
       m_tree->GetEntry(iIndex);
-      MonitorElement* element = iStore.get(*m_fullName);
-      if (nullptr == element) {
-        std::string path;
-        const char* name;
-        splitName(*m_fullName, path, name);
-        iStore.setCurrentFolder(path);
-        element = createElement(iStore, name, m_buffer);
-        if (iIsLumi) {
-          element->setLumiFlag();
-        }
-      } else {
-        mergeWithElement(element, m_buffer);
-      }
-      if (0 != m_tag) {
-        iStore.tag(element, m_tag);
-      }
-      return element;
+
+      // TODO: Make this work
+
+      // // auto me = std::make_unique<dqm::harvesting::MonitorElement>(&meData, /* is_owned */ false, /* is_readonly */ true);
+
+      // MonitorElementData* data = new MonitorElementData();
+      // MonitorElementData::Key key;
+      // // key.kind_ = kind; // TODO: make this work
+      // key.path_.set(*m_fullName, MonitorElementData::Path::Type::DIR_AND_NAME);
+      // key.scope_ = iIsLumi ? MonitorElementData::Scope::LUMI : MonitorElementData::Scope::RUN;
+      // data->key_ = key;
+      // {
+      //   MonitorElementData::Value::Access value(data->value_);
+      //   value.object = std::unique_ptr<TH1>(m_buffer);
+      // }
+
+      // std::unique_ptr<MonitorElement> me = std::make_unique<MonitorElement>(data, /* is_owned */ true, /* is_readonly */ false);
+
+      // std::unique_ptr<MonitorElementFromFile> meFromFile = std::make_unique<MonitorElementFromFile>();
+      // meFromFile->m_run = run;
+      // meFromFile->m_lumi = lumi;
+      // meFromFile->m_element = me;
+      
+      // mesFromFile.push_back(meFromFile);
     }
     void setTree(TTree* iTree) override {
       m_tree = iTree;
@@ -357,10 +500,113 @@ private:
   };
 
   void beginRun(edm::Run& run) {
-    TRACE_;
+    TRACE(run.run())
+
+    std::unique_ptr<MonitorElementCollection> product = std::make_unique<MonitorElementCollection>();
+
+    auto mes = m_MEsFromFile[std::make_tuple(run.run(), 0)];
+
+    TRACE(mes.size()) // run: 302472 count: 93228
+
+    for(MonitorElementData* meData_ptr : mes) {
+      assert(meData_ptr != nullptr);
+      product->push_back(meData_ptr);
+    }
+
+    run.put(std::move(product), "DQMGenerationRecoRun");
+    
+
+
+
+
+
+    // m_justOpenedFileSoNeedToGenerateRunTransition = false;
+
+    // assert(m_presentIndexItr != m_orderedIndices.end());
+    // RunLumiToRange runLumiRange = m_runlumiToRange[*m_presentIndexItr];
+    
+    // readNextItemType();
+
+    // //NOTE: it is possible to have a Run when all we have stored is lumis
+    // if (runLumiRange.m_lumi == 0) {
+    //   readElements();
+    // }
+
+
   }
   void beginLuminosityBlock(edm::LuminosityBlock& lumi) {
-    TRACE_;
+    TRACE(lumi.luminosityBlock())
+
+    std::unique_ptr<MonitorElementCollection> product = std::make_unique<MonitorElementCollection>();
+
+    auto mes = m_MEsFromFile[std::make_tuple(lumi.run(), lumi.luminosityBlock())];
+
+    for(MonitorElementData* meData_ptr : mes) {
+      assert(meData_ptr != nullptr);
+      product->push_back(meData_ptr);
+    }
+    
+    lumi.put(std::move(product), "DQMGenerationRecoLumi");
+
+
+
+
+
+
+    // RunLumiToRange runLumiRange = m_runlumiToRange[*m_presentIndexItr];
+
+    // // //NOTE: need to reset all lumi block elements at this point
+    // if ((m_lastSeenLumi2 != runLumiRange.m_lumi || m_lastSeenRun2 != runLumiRange.m_run ||
+    //     m_lastSeenReducedPHID2 != m_reducedHistoryIDs.at(runLumiRange.m_historyIDIndex)) &&
+    //     m_shouldReadMEs) {
+    //   m_lastSeenReducedPHID2 = m_reducedHistoryIDs.at(runLumiRange.m_historyIDIndex);
+    //   m_lastSeenRun2 = runLumiRange.m_run;
+    //   m_lastSeenLumi2 = runLumiRange.m_lumi;
+    // }
+
+    // assert(m_presentIndexItr != m_orderedIndices.end());
+
+    // readNextItemType();
+    // readElements();
+
+
+  }
+
+  void readElements(int run, int lumi) {
+    RunLumiToRange runLumiRange = m_runlumiToRange[*m_presentIndexItr];
+    bool shouldContinue = false;
+    do {
+      shouldContinue = false;
+      ++m_presentIndexItr;
+      while (m_presentIndexItr != m_orderedIndices.end() &&
+            skipIt(m_runlumiToRange[*m_presentIndexItr].m_run, m_runlumiToRange[*m_presentIndexItr].m_lumi))
+        ++m_presentIndexItr;
+
+      if (runLumiRange.m_type != kNoTypesStored) {
+        boost::shared_ptr<TreeReaderBase> reader = m_treeReaders[runLumiRange.m_type];
+        ULong64_t index = runLumiRange.m_firstIndex;
+        ULong64_t endIndex = runLumiRange.m_lastIndex + 1;
+        for (; index != endIndex; ++index) {
+          bool isLumi = runLumiRange.m_lumi != 0;
+          if (m_shouldReadMEs)
+            reader->read(index, m_MEsFromFile, isLumi, run, lumi);
+
+          //std::cout << runLumiRange.m_run << " " << runLumiRange.m_lumi <<" "<<index<< " " << runLumiRange.m_type << std::endl;
+        }
+      }
+
+      if (m_presentIndexItr != m_orderedIndices.end()) {
+        //are there more parts to this same run/lumi?
+        const RunLumiToRange nextRunLumiRange = m_runlumiToRange[*m_presentIndexItr];
+        //continue to the next item if that item is either
+        if ((m_reducedHistoryIDs.at(nextRunLumiRange.m_historyIDIndex) ==
+            m_reducedHistoryIDs.at(runLumiRange.m_historyIDIndex)) &&
+            (nextRunLumiRange.m_run == runLumiRange.m_run) && (nextRunLumiRange.m_lumi == runLumiRange.m_lumi)) {
+          shouldContinue = true;
+          runLumiRange = nextRunLumiRange;
+        }
+      }
+    } while (shouldContinue);
   }
 
   edm::InputSource::ItemType getNextItemType() override;
@@ -418,6 +664,8 @@ private:
   std::vector<edm::ProcessHistoryID> m_reducedHistoryIDs;
 
   edm::JobReport::Token m_jrToken;
+
+  MonitorElementsFromFile m_MEsFromFile;
 };
 
 //
@@ -464,7 +712,8 @@ DQMRootSource::DQMRootSource(edm::ParameterSet const& iPSet, const edm::InputSou
       m_lumisToProcess(iPSet.getUntrackedParameter<std::vector<edm::LuminosityBlockRange> >(
           "lumisToProcess", std::vector<edm::LuminosityBlockRange>())),
       m_justOpenedFileSoNeedToGenerateRunTransition(false),
-      m_shouldReadMEs(true) {
+      m_shouldReadMEs(true),
+      m_MEsFromFile(MonitorElementsFromFile()) {
   edm::sortAndRemoveOverlaps(m_lumisToProcess);
   for (std::vector<edm::LuminosityBlockRange>::const_iterator itr = m_lumisToProcess.begin();
        itr != m_lumisToProcess.end();
@@ -476,7 +725,8 @@ DQMRootSource::DQMRootSource(edm::ParameterSet const& iPSet, const edm::InputSou
   } else {
     m_treeReaders[kIntIndex].reset(new TreeSimpleReader<Long64_t>());
     m_treeReaders[kFloatIndex].reset(new TreeSimpleReader<double>());
-    m_treeReaders[kStringIndex].reset(new TreeObjectReader<std::string>());
+    // m_treeReaders[kStringIndex].reset(new TreeSimpleReader<std::string>());
+    m_treeReaders[kStringIndex].reset(new TreeStringReader());
     m_treeReaders[kTH1FIndex].reset(new TreeObjectReader<TH1F>());
     m_treeReaders[kTH1SIndex].reset(new TreeObjectReader<TH1S>());
     m_treeReaders[kTH1DIndex].reset(new TreeObjectReader<TH1D>());
@@ -487,15 +737,24 @@ DQMRootSource::DQMRootSource(edm::ParameterSet const& iPSet, const edm::InputSou
     m_treeReaders[kTProfileIndex].reset(new TreeObjectReader<TProfile>());
     m_treeReaders[kTProfile2DIndex].reset(new TreeObjectReader<TProfile2D>());
   }
-  produces<MonitorElementCollection, edm::Transition::EndRun>("DQMGenerationRecoRun");
+  produces<MonitorElementCollection, edm::Transition::BeginRun>("DQMGenerationRecoRun");
+  produces<MonitorElementCollection, edm::Transition::BeginLuminosityBlock>("DQMGenerationRecoLumi");
 }
 
-// DQMRootSource::DQMRootSource(const DQMRootSource& rhs)
+// DQMRootSource::DQMRootSource(const DQMootSource& rhs)
 // {
 //    // do actual copying here;
 // }
 
 DQMRootSource::~DQMRootSource() {
+  // for(auto const& value: m_MEsFromFile) {
+  // Traverse in reverse order
+  // for(auto it = m_MEsFromFile.rbegin(); it != m_MEsFromFile.rend(); ++it) {
+  //   auto* raw = (*it).release();
+  //   delete raw;
+  // }
+  // m_MEsFromFile.clear();
+
   if (m_file.get() != nullptr && m_file->IsOpen()) {
     m_file->Close();
     logFileAction("  Closed file ", m_catalog.fileNames()[m_presentlyOpenFileIndex].c_str());
@@ -556,6 +815,7 @@ std::shared_ptr<edm::LuminosityBlockAuxiliary> DQMRootSource::readLuminosityBloc
 }
 
 void DQMRootSource::readRun_(edm::RunPrincipal& rpCache) {
+  TRACE("Should be first")
   assert(m_presentIndexItr != m_orderedIndices.end());
   RunLumiToRange runLumiRange = m_runlumiToRange[*m_presentIndexItr];
 
@@ -578,24 +838,25 @@ void DQMRootSource::readRun_(edm::RunPrincipal& rpCache) {
       DQMStore for its current content.  */
 
   //NOTE: need to reset all run elements at this point
-  if (m_lastSeenRun != runID || m_lastSeenReducedPHID != m_reducedHistoryIDs.at(runLumiRange.m_historyIDIndex)) {
-    if (m_shouldReadMEs) {
-      auto allMEs = (*m_store).getAllContents("");
-      for (auto const& ME : allMEs) {
-        // TODO: WTF.
-        // if (!(*m_store).isCollate())
-        ME->Reset();
-      }
-    }
-    m_lastSeenReducedPHID = m_reducedHistoryIDs.at(runLumiRange.m_historyIDIndex);
-    m_lastSeenRun = runID;
-  }
+  // if (m_lastSeenRun != runID || m_lastSeenReducedPHID != m_reducedHistoryIDs.at(runLumiRange.m_historyIDIndex)) {
+  //   if (m_shouldReadMEs) {
+  //     auto allMEs = (*m_store).getAllContents("");
+  //     for (auto const& ME : allMEs) {
+  //       // TODO: WTF.
+  //       // if (!(*m_store).isCollate())
+  //       ME->Reset();
+  //     }
+  //   }
+  //   m_lastSeenReducedPHID = m_reducedHistoryIDs.at(runLumiRange.m_historyIDIndex);
+  //   m_lastSeenRun = runID;
+  // }
 
   readNextItemType();
 
   //NOTE: it is possible to have a Run when all we have stored is lumis
   if (runLumiRange.m_lumi == 0) {
-    readElements();
+    readElements(runLumiRange.m_run, runLumiRange.m_lumi);
+    // readElement(...);
   }
 
   edm::Service<edm::JobReport> jr;
@@ -605,6 +866,7 @@ void DQMRootSource::readRun_(edm::RunPrincipal& rpCache) {
 }
 
 void DQMRootSource::readLuminosityBlock_(edm::LuminosityBlockPrincipal& lbCache) {
+  TRACE("Should be first")
   assert(m_presentIndexItr != m_orderedIndices.end());
   RunLumiToRange runLumiRange = m_runlumiToRange[*m_presentIndexItr];
   assert(runLumiRange.m_run == lbCache.id().run());
@@ -620,7 +882,8 @@ void DQMRootSource::readLuminosityBlock_(edm::LuminosityBlockPrincipal& lbCache)
   }
 
   readNextItemType();
-  readElements();
+  readElements(runLumiRange.m_run, runLumiRange.m_lumi);
+  // readElement(...);
 
   edm::Service<edm::JobReport> jr;
   jr->reportInputLumiSection(lbCache.id().run(), lbCache.id().luminosityBlock());
@@ -705,12 +968,16 @@ void DQMRootSource::readElements() {
 void DQMRootSource::readNextItemType() {
   //Do the work of actually figuring out where next to go
 
+  // m_nextItemType = edm::InputSource::IsRun;
+  // return;
+
   assert(m_nextIndexItr != m_orderedIndices.end());
   RunLumiToRange runLumiRange = m_runlumiToRange[*m_nextIndexItr];
 
   if (m_nextItemType != edm::InputSource::IsFile) {
     if (runLumiRange.m_lumi != 0 && m_nextItemType == edm::InputSource::IsRun) {
       m_nextItemType = edm::InputSource::IsLumi;
+      TRACE(m_nextItemType)
       return;
     }
     ++m_nextIndexItr;
@@ -755,6 +1022,7 @@ void DQMRootSource::readNextItemType() {
       m_nextItemType = edm::InputSource::IsLumi;
     }
   }
+  TRACE(m_nextItemType)
 }
 
 bool DQMRootSource::setupFile(unsigned int iIndex) {
@@ -925,13 +1193,13 @@ bool DQMRootSource::setupFile(unsigned int iIndex) {
 
   for (Long64_t index = 0; index != indicesTree->GetEntries(); ++index) {
     indicesTree->GetEntry(index);
-    //     std::cout <<"read r:"<<temp.m_run
-    // 	      <<" l:"<<temp.m_lumi
-    // 	      <<" b:"<<temp.m_beginTime
-    // 	      <<" e:"<<temp.m_endTime
-    // 	      <<" fi:" << temp.m_firstIndex
-    // 	      <<" li:" << temp.m_lastIndex
-    // 	      <<" type:" << temp.m_type << std::endl;
+        // std::cout <<"read r:"<<temp.m_run
+    	  //     <<" l:"<<temp.m_lumi
+    	  //     <<" b:"<<temp.m_beginTime
+    	  //     <<" e:"<<temp.m_endTime
+    	  //     <<" fi:" << temp.m_firstIndex
+    	  //     <<" li:" << temp.m_lastIndex
+    	  //     <<" type:" << temp.m_type << std::endl;
     m_runlumiToRange.push_back(temp);
 
     RunLumiPHIDKey runLumi(m_reducedHistoryIDs.at(temp.m_historyIDIndex), temp.m_run, temp.m_lumi);
