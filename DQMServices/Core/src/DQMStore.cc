@@ -87,7 +87,7 @@ namespace dqm {
         return localmes_[me_ptr->internal()->key_].get();
       }
 
-      printTrace("booking " + me->getFullname());
+      // printTrace("booking " + me->getFullname());
 
       auto& existing = localmes_[me->internal()->key_];
 
@@ -811,7 +811,7 @@ namespace dqm {
 
     template <class ME, class STORE>
     ME* IGetter<ME, STORE>::get(std::string const& fullpath) const {
-      TRACE(fullpath);
+      // TRACE(fullpath);
 
       MonitorElementData::Path path;
       path.set(fullpath, MonitorElementData::Path::Type::DIR_AND_NAME);
@@ -828,7 +828,7 @@ namespace dqm {
         return meptr;
       }
       // else ...
-      TRACE("get(): returning nullptr");
+      // TRACE("get(): returning nullptr");
       return nullptr;
     }
 
