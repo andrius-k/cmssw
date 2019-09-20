@@ -34,7 +34,6 @@ SiStripQualityHotStripIdentifierRoot::SiStripQualityHotStripIdentifierRoot(const
       MeanNumberOfCluster(0),
       calibrationthreshold(iConfig.getUntrackedParameter<uint32_t>("CalibrationThreshold", 10000)) {
   dqmStore_ = std::make_unique<DQMStore>();
-  dqmStore_->setVerbose(iConfig.getUntrackedParameter<uint32_t>("verbosity", 0));
 
   if (!filename.empty()) {
     edm::LogInfo("SiStripQualityHotStripIdentifierRoot") << " before opening file " << filename.c_str();
