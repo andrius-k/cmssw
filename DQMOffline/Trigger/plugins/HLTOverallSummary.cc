@@ -79,8 +79,6 @@ HLTOverallSummary::HLTOverallSummary(const edm::ParameterSet& pset)
   dbe_ = std::make_unique<DQMStore>();
   if (!dbe_) {
     LogInfo("HLTMuonVal") << "Can't find DQMStore, no results will be saved" << endl;
-  } else {
-    dbe_->setVerbose(0);
   }
 
   parameters_ = pset;
