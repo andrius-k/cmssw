@@ -80,14 +80,6 @@ void TrackerHitAnalyzer::bookHistograms(DQMStore::IBooker &ibooker, const edm::R
   Char_t hname6[50], htitle6[80];
 
   if (dqmstore_) {
-    if (verbose_) {
-      dqmstore_->setVerbose(1);
-    } else {
-      dqmstore_->setVerbose(0);
-    }
-  }
-
-  if (dqmstore_) {
     if (verbose_)
       dqmstore_->showDirStructure();
 

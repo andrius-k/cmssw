@@ -16,9 +16,6 @@ FourVectorHLT::FourVectorHLT(const edm::ParameterSet& iConfig) {
   LogDebug("FourVectorHLT") << "constructor....";
 
   dbe_ = std::make_unique<DQMStore>();
-  if (iConfig.getUntrackedParameter<bool>("DQMStore", false)) {
-    dbe_->setVerbose(0);
-  }
 
   dirname_ = "HLT/FourVectorHLT";
 

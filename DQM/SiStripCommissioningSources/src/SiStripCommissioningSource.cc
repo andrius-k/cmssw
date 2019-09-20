@@ -135,7 +135,6 @@ void SiStripCommissioningSource::beginRun(edm::Run const& run, const edm::EventS
 
   dqm_ = std::make_unique<DQMStore>();
   dqm(__func__);
-  dqm()->setVerbose(0);
 
   // ---------- Base directory ----------
 
