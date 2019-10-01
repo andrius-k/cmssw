@@ -916,11 +916,13 @@ namespace dqm {
 
     template <class ME>
     QCriterion* DQMStore<ME>::getQCriterion(std::string const& qtname) const {
-      assert(!"NIY");
+      // assert(!"NIY");
+      return nullptr;
     }
     template <class ME>
     QCriterion* DQMStore<ME>::createQTest(std::string const& algoname, std::string const& qtname) {
-      assert(!"NIY");
+      // assert(!"NIY");
+      return nullptr;
     }
     template <class ME>
     void DQMStore<ME>::useQTest(std::string const& dir, std::string const& qtname) {
