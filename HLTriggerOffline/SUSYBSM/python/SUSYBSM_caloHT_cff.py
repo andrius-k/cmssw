@@ -2,7 +2,7 @@ import FWCore.ParameterSet.Config as cms
 from DQMServices.Core.DQMEDHarvester import DQMEDHarvester
 
 from DQMServices.Core.DQMEDAnalyzer import DQMEDAnalyzer
-SUSY_HLT_CaloHT200 = DQMEDAnalyzer('SUSY_HLT_InclusiveHT',
+SUSYHLTCaloHT200 = DQMEDAnalyzer('SUSY_HLT_InclusiveHT',
   trigSummary = cms.InputTag("hltTriggerSummaryAOD"),
   pfMETCollection = cms.InputTag("pfMet"),
   pfJetCollection = cms.InputTag("ak4PFJetsCHS"),
@@ -15,7 +15,7 @@ SUSY_HLT_CaloHT200 = DQMEDAnalyzer('SUSY_HLT_InclusiveHT',
   EtaThrJet = cms.untracked.double(3.0)
 )
 
-SUSY_HLT_CaloHT250 = DQMEDAnalyzer('SUSY_HLT_InclusiveHT',
+SUSYHLTCaloHT250 = DQMEDAnalyzer('SUSY_HLT_InclusiveHT',
   trigSummary = cms.InputTag("hltTriggerSummaryAOD"),
   pfMETCollection = cms.InputTag("pfMet"),
   pfJetCollection = cms.InputTag("ak4PFJetsCHS"),
@@ -28,7 +28,7 @@ SUSY_HLT_CaloHT250 = DQMEDAnalyzer('SUSY_HLT_InclusiveHT',
   EtaThrJet = cms.untracked.double(3.0)
 )
 
-SUSY_HLT_CaloHT300 = DQMEDAnalyzer('SUSY_HLT_InclusiveHT',
+SUSYHLTCaloHT300 = DQMEDAnalyzer('SUSY_HLT_InclusiveHT',
   trigSummary = cms.InputTag("hltTriggerSummaryAOD"),
   pfMETCollection = cms.InputTag("pfMet"),
   pfJetCollection = cms.InputTag("ak4PFJetsCHS"),
@@ -41,7 +41,7 @@ SUSY_HLT_CaloHT300 = DQMEDAnalyzer('SUSY_HLT_InclusiveHT',
   EtaThrJet = cms.untracked.double(3.0)
 )
 
-SUSY_HLT_CaloHT350 = DQMEDAnalyzer('SUSY_HLT_InclusiveHT',
+SUSYHLTCaloHT350 = DQMEDAnalyzer('SUSY_HLT_InclusiveHT',
   trigSummary = cms.InputTag("hltTriggerSummaryAOD"),
   pfMETCollection = cms.InputTag("pfMet"),
   pfJetCollection = cms.InputTag("ak4PFJetsCHS"),
@@ -54,7 +54,7 @@ SUSY_HLT_CaloHT350 = DQMEDAnalyzer('SUSY_HLT_InclusiveHT',
   EtaThrJet = cms.untracked.double(3.0)
 )
 
-SUSY_HLT_CaloHT400 = DQMEDAnalyzer('SUSY_HLT_InclusiveHT',
+SUSYHLTCaloHT400 = DQMEDAnalyzer('SUSY_HLT_InclusiveHT',
   trigSummary = cms.InputTag("hltTriggerSummaryAOD"),
   pfMETCollection = cms.InputTag("pfMet"),
   pfJetCollection = cms.InputTag("ak4PFJetsCHS"),

@@ -254,7 +254,7 @@ private:
 
   std::ostringstream oss;
 
-  DQMStore* dqmStore;
+  std::unique_ptr<DQMStore> dqmStore;
 
   MonitorElement* tmp;
   TProfile* tmp_prof;

@@ -53,7 +53,7 @@ SiStripMonitorDigi::SiStripMonitorDigi(const edm::ParameterSet& iConfig)
       show_control_view(false),
       select_all_detectors(true),
       reset_each_run(false),
-      folder_organizer(),
+      folder_organizer(nullptr),
       m_cacheID_(0) {
   firstEvent = -1;
   eventNb = 0;
@@ -267,9 +267,6 @@ void SiStripMonitorDigi::dqmBeginRun(const edm::Run& run, const edm::EventSetup&
 }
 
 //--------------------------------------------------------------------------------------------
-void SiStripMonitorDigi::endRun(const edm::Run&, const edm::EventSetup&) {}
-
-//--------------------------------------------------------------------------------------------
 void SiStripMonitorDigi::beginLuminosityBlock(const edm::LuminosityBlock& lb, const edm::EventSetup& es) {
   if (subdetswitchtotdigifailureon) {
     isStableBeams = false;
@@ -337,7 +334,7 @@ void SiStripMonitorDigi::createMEs(DQMStore::IBooker& ibooker, const edm::EventS
     }
 
     // create SiStripFolderOrganizer
-    SiStripFolderOrganizer folder_organizer;
+    SiStripFolderOrganizer folder_organizer(&ibooker);
 
     // Create TkHistoMap for Digi and APV shots properies
 
@@ -453,7 +450,7 @@ void SiStripMonitorDigi::createMEs(DQMStore::IBooker& ibooker, const edm::EventS
       ShotsVsTimeApvShotsGlobal->setAxisTitle("Time (s)", 1);
       ShotsVsTimeApvShotsGlobal->setAxisTitle("# Apv Shots", 2);
       if (ShotsVsTimeApvShotsGlobal->kind() == MonitorElement::Kind::TPROFILE)
-        ShotsVsTimeApvShotsGlobal->getTH1()->SetCanExtend(TH1::kAllAxes);
+        ShotsVsTimeApvShotsGlobal->setCanExtend(TH1::kAllAxes);
     }
 
     //cumulative number of Strips in APV shots
@@ -986,7 +983,7 @@ SiStripMonitorDigi::MonitorElement* SiStripMonitorDigi::bookMETrend(DQMStore::IB
 
   me->setAxisTitle("Lumisection", 1);
   if (me->kind() == MonitorElement::Kind::TPROFILE)
-    me->getTH1()->SetCanExtend(TH1::kAllAxes);
+    me->setCanExtend(TH1::kAllAxes);
   return me;
 }
 
@@ -1023,7 +1020,7 @@ void SiStripMonitorDigi::createModuleMEs(DQMStore::IBooker& ibooker, ModMEs& mod
     mod_single.NumberOfDigis = ibooker.book1D(hid, hid, 21, -0.5, 20.5);
     ibooker.tag(mod_single.NumberOfDigis, detid);
     mod_single.NumberOfDigis->setAxisTitle("number of digis in one detector module");
-    mod_single.NumberOfDigis->getTH1()->StatOverflows(kTRUE);  // over/underflows in Mean calculation
+    mod_single.NumberOfDigis->setStatOverflows(kTRUE);  // over/underflows in Mean calculation
   }
 
   //nr. of digis per strip in module
@@ -1033,7 +1030,7 @@ void SiStripMonitorDigi::createModuleMEs(DQMStore::IBooker& ibooker, ModMEs& mod
     mod_single.NumberOfDigisPerStrip = ibooker.book1D(hid, hid, nstrips, -0.5, nstrips + 0.5);
     ibooker.tag(mod_single.NumberOfDigisPerStrip, detid);
     mod_single.NumberOfDigisPerStrip->setAxisTitle("number of (digis > 0) per strip");
-    mod_single.NumberOfDigisPerStrip->getTH1()->StatOverflows(kTRUE);  // over/underflows in Mean calculation
+    mod_single.NumberOfDigisPerStrip->setStatOverflows(kTRUE);  // over/underflows in Mean calculation
   }
   //#ADCs for hottest strip
   if (moduleswitchadchotteston) {
@@ -1199,7 +1196,7 @@ void SiStripMonitorDigi::createSubDetMEs(DQMStore::IBooker& ibooker, std::string
     subdetMEs.SubDetTotDigiProf->setAxisTitle("Lumisection", 1);
 
     if (subdetMEs.SubDetTotDigiProf->kind() == MonitorElement::Kind::TPROFILE)
-      subdetMEs.SubDetTotDigiProf->getTH1()->SetCanExtend(TH1::kAllAxes);
+      subdetMEs.SubDetTotDigiProf->setCanExtend(TH1::kAllAxes);
   }
 
   // Number of Digi vs Bx - Profile
@@ -1313,7 +1310,7 @@ void SiStripMonitorDigi::createSubDetMEs(DQMStore::IBooker& ibooker, std::string
     subdetMEs.SubDetNApvShotsProf->setAxisTitle("Time (s)", 1);
     subdetMEs.SubDetNApvShotsProf->setAxisTitle("# Apv Shots", 2);
     if (subdetMEs.SubDetNApvShotsProf->kind() == MonitorElement::Kind::TPROFILE)
-      subdetMEs.SubDetNApvShotsProf->getTH1()->SetCanExtend(TH1::kAllAxes);
+      subdetMEs.SubDetNApvShotsProf->setCanExtend(TH1::kAllAxes);
   }
 
   SubDetMEsMap[label] = subdetMEs;

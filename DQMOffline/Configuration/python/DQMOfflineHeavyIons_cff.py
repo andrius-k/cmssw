@@ -106,7 +106,7 @@ DQMOfflineHeavyIonsPrePOG = cms.Sequence( muonMonitors
                                           )
 
 #disabled, until an appropriate configuration is set
-hltTauOfflineMonitor_PFTaus.Matching.doMatching = False
+hltTauOfflineMonitorPFTaus.Matching.doMatching = False
 
 DQMOfflineHeavyIonsPOG = cms.Sequence( DQMOfflineHeavyIonsPrePOG *
                                        DQMMessageLogger )

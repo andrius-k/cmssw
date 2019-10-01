@@ -3,7 +3,7 @@ from DQMServices.Core.DQMEDHarvester import DQMEDHarvester
 from copy import deepcopy
 
 from DQMServices.Core.DQMEDAnalyzer import DQMEDAnalyzer
-SUSY_HLT_Ele_HT_Control_SingleLepton = DQMEDAnalyzer('SUSY_HLT_SingleLepton',
+SUSYHLTEleHTControlSingleLepton = DQMEDAnalyzer('SUSY_HLT_SingleLepton',
                                                       electronCollection = cms.InputTag('gedGsfElectrons'),
                                                       muonCollection = cms.InputTag(''),
                                                       pfMetCollection = cms.InputTag('pfMet'),
@@ -56,4 +56,4 @@ SUSYoHLToEleHToControlSingleLeptonPOSTPROCESSING = DQMEDHarvester('DQMGenericCli
 
 # fastsim has no conversion collection (yet)
 from Configuration.Eras.Modifier_fastSim_cff import fastSim
-fastSim.toModify(SUSY_HLT_Ele_HT_Control_SingleLepton,conversionCollection=cms.InputTag(''))
+fastSim.toModify(SUSYHLTEleHTControlSingleLepton,conversionCollection=cms.InputTag(''))

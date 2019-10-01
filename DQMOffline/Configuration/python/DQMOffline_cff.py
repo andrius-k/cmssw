@@ -159,7 +159,7 @@ DQMOfflineCommonSiStripZeroBiasFakeHLT.remove( triggerOfflineDQMSource )
 DQMOfflineLumi = cms.Sequence ( zcounting )
 
 muonRecoAnalyzer.doMVA =         cms.bool( True )
-muonRecoAnalyzer_miniAOD.doMVA = cms.bool( True )
+muonRecoAnalyzerminiAOD.doMVA = cms.bool( True )
 
 DQMOfflineMuon = cms.Sequence( dtSources *
                                rpcTier0Source *

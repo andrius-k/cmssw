@@ -24,7 +24,7 @@ DQMMessageLoggerClient::~DQMMessageLoggerClient() = default;
 
 void DQMMessageLoggerClient::beginJob() {
   //LogTrace(metname)<<"[DQMMessageLoggerClient] Parameters initialization";
-  theDbe = Service<DQMStore>().operator->();
+  theDbe = std::make_unique<DQMStore>();
 
   if (theDbe != nullptr) {
     theDbe->setCurrentFolder(directoryName);

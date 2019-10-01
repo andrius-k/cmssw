@@ -194,7 +194,7 @@ process.dqmcommon = cms.Sequence(process.dqmEnv
 process.monitor = cms.Sequence(process.dqmBeamMonitor
                                )
 
-#process.monitor_pixelless = cms.Sequence(process.dqmBeamMonitor_pixelless
+#process.monitor_pixelless = cms.Sequence(process.dqmBeamMonitorpixelless
 #                                          *process.dqmEnvPixelLess)
 
 

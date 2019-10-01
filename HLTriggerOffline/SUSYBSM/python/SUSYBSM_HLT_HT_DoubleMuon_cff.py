@@ -2,7 +2,7 @@ import FWCore.ParameterSet.Config as cms
 from DQMServices.Core.DQMEDHarvester import DQMEDHarvester
 
 from DQMServices.Core.DQMEDAnalyzer import DQMEDAnalyzer
-SUSY_HLT_HT_DoubleMuon = DQMEDAnalyzer('SUSY_HLT_DoubleMuon_Hadronic',
+SUSYHLTHTDoubleMuon = DQMEDAnalyzer('SUSY_HLT_DoubleMuon_Hadronic',
   trigSummary = cms.InputTag('hltTriggerSummaryAOD','','HLT'),
   MuonCollection = cms.InputTag("muons"),
   pfJetCollection = cms.InputTag("ak4PFJetsCHS"),
@@ -17,7 +17,7 @@ SUSY_HLT_HT_DoubleMuon = DQMEDAnalyzer('SUSY_HLT_DoubleMuon_Hadronic',
   EtaThrJet = cms.untracked.double(3.0)
 )
 
-SUSY_HLT_HT250_DoubleMuon = DQMEDAnalyzer('SUSY_HLT_DoubleMuon_Hadronic',
+SUSYHLTHT250DoubleMuon = DQMEDAnalyzer('SUSY_HLT_DoubleMuon_Hadronic',
   trigSummary = cms.InputTag('hltTriggerSummaryAOD','','HLT'),
   MuonCollection = cms.InputTag("muons"),
   pfJetCollection = cms.InputTag("ak4PFJetsCHS"),

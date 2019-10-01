@@ -102,11 +102,11 @@ process.p      = cms.Path(
 #    process.DiElectronDQM              +
 #    process.ElecMuonDQM                +
     #process.topSingleMuonLooseDQM      +
-    process.topSingleMuonMediumDQM_miniAOD  +
+    process.topSingleMuonMediumDQMminiAOD  +
     #process.topSingleElectronLooseDQM  +
-    process.topSingleElectronMediumDQM_miniAOD +
-    process.singleTopMuonMediumDQM_miniAOD     +
-    process.singleTopElectronMediumDQM_miniAOD
+    process.topSingleElectronMediumDQMminiAOD +
+    process.singleTopMuonMediumDQMminiAOD     +
+    process.singleTopElectronMediumDQMminiAOD
 )
 process.endjob = cms.Path(
     process.endOfProcess

@@ -85,7 +85,7 @@ private:
                                bool mechanicalView,
                                std::string& fullName);
 
-  DQMStore* dqmStore_{nullptr};
+  std::shared_ptr<DQMStore> dqmStore_{nullptr};
 
   const TkDetMap* tkdetmap_;
   DetId cached_detid;

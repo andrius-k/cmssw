@@ -3,7 +3,7 @@ from DQMServices.Core.DQMEDHarvester import DQMEDHarvester
 from copy import deepcopy
 
 from DQMServices.Core.DQMEDAnalyzer import DQMEDAnalyzer
-SUSY_HLT_Mu15_HT600_SingleLepton = DQMEDAnalyzer('SUSY_HLT_SingleLepton',
+SUSYHLTMu15HT600SingleLepton = DQMEDAnalyzer('SUSY_HLT_SingleLepton',
                                              electronCollection = cms.InputTag(''),
                                              muonCollection = cms.InputTag('muons'),
                                              pfMetCollection = cms.InputTag('pfMet'),
@@ -53,7 +53,7 @@ SUSYoHLToMu15oHT600oSingleLeptonPOSTPROCESSING = DQMEDHarvester('DQMGenericClien
                                                             resolution = cms.vstring('')
                                                             )
 
-SUSY_HLT_Mu15_HT400_SingleLepton = DQMEDAnalyzer('SUSY_HLT_SingleLepton',
+SUSYHLTMu15HT400SingleLepton = DQMEDAnalyzer('SUSY_HLT_SingleLepton',
                                              electronCollection = cms.InputTag(''),
                                              muonCollection = cms.InputTag('muons'),
                                              pfMetCollection = cms.InputTag('pfMet'),
@@ -103,7 +103,7 @@ SUSYoHLToMu15oHT400oSingleLeptonPOSTPROCESSING = DQMEDHarvester('DQMGenericClien
                                                             resolution = cms.vstring('')
                                                             )
 
-SUSY_HLT_Mu50_HT400_SingleLepton = DQMEDAnalyzer('SUSY_HLT_SingleLepton',
+SUSYHLTMu50HT400SingleLepton = DQMEDAnalyzer('SUSY_HLT_SingleLepton',
                                              electronCollection = cms.InputTag(''),
                                              muonCollection = cms.InputTag('muons'),
                                              pfMetCollection = cms.InputTag('pfMet'),
@@ -154,9 +154,9 @@ SUSYoHLToMu50oHT400oSingleLeptonPOSTPROCESSING = DQMEDHarvester('DQMGenericClien
                                                             )
 
 
-SUSY_HLT_Mu_HT_SingleLepton = cms.Sequence( SUSY_HLT_Mu15_HT600_SingleLepton
-                                             + SUSY_HLT_Mu15_HT400_SingleLepton
-                                             + SUSY_HLT_Mu50_HT400_SingleLepton
+SUSY_HLT_Mu_HT_SingleLepton = cms.Sequence( SUSYHLTMu15HT600SingleLepton
+                                             + SUSYHLTMu15HT400SingleLepton
+                                             + SUSYHLTMu50HT400SingleLepton
 )
 
 SUSY_HLT_Mu_HT_SingleLepton_POSTPROCESSING = cms.Sequence( SUSYoHLToMu15oHT600oSingleLeptonPOSTPROCESSING

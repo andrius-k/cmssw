@@ -17,7 +17,7 @@ EgHLTOfflineSummaryClient::EgHLTOfflineSummaryClient(const edm::ParameterSet& iC
     : egHLTSumHistName_("egHLTTrigSum"), isSetup_(false) {
   dirName_ = iConfig.getParameter<std::string>(
       "DQMDirName");  //only one chance to get this, if we every have another shot, remember to check isSetup is okay
-  dbe_ = edm::Service<DQMStore>().operator->();
+  dbe_ = std::make_unique<DQMStore>();
   if (!dbe_) {
     edm::LogError("EgHLTOfflineSummaryClient")
         << "unable to get DQMStore service, no summary histograms will be produced";

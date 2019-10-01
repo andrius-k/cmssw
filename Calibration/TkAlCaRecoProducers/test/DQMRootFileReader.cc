@@ -49,7 +49,7 @@ private:
   // ----------member data ---------------------------
 
   // back-end interface
-  DQMStore *dbe;
+  std::unique_ptr<DQMStore> dbe;
   std::string filename;
 };
 
@@ -58,7 +58,7 @@ private:
 //
 DQMRootFileReader::DQMRootFileReader(const edm::ParameterSet &iConfig) {
   // get hold of back-end interface
-  dbe = edm::Service<DQMStore>().operator->();
+  dbe = std::make_unique<DQMStore>();
 
   filename = iConfig.getUntrackedParameter<std::string>("RootFileName", "test_playback.root");
 }

@@ -94,7 +94,7 @@ process.phystrigger = cms.Sequence(process.hltTriggerTypeFilter*process.gtDigis*
 process.tracking = cms.Sequence(process.siPixelDigis*process.siStripDigis*process.trackerlocalreco*process.offlineBeamSpot*process.recopixelvertexing*process.ckftracks)
 process.monitor = cms.Sequence(process.dqmBeamMonitor*process.dqmEnv)
 process.tracking_pixelless = cms.Sequence(process.siPixelDigis*process.siStripDigis*process.trackerlocalreco*process.offlineBeamSpot*process.ctfTracksPixelLess)
-process.monitor_pixelless = cms.Sequence(process.dqmBeamMonitor_pixelless*process.dqmEnvPixelLess)
+process.monitor_pixelless = cms.Sequence(process.dqmBeamMonitorpixelless*process.dqmEnvPixelLess)
 process.tracking_FirstStep = cms.Sequence(process.siPixelDigis*process.siStripDigis*process.trackerlocalreco*process.offlineBeamSpot*process.recopixelvertexing*process.firstStep)
 
 process.p = cms.Path(process.gtDigis*process.tracking_FirstStep*process.offlinePrimaryVertices*process.monitor*process.dqmSaver)

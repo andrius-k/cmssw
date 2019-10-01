@@ -161,13 +161,6 @@ void TauDQMFileLoader::endRun(const edm::Run& r, const edm::EventSetup& c) {
     return;
   }
 
-  //--- check that DQMStore service is available
-  if (!edm::Service<DQMStore>().isAvailable()) {
-    edm::LogError("endJob") << " Failed to access dqmStore"
-                            << " --> histograms will NOT be loaded !!";
-    return;
-  }
-
   //--- stop ROOT from keeping references to all histograms
   //TH1::AddDirectory(false);
 
@@ -213,7 +206,7 @@ void TauDQMFileLoader::endRun(const edm::Run& r, const edm::EventSetup& c) {
 
   //--- load histograms from file
   //std::cout << "--> loading histograms from file..." << std::endl;
-  DQMStore& dqmStore = (*edm::Service<DQMStore>());
+  auto dqmStore = std::make_unique<DQMStore>();
   for (std::map<std::string, cfgEntryFileSet>::const_iterator fileSet = fileSets_.begin(); fileSet != fileSets_.end();
        ++fileSet) {
     for (vstring::const_iterator inputFileName = fileSet->second.inputFileNames_.begin();
@@ -221,7 +214,7 @@ void TauDQMFileLoader::endRun(const edm::Run& r, const edm::EventSetup& c) {
          ++inputFileName) {
       if (verbosity)
         std::cout << " opening inputFile = " << (*inputFileName) << std::endl;
-      dqmStore.open(*inputFileName, true);
+      dqmStore->open(*inputFileName, true);
 
       //if ( verbosity ) dqmStore.showDirStructure();
 
@@ -236,8 +229,8 @@ void TauDQMFileLoader::endRun(const edm::Run& r, const edm::EventSetup& c) {
             dqmDirectoryName(std::string(inputDirectory)).append(fileSet->second.dqmDirectory_store_);
         //std::cout << "outputDirectory = " << outputDirectory << std::endl;
 
-        dqmStore.setCurrentFolder(inputDirectory);
-        std::vector<std::string> dirNames = dqmStore.getSubdirs();
+        dqmStore->setCurrentFolder(inputDirectory);
+        std::vector<std::string> dirNames = dqmStore->getSubdirs();
         for (std::vector<std::string>::const_iterator dirName = dirNames.begin(); dirName != dirNames.end();
              ++dirName) {
           std::string subDirName = dqmSubDirectoryName_merged(inputDirectory, *dirName);
@@ -257,7 +250,7 @@ void TauDQMFileLoader::endRun(const edm::Run& r, const edm::EventSetup& c) {
             //    clear inputDirectory once finished processing all inputFiles.
             int mode = (inputFileName == fileSet->second.inputFileNames_.begin()) ? 1 : 3;
             dqmCopyRecursively(
-                dqmStore, inputDirName_full, outputDirName_full, fileSet->second.scaleFactor_, mode, true);
+                *dqmStore, inputDirName_full, outputDirName_full, fileSet->second.scaleFactor_, mode, true);
           }
         }
       }
@@ -266,7 +259,7 @@ void TauDQMFileLoader::endRun(const edm::Run& r, const edm::EventSetup& c) {
 
   std::cout << "done." << std::endl;
   if (verbosity)
-    dqmStore.showDirStructure();
+    dqmStore->showDirStructure();
 }
 
 #include "FWCore/Framework/interface/MakerMacros.h"

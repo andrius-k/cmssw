@@ -45,7 +45,7 @@ public:
 private:
   unsigned int verbose_;
 
-  DQMStore* theDQM;
+  std::unique_ptr<DQMStore> theDQM;
   std::vector<std::string> subDirs_;
   std::string outputFileName_;
 

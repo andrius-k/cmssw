@@ -71,5 +71,6 @@ private:
   bool trackerFEDsFound_;
   bool printFaultyModuleList_;
   TTree* tkinfoTree_{nullptr};
+  std::unique_ptr<DQMStore> dqm_store;
 };
 #endif

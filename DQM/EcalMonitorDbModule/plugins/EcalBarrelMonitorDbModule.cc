@@ -26,7 +26,7 @@
 #include "FWCore/Framework/interface/MakerMacros.h"
 
 EcalBarrelMonitorDbModule::EcalBarrelMonitorDbModule(const edm::ParameterSet &ps) {
-  dqmStore_ = edm::Service<DQMStore>().operator->();
+  dqmStore_ = std::make_unique<DQMStore>();
 
   prefixME_ = ps.getUntrackedParameter<std::string>("prefixME", "");
 

@@ -160,10 +160,10 @@ void SiStripLAProfileBooker::beginRun(const edm::Run&, const edm::EventSetup& c)
   // use SistripHistoId for producing histogram id (and title)
   SiStripHistoId hidmanager;
 
-  // create SiStripFolderOrganizer
-  SiStripFolderOrganizer folder_organizer;
+  dbe_ = std::make_unique<DQMStore>();
 
-  dbe_ = edm::Service<DQMStore>().operator->();
+  // create SiStripFolderOrganizer
+  SiStripFolderOrganizer folder_organizer(static_cast<DQMStore::IBooker*>(dbe_.get()));
 
   //get all detids
 

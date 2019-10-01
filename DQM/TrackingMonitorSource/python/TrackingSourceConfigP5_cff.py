@@ -14,14 +14,14 @@ TrackMon_cosmicTk.TkSizeMin = cms.double(-0.5)
 
 # Clone for CKF Tracks
 import DQM.TrackingMonitor.TrackerCosmicsTrackingMonitor_cfi
-TrackMon_ckf = DQM.TrackingMonitor.TrackerCosmicsTrackingMonitor_cfi.TrackerCosmicTrackMon.clone()
-TrackMon_ckf.TrackProducer      = 'ctfWithMaterialTracksP5'
-TrackMon_ckf.AlgoName           = 'CKFTk'
-TrackMon_ckf.FolderName         = 'Tracking/TrackParameters'
-TrackMon_ckf.doSeedParameterHistos = True
-TrackMon_ckf.TkSizeBin = cms.int32(4)
-TrackMon_ckf.TkSizeMax = cms.double( 3.5)
-TrackMon_ckf.TkSizeMin = cms.double(-0.5)
+TrackMonckf = DQM.TrackingMonitor.TrackerCosmicsTrackingMonitor_cfi.TrackerCosmicTrackMon.clone()
+TrackMonckf.TrackProducer      = 'ctfWithMaterialTracksP5'
+TrackMonckf.AlgoName           = 'CKFTk'
+TrackMonckf.FolderName         = 'Tracking/TrackParameters'
+TrackMonckf.doSeedParameterHistos = True
+TrackMonckf.TkSizeBin = cms.int32(4)
+TrackMonckf.TkSizeMax = cms.double( 3.5)
+TrackMonckf.TkSizeMin = cms.double(-0.5)
 
 # Clone for Road Search  Tracks
 #import DQM.TrackingMonitor.TrackerCosmicsTrackingMonitor_cfi

@@ -123,9 +123,9 @@ process.siStripFEDCheck.doPLOTnFEDinWdataVsLS   = cms.bool(True)
 process.load("DQM.SiStripMonitorClient.SiStripSourceConfigP5_cff")
 process.load("DQM.TrackingMonitorSource.TrackingSourceConfigP5_cff")
 process.TrackMon_gentk.doLumiAnalysis = False
-process.TrackMon_ckf.doLumiAnalysis = False
+process.TrackMonckf.doLumiAnalysis = False
 process.TrackMon_hi.doLumiAnalysis = False
-process.TrackMon_ckf.AlgoName = 'CKFTk'
+process.TrackMonckf.AlgoName = 'CKFTk'
 
 #--------------------------
 # Quality Test
@@ -221,7 +221,7 @@ if (process.runType.getRunType() == process.runType.cosmic_run or process.runTyp
     # Reference run for cosmic
     process.DQMStore.referenceFileName = '/dqmdata/dqm/reference/sistrip_reference_cosmic.root'
     # Source config for cosmic data
-    process.SiStripSources_TrkReco_cosmic = cms.Sequence(process.SiStripMonitorTrack_ckf*process.TrackMon_ckf)
+    process.SiStripSources_TrkReco_cosmic = cms.Sequence(process.SiStripMonitorTrack_ckf*process.TrackMonckf)
     # Client config for cosmic data
     ### STRIP
     process.load("DQM.SiStripMonitorClient.SiStripClientConfigP5_Cosmic_cff")

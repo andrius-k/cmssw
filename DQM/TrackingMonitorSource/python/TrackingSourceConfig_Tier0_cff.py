@@ -11,10 +11,10 @@ from DQM.TrackingMonitorSource.TrackerCollisionTrackingMonitor_cff import *
 
 #import DQM.TrackingMonitor.TrackerCosmicsTrackingMonitor_cfi
 import DQM.TrackingMonitor.TrackEfficiencyMonitor_cfi
-TrackMon_ckf 					   = DQM.TrackingMonitor.TrackEfficiencyMonitor_cfi.TrackEffMon.clone()
-TrackMon_ckf.TKTrackCollection                     = 'generalTracks'#ctfWithMaterialTracksBeamHaloMuon'#rsWithMaterialTracksP5'#muons'#globalCosmicMuons'#ctfWithMaterialTracksP5'
-TrackMon_ckf.AlgoName                              = 'CKFTk'
-TrackMon_ckf.FolderName                            = 'Tracking/TrackParameters'
+TrackMonckf 					   = DQM.TrackingMonitor.TrackEfficiencyMonitor_cfi.TrackEffMon.clone()
+TrackMonckf.TKTrackCollection                     = 'generalTracks'#ctfWithMaterialTracksBeamHaloMuon'#rsWithMaterialTracksP5'#muons'#globalCosmicMuons'#ctfWithMaterialTracksP5'
+TrackMonckf.AlgoName                              = 'CKFTk'
+TrackMonckf.FolderName                            = 'Tracking/TrackParameters'
 
 # Clone for RS Tracks
 #import DQM.TrackingMonitor.TrackEfficiencyMonitor_cfi
@@ -348,8 +348,8 @@ from DQM.TrackingMonitor.primaryVertexResolution_cfi import *
 # Sequence
 TrackingDQMSourceTier0 = cms.Sequence(cms.ignore(trackingDQMgoodOfflinePrimaryVertices))
 # dEdx monitoring
-TrackingDQMSourceTier0 += dedxHarmonicSequence * dEdxMonCommon * dEdxHitMonCommon   * TrackMon_ckf * TrackSplitMonitor * dqmInfoTracking
-#TrackMon_cosmicTk*TrackMon_ckf*TrackEffMon_ckf*TrackSplitMonitor*dqmInfoTracking
+TrackingDQMSourceTier0 += dedxHarmonicSequence * dEdxMonCommon * dEdxHitMonCommon   * TrackMonckf * TrackSplitMonitor * dqmInfoTracking
+#TrackMon_cosmicTk*TrackMonckf*TrackEffMon_ckf*TrackSplitMonitor*dqmInfoTracking
 #    # temporary patch in order to have BXlumi
 #    * lumiProducer
 # track collections
@@ -386,7 +386,7 @@ TrackingDQMSourceTier0 += dqmInfoTracking
 
 TrackingDQMSourceTier0Common = cms.Sequence(cms.ignore(trackingDQMgoodOfflinePrimaryVertices))
 # dEdx monitoring
-TrackingDQMSourceTier0Common += (dedxHarmonicSequence * dEdxMonCommon * dEdxHitMonCommon * TrackMon_ckf * TrackSplitMonitor * dqmInfoTracking)
+TrackingDQMSourceTier0Common += (dedxHarmonicSequence * dEdxMonCommon * dEdxHitMonCommon * TrackMonckf * TrackSplitMonitor * dqmInfoTracking)
 #TrackEffMon_ckf*TrackSplitMonitor*dqmInfoTracking)    
 ## monitor track collections
 for tracks in selectedTracks :
@@ -407,8 +407,8 @@ TrackingDQMSourceTier0Common += dqmInfoTracking
 
 TrackingDQMSourceTier0MinBias = cms.Sequence(cms.ignore(trackingDQMgoodOfflinePrimaryVertices))
 # dEdx monitoring
-TrackingDQMSourceTier0MinBias += dedxHarmonicSequence * dEdxMonCommon * dEdxHitMonCommon * TrackMon_ckf * TrackSplitMonitor * dqmInfoTracking
-#TrackMon_cosmicTk*TrackMon_ckf*TrackEffMon_ckf*TrackSplitMonitor*dqmInfoTracking#TrackMon_ckf*TrackEffMon_ckf 
+TrackingDQMSourceTier0MinBias += dedxHarmonicSequence * dEdxMonCommon * dEdxHitMonCommon * TrackMonckf * TrackSplitMonitor * dqmInfoTracking
+#TrackMon_cosmicTk*TrackMonckf*TrackEffMon_ckf*TrackSplitMonitor*dqmInfoTracking#TrackMonckf*TrackEffMon_ckf 
 #    * lumiProducer
 # monitor track collections
 for tracks in selectedTracks :

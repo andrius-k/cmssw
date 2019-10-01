@@ -26,8 +26,8 @@ process.load("Geometry.CaloEventSetup.CaloTopology_cfi")
 # # remember to compile with USER_CXXFLAGS="-DEDM_ML_DEBUG"
 # process.MessageLogger.cerr.threshold = cms.untracked.string("DEBUG")
 # process.MessageLogger.debugModules.extend([
-#         "hltTauOfflineMonitor_PFTaus",
-#         "hltTauOfflineMonitor_Inclusive",
+#         "hltTauOfflineMonitorPFTaus",
+#         "hltTauOfflineMonitorInclusive",
 #         "HLTTauPostAnalysis_PFTaus",
 #         "HLTTauPostAnalysis_Inclusive",
 #         ])

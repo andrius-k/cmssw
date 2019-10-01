@@ -118,7 +118,7 @@ namespace {
     }
 
   private:
-    DQMStore* store_;
+    std::unique_ptr<DQMStore> store_;
     std::string folder_;
     std::string name_;
     std::map<int, int> entries_per_LS_;
@@ -168,7 +168,7 @@ namespace {
     };
 
   private:
-    DQMStore* store_;
+    std::unique_ptr<DQMStore> store_;
     std::string folder_;
     std::string name_;
     std::map<int, int> entries_per_LS_;
@@ -221,7 +221,7 @@ DummyHarvestingClient::DummyHarvestingClient(const edm::ParameterSet& iConfig)
       book_at_beginJob_(iConfig.getUntrackedParameter<bool>("book_at_beginJob", false)),
       book_at_beginRun_(iConfig.getUntrackedParameter<bool>("book_at_beginRun", false)),
       elements_(iConfig.getUntrackedParameter<std::vector<edm::ParameterSet> >("elements")) {
-  edm::Service<DQMStore> dstore;
+  auto dstore = std::make_unique<DQMStore>();
   // TODO(rovere): assert on multiple book conditions
   if (book_at_constructor_)
     bookHistograms();

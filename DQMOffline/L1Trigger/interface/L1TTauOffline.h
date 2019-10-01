@@ -89,7 +89,7 @@ protected:
   void bookHistograms(DQMStore::IBooker&, edm::Run const&, edm::EventSetup const&) override;
   void analyze(edm::Event const& e, edm::EventSetup const& eSetup) override;
   void endRun(edm::Run const& run, edm::EventSetup const& eSetup) override;
-  void endJob() override;
+  void endJob();  // TODO: endJob not allowed in DQMEDAnalyzer
 
   const reco::Vertex getPrimaryVertex(edm::Handle<reco::VertexCollection> const& vertex,
                                       edm::Handle<reco::BeamSpot> const& beamSpot);

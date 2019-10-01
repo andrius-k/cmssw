@@ -140,7 +140,7 @@ void SiPixelClusterSource::bookHistograms(DQMStore::IBooker &iBooker, edm::Run c
   ss2.str(std::string());
   ss2 << "Total number of barrel clusters profile;Lumisection;";
   meClusBarrelProf = iBooker.bookProfile(ss1.str(), ss2.str(), 2400, 0., 150, 0, 0, "");
-  meClusBarrelProf->getTH1()->SetCanExtend(TH1::kAllAxes);
+  meClusBarrelProf->setCanExtend(TH1::kAllAxes);
 
   iBooker.setCurrentFolder(topFolderName_ + "/Endcap");
 
@@ -149,14 +149,14 @@ void SiPixelClusterSource::bookHistograms(DQMStore::IBooker &iBooker, edm::Run c
   ss2.str(std::string());
   ss2 << "Total number of FPIX+ clusters profile;Lumisection;";
   meClusFpixPProf = iBooker.bookProfile(ss1.str(), ss2.str(), 2400, 0., 150, 0, 0, "");
-  meClusFpixPProf->getTH1()->SetCanExtend(TH1::kAllAxes);
+  meClusFpixPProf->setCanExtend(TH1::kAllAxes);
 
   ss1.str(std::string());
   ss1 << "totalNumberOfClustersProfile_siPixelClusters_FPIX-";
   ss2.str(std::string());
   ss2 << "Total number of FPIX- clusters profile;Lumisection;";
   meClusFpixMProf = iBooker.bookProfile(ss1.str(), ss2.str(), 2400, 0., 150, 0, 0, "");
-  meClusFpixMProf->getTH1()->SetCanExtend(TH1::kAllAxes);
+  meClusFpixMProf->setCanExtend(TH1::kAllAxes);
 
   iBooker.setCurrentFolder(topFolderName_ + "/Barrel");
   for (int i = 1; i <= noOfLayers; i++) {

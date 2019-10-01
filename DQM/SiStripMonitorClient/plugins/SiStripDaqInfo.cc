@@ -102,12 +102,12 @@ void SiStripDaqInfo::beginRun(edm::Run const& run, edm::EventSetup const& eSetup
 
     readFedIds(fedCabling_, eSetup);
   }
-  auto& dqm_store = *edm::Service<DQMStore>{};
+  auto dqm_store = std::make_shared<DQMStore>();
   if (!bookedStatus_) {
-    bookStatus(dqm_store);
+    bookStatus(*dqm_store);
   }
   if (nFedTotal_ == 0) {
-    fillDummyStatus(dqm_store);
+    fillDummyStatus(*dqm_store);
     edm::LogInfo("SiStripDaqInfo") << " SiStripDaqInfo::No FEDs Connected!!!";
     return;
   }
@@ -136,7 +136,7 @@ void SiStripDaqInfo::beginRun(edm::Run const& run, edm::EventSetup const& eSetup
   if (nFEDConnected > 0) {
     daqFraction_->Reset();
     daqFraction_->Fill(nFEDConnected / nFedTotal_);
-    readSubdetFedFractions(dqm_store, fedsInIds, eSetup);
+    readSubdetFedFractions(*dqm_store, fedsInIds, eSetup);
   }
 }
 
@@ -245,7 +245,7 @@ void SiStripDaqInfo::findExcludedModule(DQMStore& dqm_store,
     ichannel++;
     if (ichannel == 1) {
       std::string subdet_folder;
-      SiStripFolderOrganizer folder_organizer;
+      SiStripFolderOrganizer folder_organizer(static_cast<DQMStore::IBooker*>(&dqm_store));
       folder_organizer.getSubDetFolder(detId, tTopo, subdet_folder);
       if (!dqm_store.dirExists(subdet_folder)) {
         subdet_folder = mechanical_dir + subdet_folder.substr(subdet_folder.find(mdir) + mdir.size());

@@ -32,7 +32,7 @@ EcalPreshowerSimHitsValidation::EcalPreshowerSimHitsValidation(const edm::Parame
 
   // get hold of back-end interface
   dbe_ = nullptr;
-  dbe_ = edm::Service<DQMStore>().operator->();
+  dbe_ = std::make_unique<DQMStore>();
   if (dbe_) {
     if (verbose_) {
       dbe_->setVerbose(1);
@@ -123,10 +123,6 @@ EcalPreshowerSimHitsValidation::EcalPreshowerSimHitsValidation(const edm::Parame
 }
 
 EcalPreshowerSimHitsValidation::~EcalPreshowerSimHitsValidation() {}
-
-void EcalPreshowerSimHitsValidation::beginJob() {}
-
-void EcalPreshowerSimHitsValidation::endJob() {}
 
 void EcalPreshowerSimHitsValidation::analyze(const edm::Event &e, const edm::EventSetup &c) {
   edm::LogInfo("EventInfo") << " Run = " << e.id().run() << " Event = " << e.id().event();

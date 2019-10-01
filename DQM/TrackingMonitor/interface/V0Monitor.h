@@ -38,9 +38,6 @@ struct MEbinning {
 
 class V0Monitor : public DQMEDAnalyzer {
 public:
-  typedef dqm::legacy::DQMStore DQMStore;
-  typedef dqm::legacy::MonitorElement MonitorElement;
-
   V0Monitor(const edm::ParameterSet&);
   ~V0Monitor() override;
 

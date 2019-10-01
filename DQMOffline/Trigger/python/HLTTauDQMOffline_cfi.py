@@ -74,7 +74,7 @@ TauRefProducer = cms.EDProducer("HLTTauRefProducer",
 #----------------------------------MONITORS--------------------------------------------------------------------------
 
 from DQMServices.Core.DQMEDAnalyzer import DQMEDAnalyzer
-hltTauOfflineMonitor_PFTaus = DQMEDAnalyzer('HLTTauDQMOfflineSource',
+hltTauOfflineMonitorPFTaus = DQMEDAnalyzer('HLTTauDQMOfflineSource',
     HLTProcessName = cms.untracked.string(hltTauDQMofflineProcess),
     DQMBaseFolder = cms.untracked.string("HLT/TAU/PFTaus"),
     TriggerResultsSrc = cms.untracked.InputTag("TriggerResults", "", hltTauDQMofflineProcess),
@@ -114,7 +114,7 @@ hltTauOfflineMonitor_PFTaus = DQMEDAnalyzer('HLTTauDQMOfflineSource',
     ),
 )
 
-hltTauOfflineMonitor_Inclusive = hltTauOfflineMonitor_PFTaus.clone(
+hltTauOfflineMonitorInclusive = hltTauOfflineMonitorPFTaus.clone(
     DQMBaseFolder = "HLT/TAU/Inclusive",
     Matching = cms.PSet(
         doMatching            = cms.untracked.bool(False),
@@ -135,7 +135,7 @@ def TriggerSelectionParameters(hltpaths):
     return genericTriggerSelectionParameters
 
 
-hltTauOfflineMonitor_TagAndProbe = hltTauOfflineMonitor_PFTaus.clone(
+hltTauOfflineMonitorTagAndProbe = hltTauOfflineMonitorPFTaus.clone(
     DQMBaseFolder = cms.untracked.string("HLT/TAU/TagAndProbe"),
     Matching = cms.PSet(                                                                                                                                                                             
         doMatching            = cms.untracked.bool(True),                                                                                                                                            

@@ -3,7 +3,7 @@ from DQMServices.Core.DQMEDHarvester import DQMEDHarvester
 from copy import deepcopy
 
 from DQMServices.Core.DQMEDAnalyzer import DQMEDAnalyzer
-SUSY_HLT_Mu15_HT350_MET50_SingleLepton = DQMEDAnalyzer('SUSY_HLT_SingleLepton',
+SUSYHLTMu15HT350MET50SingleLepton = DQMEDAnalyzer('SUSY_HLT_SingleLepton',
                                                  electronCollection = cms.InputTag(''),
                                                  muonCollection = cms.InputTag('muons'),
                                                  pfMetCollection = cms.InputTag('pfMet'),
@@ -55,7 +55,7 @@ SUSYoHLToMu15oHT350oMET50oSingleLeptonPOSTPROCESSING = DQMEDHarvester('DQMGeneri
                                                                 resolution = cms.vstring('')
                                                                 )
 
-SUSY_HLT_Mu15_HT400_MET50_SingleLepton = DQMEDAnalyzer('SUSY_HLT_SingleLepton',
+SUSYHLTMu15HT400MET50SingleLepton = DQMEDAnalyzer('SUSY_HLT_SingleLepton',
                                                  electronCollection = cms.InputTag(''),
                                                  muonCollection = cms.InputTag('muons'),
                                                  pfMetCollection = cms.InputTag('pfMet'),
@@ -108,8 +108,8 @@ SUSYoHLToMu15oHT400oMET50oSingleLeptonPOSTPROCESSING = DQMEDHarvester('DQMGeneri
                                                                 )
 
 
-SUSY_HLT_Mu_HT_MET_SingleLepton = cms.Sequence( SUSY_HLT_Mu15_HT350_MET50_SingleLepton
-                                                + SUSY_HLT_Mu15_HT400_MET50_SingleLepton
+SUSY_HLT_Mu_HT_MET_SingleLepton = cms.Sequence( SUSYHLTMu15HT350MET50SingleLepton
+                                                + SUSYHLTMu15HT400MET50SingleLepton
 )
 
 SUSY_HLT_Mu_HT_MET_SingleLepton_POSTPROCESSING = cms.Sequence( SUSYoHLToMu15oHT350oMET50oSingleLeptonPOSTPROCESSING

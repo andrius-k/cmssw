@@ -10,13 +10,11 @@ class TH1F;
 
 class CandidateBenchmarkAnalyzer : public BenchmarkAnalyzer, public CandidateBenchmark {
 public:
-  typedef dqm::legacy::DQMStore DQMStore;
-
   CandidateBenchmarkAnalyzer(const edm::ParameterSet &parameterSet);
 
   void analyze(const edm::Event &, const edm::EventSetup &) override;
 
-  void bookHistograms(DQMStore::IBooker &, edm::Run const &, edm::EventSetup const &) override;
+  void bookHistograms(dqm::reco::DQMStore::IBooker &, edm::Run const &, edm::EventSetup const &) override;
 
   edm::EDGetTokenT<edm::View<reco::Candidate>> myColl_;
 };

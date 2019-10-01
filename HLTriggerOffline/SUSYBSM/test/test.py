@@ -55,8 +55,8 @@ process.out = cms.OutputModule("PoolOutputModule",
 )
 
 
-process.HLTSusyExoValSeq = cms.Sequence(process.SUSY_HLT_MET_MUON_ER)
-#process.HLTSusyExoValSeq = cms.Sequence(process.SUSY_HLT_InclusiveHT_aux350 + process.SUSY_HLT_InclusiveHT_aux600)
+process.HLTSusyExoValSeq = cms.Sequence(process.SUSYHLTMETMUONER)
+#process.HLTSusyExoValSeq = cms.Sequence(process.SUSYHLTInclusiveHTaux350 + process.SUSYHLTInclusiveHTaux600)
 
 process.run_module = cms.Path(process.HLTSusyExoValSeq+process.MEtoEDMConverter)
 #process.run_module = cms.Path(process.HLTSusyExoValSeq)

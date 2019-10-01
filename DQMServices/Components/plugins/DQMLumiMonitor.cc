@@ -90,7 +90,7 @@ void DQMLumiMonitor::bookHistograms() {
     corrIntLumiAndClusVsLSME_->Reset();
 }
 void DQMLumiMonitor::beginJob() {
-  dbe_ = edm::Service<DQMStore>().operator->();
+  dbe_ = std::make_unique<DQMStore>();
   intLumi_ = -1.0;
   nLumi_ = -1;
 }

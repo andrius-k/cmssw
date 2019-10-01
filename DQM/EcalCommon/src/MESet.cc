@@ -247,20 +247,21 @@ namespace ecaldqm {
     if (!active_)
       return;
 
-    DQMStore &store(*edm::Service<DQMStore>());
+    // TODO: need to use parent instance
+    auto store = std::make_unique<DQMStore>();
 
     for (unsigned iME(0); iME < mes_.size(); ++iME)
-      store.softReset(mes_[iME]);
+      store->softReset(mes_[iME]);
   }
 
   void MESet::recoverStats() {
     if (!active_)
       return;
 
-    DQMStore &store(*edm::Service<DQMStore>());
+    auto store = std::make_unique<DQMStore>();
 
     for (unsigned iME(0); iME < mes_.size(); ++iME)
-      store.disableSoftReset(mes_[iME]);
+      store->disableSoftReset(mes_[iME]);
   }
 
   void MESet::fill_(unsigned _iME, int _bin, double _w) {

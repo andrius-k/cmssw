@@ -52,7 +52,7 @@ void SiStripPopConHistoryDQMBase::dqmEndJob(DQMStore::IBooker&, DQMStore::IGette
   edm::LogInfo("HDQMSummary") << ss.str();
 
   // OPEN DQM FILE
-  const std::vector<MonitorElement*> MEs = getter.getAllContents(MEDir_);
+  auto MEs = getter.getAllContents(MEDir_);
 
   // FILL SUMMARY
   edm::LogInfo("HDQMSummary") << "\nSTARTING TO FILL OBJECT ";

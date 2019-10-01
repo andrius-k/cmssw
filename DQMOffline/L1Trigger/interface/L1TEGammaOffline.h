@@ -49,7 +49,7 @@ protected:
   void bookHistograms(DQMStore::IBooker&, edm::Run const&, edm::EventSetup const&) override;
   void analyze(edm::Event const& e, edm::EventSetup const& eSetup) override;
   void endRun(edm::Run const& run, edm::EventSetup const& eSetup) override;
-  void endJob() override;
+  void endJob();  // TODO: endJob not allowed in DQMEDAnalyzer
 
 private:
   bool passesLooseEleId(reco::GsfElectron const& electron) const;

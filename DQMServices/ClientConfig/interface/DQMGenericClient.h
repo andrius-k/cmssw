@@ -114,7 +114,6 @@ private:
   bool isWildcardUsed_;
   bool resLimitedFit_;
 
-  DQMStore* theDQM;
   std::vector<std::string> subDirs_;
   std::string outputFileName_;
 

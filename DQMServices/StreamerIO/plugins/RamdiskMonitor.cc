@@ -6,7 +6,7 @@
 #include "FWCore/Framework/interface/EventSetup.h"
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
 
-#include "DQMServices/Core/interface/oneDQMEDAnalyzer.h"
+#include "DQMServices/Core/interface/DQMOneEDAnalyzer.h"
 #include "DQMServices/Core/interface/DQMStore.h"
 
 #include "DQMServices/StreamerIO/plugins/DQMFileIterator.h"
@@ -25,7 +25,7 @@ namespace dqm {
   namespace rdm {
     struct Empty {};
   }  // namespace rdm
-  class RamdiskMonitor : public one::DQMEDAnalyzer<edm::LuminosityBlockCache<rdm::Empty>> {
+  class RamdiskMonitor : public DQMOneEDAnalyzer<edm::LuminosityBlockCache<rdm::Empty>> {
   public:
     RamdiskMonitor(const edm::ParameterSet &ps);
     ~RamdiskMonitor() override;
@@ -87,10 +87,10 @@ namespace dqm {
       m.deliveryDelayCTime =
           ib.book1D("DeliveryDelayCTime", "Observed delivery delay for the data file (ctime).", 4, 0., 4.);
 
-      m.eventsAccepted->getTH1F()->SetCanExtend(TH1::kXaxis);
-      m.eventsProcessed->getTH1F()->SetCanExtend(TH1::kXaxis);
-      m.deliveryDelayMTime->getTH1F()->SetCanExtend(TH1::kXaxis);
-      m.deliveryDelayCTime->getTH1F()->SetCanExtend(TH1::kXaxis);
+      m.eventsAccepted->setCanExtend(TH1::kXaxis);
+      m.eventsProcessed->setCanExtend(TH1::kXaxis);
+      m.deliveryDelayMTime->setCanExtend(TH1::kXaxis);
+      m.deliveryDelayCTime->setCanExtend(TH1::kXaxis);
 
       m.eventsAccepted->setAxisTitle("Luminosity Section", 1);
       m.eventsProcessed->setAxisTitle("Luminosity Section", 1);

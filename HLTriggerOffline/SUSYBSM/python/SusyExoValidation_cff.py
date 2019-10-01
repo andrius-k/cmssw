@@ -33,70 +33,70 @@ from HLTriggerOffline.SUSYBSM.SUSYBSM_ElecFakes_cff import *
 HLTSusyExoValSeq = cms.Sequence(SUSY_HLT_HT_MET +
                                 SUSY_HLT_InclusiveHT + 
                                 SUSY_HLT_InclusiveMET +
-                                SUSY_HLT_MET_BTAG +
+                                SUSYHLTMETBTAG +
                                 SUSY_HLT_MET_MUON +
                                 SUSY_HLT_Mu_HT_SingleLepton +
                                 SUSY_HLT_Mu_HT_MET_SingleLepton +
-                                SUSY_HLT_Mu_HT_BTag_SingleLepton +
-                                SUSY_HLT_Mu_HT_Control_SingleLepton +
+                                SUSYHLTMuHTBTagSingleLepton +
+                                SUSYHLTMuHTControlSingleLepton +
                                 SUSY_HLT_Ele_HT_SingleLepton +
                                 SUSY_HLT_Ele_HT_MET_SingleLepton +
-                                SUSY_HLT_Ele_HT_BTag_SingleLepton +
-                                SUSY_HLT_Ele_HT_Control_SingleLepton +
-                                SUSY_HLT_MET_MUON_ER +
-                                SUSY_HLT_MET_HT_MUON +
-                                SUSY_HLT_MET_HT_MUON_ER +
-                                SUSY_HLT_MET_HT_MUON_BTAG +
+                                SUSYHLTEleHTBTagSingleLepton +
+                                SUSYHLTEleHTControlSingleLepton +
+                                SUSYHLTMETMUONER +
+                                SUSYHLTMETHTMUON +
+                                SUSYHLTMETHTMUONER +
+                                SUSYHLTMETHTMUONBTAG +
                                 cms.ignore(hemispheres)+ #for razor triggers
                                 cms.ignore(caloHemispheres)+ #for razor triggers
-                                SUSY_HLT_RazorHbb_Rsq0p02_MR300_2CSV0p7_0p4 +
-                                SUSY_HLT_RazorHbb_Rsq0p02_MR300_2CSV0p7 +
-                                SUSY_HLT_RazorHbb_Rsq0p02_MR400_2CSV0p7 +
-                                SUSY_HLT_RazorHbb_Rsq0p02_MR450_2CSV0p7 +
-                                SUSY_HLT_RazorHbb_Rsq0p02_MR500_2CSV0p7 +
-                                SUSY_HLT_RazorHbb_Rsq0p02_MR550_2CSV0p7 +
-                                SUSY_HLT_Razor_Main_RsqMR300 + 
-                                SUSY_HLT_Razor_QuadJet_RsqMR300 +
-                                SUSY_HLT_Razor_DM_Rsq0p36 + 
-                                SUSY_HLT_Razor_Main_RsqMR270 + 
-                                SUSY_HLT_Razor_QuadJet_RsqMR270 +
-                                SUSY_HLT_Razor_DM_Rsq0p30 + 
-                                SUSY_HLT_Razor_Main_RsqMR260 + 
-                                SUSY_HLT_Razor_QuadJet_RsqMR260 +
-                                SUSY_HLT_Razor_Main_RsqMR240 + 
-                                SUSY_HLT_Razor_QuadJet_RsqMR240 +
-                                SUSY_HLT_Razor_DM_Rsq0p25 + 
-                                SUSY_HLT_Razor_Main_Calo_RsqMR240 +
-                                SUSY_HLT_Razor_QuadJet_Calo_RsqMR240 +
-                                SUSY_HLT_Razor_DM_Calo_Rsq0p25 +
-                                SUSY_HLT_CaloHT200 +
-                                SUSY_HLT_CaloHT250 +
-                                SUSY_HLT_CaloHT300 +
-                                SUSY_HLT_CaloHT350 +
-                                SUSY_HLT_CaloHT400 +
-                                SUSY_HLT_PhotonHT +
-                                SUSY_HLT_PhotonMET_pt36 +
-                                SUSY_HLT_PhotonMET_pt50 +
-                                SUSY_HLT_PhotonMET_pt75 +
-                                SUSY_HLT_HT_DoubleMuon +
-                                SUSY_HLT_HT_DoubleEle +
-                                SUSY_HLT_HT_MuEle +
-								SUSY_HLT_HT250_DoubleMuon +
-                                SUSY_HLT_HT250_DoubleEle +
-                                SUSY_HLT_HT250_MuEle +
-                                SUSY_HLT_Muon_BJet +
-                                SUSY_HLT_Electron_BJet +
-                                SUSY_HLT_HT200_alphaT0p51 +
-                                SUSY_HLT_HT200_alphaT0p57 +
-                                SUSY_HLT_HT250_alphaT0p55 +
-                                SUSY_HLT_HT300_alphaT0p53 +
-                                SUSY_HLT_HT350_alphaT0p52 +
-                                SUSY_HLT_HT400_alphaT0p51 +
-                                SUSY_HLT_HT200_alphaT0p63 +
-                                SUSY_HLT_HT250_alphaT0p58 +
-                                SUSY_HLT_HT300_alphaT0p54 +
-                                SUSY_HLT_HT350_alphaT0p53 +
-                                SUSY_HLT_HT400_alphaT0p52 +
+                                SUSYHLTRazorHbbRsq0p02MR3002CSV0p70p4 +
+                                SUSYHLTRazorHbbRsq0p02MR3002CSV0p7 +
+                                SUSYHLTRazorHbbRsq0p02MR4002CSV0p7 +
+                                SUSYHLTRazorHbbRsq0p02MR4502CSV0p7 +
+                                SUSYHLTRazorHbbRsq0p02MR5002CSV0p7 +
+                                SUSYHLTRazorHbbRsq0p02MR5502CSV0p7 +
+                                SUSYHLTRazorMainRsqMR300 + 
+                                SUSYHLTRazorQuadJetRsqMR300 +
+                                SUSYHLTRazorDMRsq0p36 + 
+                                SUSYHLTRazorMainRsqMR270 + 
+                                SUSYHLTRazorQuadJetRsqMR270 +
+                                SUSYHLTRazorDMRsq0p30 + 
+                                SUSYHLTRazorMainRsqMR260 + 
+                                SUSYHLTRazorQuadJetRsqMR260 +
+                                SUSYHLTRazorMainRsqMR240 + 
+                                SUSYHLTRazorQuadJetRsqMR240 +
+                                SUSYHLTRazorDMRsq0p25 + 
+                                SUSYHLTRazorMainCaloRsqMR240 +
+                                SUSYHLTRazorQuadJetCaloRsqMR240 +
+                                SUSYHLTRazorDMCaloRsq0p25 +
+                                SUSYHLTCaloHT200 +
+                                SUSYHLTCaloHT250 +
+                                SUSYHLTCaloHT300 +
+                                SUSYHLTCaloHT350 +
+                                SUSYHLTCaloHT400 +
+                                SUSYHLTPhotonHT +
+                                SUSYHLTPhotonMETpt36 +
+                                SUSYHLTPhotonMETpt50 +
+                                SUSYHLTPhotonMETpt75 +
+                                SUSYHLTHTDoubleMuon +
+                                SUSYHLTHTDoubleEle +
+                                SUSYHLTHTMuEle +
+								SUSYHLTHT250DoubleMuon +
+                                SUSYHLTHT250DoubleEle +
+                                SUSYHLTHT250MuEle +
+                                SUSYHLTMuonBJet +
+                                SUSYHLTElectronBJet +
+                                SUSYHLTHT200alphaT0p51 +
+                                SUSYHLTHT200alphaT0p57 +
+                                SUSYHLTHT250alphaT0p55 +
+                                SUSYHLTHT300alphaT0p53 +
+                                SUSYHLTHT350alphaT0p52 +
+                                SUSYHLTHT400alphaT0p51 +
+                                SUSYHLTHT200alphaT0p63 +
+                                SUSYHLTHT250alphaT0p58 +
+                                SUSYHLTHT300alphaT0p54 +
+                                SUSYHLTHT350alphaT0p53 +
+                                SUSYHLTHT400alphaT0p52 +
                                 SUSY_HLT_ElecFakes +
                                 SUSY_HLT_MuonFakes
                                 )

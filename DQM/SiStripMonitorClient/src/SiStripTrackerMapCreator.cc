@@ -396,7 +396,7 @@ uint16_t SiStripTrackerMapCreator::getDetectorFlagAndComment(DQMStore* const dqm
   if (!dqm_store)
     return flag;
 
-  SiStripFolderOrganizer folder_organizer;
+  SiStripFolderOrganizer folder_organizer(static_cast<DQMStore::IGetter*>(dqm_store));
   std::string subdet_folder, badmodule_folder;
 
   dqm_store->cd();

@@ -37,8 +37,8 @@ class TrackerTopology;
 
 class SiStripCalibLorentzAngle : public ConditionDBWriter<SiStripLorentzAngle> {
 public:
-  typedef dqm::legacy::MonitorElement MonitorElement;
-  typedef dqm::legacy::DQMStore DQMStore;
+  typedef dqm::harvesting::MonitorElement MonitorElement;
+  typedef dqm::harvesting::DQMStore DQMStore;
   explicit SiStripCalibLorentzAngle(const edm::ParameterSet &conf);
 
   ~SiStripCalibLorentzAngle() override;

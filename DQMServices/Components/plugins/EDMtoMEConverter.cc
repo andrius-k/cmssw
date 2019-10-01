@@ -293,21 +293,25 @@ EDMtoMEConverter::EDMtoMEConverter(const edm::ParameterSet &iPSet) : verbosity(0
 EDMtoMEConverter::~EDMtoMEConverter() = default;
 
 void EDMtoMEConverter::endRunProduce(edm::Run &iRun, edm::EventSetup const &iSetup) {
+#if 0
   if (convertOnEndRun) {
-    DQMStore *store = edm::Service<DQMStore>().operator->();
+    std::unique_ptr<DQMStore> store = std::make_unique<DQMStore>();
     store->meBookerGetter([&](DQMStore::IBooker &b, DQMStore::IGetter &g) { getData(b, g, iRun); });
   }
 
   iRun.put(dqmRunToken_, std::make_unique<DQMToken>());
+#endif
 }
 
 void EDMtoMEConverter::endLuminosityBlockProduce(edm::LuminosityBlock &iLumi, edm::EventSetup const &iSetup) {
+#if 0
   if (convertOnEndLumi) {
-    DQMStore *store = edm::Service<DQMStore>().operator->();
+    std::unique_ptr<DQMStore> store = std::make_unique<DQMStore>();
     store->meBookerGetter([&](DQMStore::IBooker &b, DQMStore::IGetter &g) { getData(b, g, iLumi); });
   }
 
   iLumi.put(dqmLumiToken_, std::make_unique<DQMToken>());
+#endif
 }
 
 template <class T>

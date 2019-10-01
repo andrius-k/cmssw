@@ -34,7 +34,7 @@ using namespace sistrip;
 // -----------------------------------------------------------------------------
 //
 SiStripCommissioningOfflineClient::SiStripCommissioningOfflineClient(const edm::ParameterSet& pset)
-    : bei_(edm::Service<DQMStore>().operator->()),
+    : bei_(std::make_unique<DQMStore>()),
       histos_(nullptr),
       //inputFiles_( pset.getUntrackedParameter< std::vector<std::string> >( "InputRootFiles", std::vector<std::string>() ) ),
       outputFileName_(pset.getUntrackedParameter<std::string>("OutputRootFile", "")),
@@ -191,13 +191,13 @@ void SiStripCommissioningOfflineClient::beginRun(const edm::Run& run, const edm:
   }
 
   // Extract run type from contents
-  runType_ = CommissioningHistograms::runType(bei_, contents);
+  runType_ = CommissioningHistograms::runType(&*bei_, contents);
 
   // Extract run number from contents
-  runNumber_ = CommissioningHistograms::runNumber(bei_, contents);
+  runNumber_ = CommissioningHistograms::runNumber(&*bei_, contents);
 
   // Copy custom information to the collated structure
-  CommissioningHistograms::copyCustomInformation(bei_, contents);
+  CommissioningHistograms::copyCustomInformation(&*bei_, contents);
 
   // Check runType
   if (runType_ == sistrip::UNKNOWN_RUN_TYPE) {
@@ -370,30 +370,30 @@ void SiStripCommissioningOfflineClient::createHistos(const edm::ParameterSet& ps
 
   // Create "commissioning histograms" object
   if (runType_ == sistrip::FAST_CABLING) {
-    histos_ = new FastFedCablingHistograms(pset, bei_);
+    histos_ = new FastFedCablingHistograms(pset, &*bei_);
   } else if (runType_ == sistrip::FED_CABLING) {
-    histos_ = new FedCablingHistograms(pset, bei_);
+    histos_ = new FedCablingHistograms(pset, &*bei_);
   } else if (runType_ == sistrip::APV_TIMING) {
-    histos_ = new ApvTimingHistograms(pset, bei_);
+    histos_ = new ApvTimingHistograms(pset, &*bei_);
   } else if (runType_ == sistrip::OPTO_SCAN) {
-    histos_ = new OptoScanHistograms(pset, bei_);
+    histos_ = new OptoScanHistograms(pset, &*bei_);
   } else if (runType_ == sistrip::VPSP_SCAN) {
-    histos_ = new VpspScanHistograms(pset, bei_);
+    histos_ = new VpspScanHistograms(pset, &*bei_);
   } else if (runType_ == sistrip::PEDESTALS) {
-    histos_ = new PedestalsHistograms(pset, bei_);
+    histos_ = new PedestalsHistograms(pset, &*bei_);
   } else if (runType_ == sistrip::PEDS_FULL_NOISE) {
-    histos_ = new PedsFullNoiseHistograms(pset, bei_);
+    histos_ = new PedsFullNoiseHistograms(pset, &*bei_);
   } else if (runType_ == sistrip::PEDS_ONLY) {
-    histos_ = new PedsOnlyHistograms(pset, bei_);
+    histos_ = new PedsOnlyHistograms(pset, &*bei_);
   } else if (runType_ == sistrip::NOISE) {
-    histos_ = new NoiseHistograms(pset, bei_);
+    histos_ = new NoiseHistograms(pset, &*bei_);
   } else if (runType_ == sistrip::APV_LATENCY || runType_ == sistrip::FINE_DELAY) {
-    histos_ = new SamplingHistograms(pset, bei_, runType_);
+    histos_ = new SamplingHistograms(pset, &*bei_, runType_);
   } else if (runType_ == sistrip::CALIBRATION || runType_ == sistrip::CALIBRATION_DECO ||
              runType_ == sistrip::CALIBRATION_SCAN || runType_ == sistrip::CALIBRATION_SCAN_DECO) {
-    histos_ = new CalibrationHistograms(pset, bei_, runType_);
+    histos_ = new CalibrationHistograms(pset, &*bei_, runType_);
   } else if (runType_ == sistrip::DAQ_SCOPE_MODE) {
-    histos_ = new DaqScopeModeHistograms(pset, bei_);
+    histos_ = new DaqScopeModeHistograms(pset, &*bei_);
   } else if (runType_ == sistrip::UNDEFINED_RUN_TYPE) {
     histos_ = nullptr;
     edm::LogError(mlDqmClient_) << "[SiStripCommissioningOfflineClient::" << __func__ << "]"

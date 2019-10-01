@@ -34,7 +34,7 @@ protected:
   void analyze(const edm::Event &e, const edm::EventSetup &c) override;
 
   // EndJob
-  void endJob() override;
+  void endJob();  // TODO: endJob not allowed in DQMEDAnalyzer
 
   // void BookTestHistos(Char_t sname, int nbin, float *xmin, float *xmax);
 
@@ -49,7 +49,6 @@ private:
   edm::EDGetTokenT<edm::PSimHitContainer> edmPSimHitContainer_siTECLow_Token_, edmPSimHitContainer_siTECHigh_Token_;
   edm::EDGetTokenT<edm::SimTrackContainer> edmSimTrackContainerToken_;
 
-  DQMStore *fDBE;
   edm::ParameterSet conf_;
 
   MonitorElement *htofeta;

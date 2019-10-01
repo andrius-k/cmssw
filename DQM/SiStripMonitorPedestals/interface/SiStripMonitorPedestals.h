@@ -58,7 +58,7 @@ public:
 
   void analyze(const edm::Event &, const edm::EventSetup &) override;
   void endRun(edm::Run const &run, edm::EventSetup const &eSetup) override;
-  void endJob() override;
+  void endJob() /* never called */;
   void bookHistograms(DQMStore::IBooker &, edm::Run const &, edm::EventSetup const &) override;
 
 private:
@@ -89,7 +89,6 @@ private:
     MonitorElement *BadStripsDB;
   };
 
-  DQMStore *dqmStore_;
   edm::ParameterSet conf_;
   std::map<uint32_t, ModMEs> PedMEs;
   edm::ESHandle<SiStripDetCabling> detcabling;

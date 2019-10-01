@@ -52,7 +52,7 @@ private:
   edm::EDGetTokenT<edmNew::DetSetVector<SiPixelCluster> > pixelClusterInputTag_;
   edm::EDGetTokenT<LumiSummary> lumiRecordName_;
 
-  DQMStore* dbe_;
+  std::unique_ptr<DQMStore> dbe_;
 
   MonitorElement* nClusME_;
   MonitorElement* intLumiVsLSME_;

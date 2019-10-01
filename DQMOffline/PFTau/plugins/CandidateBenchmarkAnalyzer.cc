@@ -26,7 +26,7 @@ CandidateBenchmarkAnalyzer::CandidateBenchmarkAnalyzer(const edm::ParameterSet &
   myColl_ = consumes<View<Candidate>>(inputLabel_);
 }
 
-void CandidateBenchmarkAnalyzer::bookHistograms(DQMStore::IBooker &ibooker,
+void CandidateBenchmarkAnalyzer::bookHistograms(dqm::reco::DQMStore::IBooker &ibooker,
                                                 edm::Run const &iRun,
                                                 edm::EventSetup const &iSetup) {
   BenchmarkAnalyzer::bookHistograms(ibooker, iRun, iSetup);

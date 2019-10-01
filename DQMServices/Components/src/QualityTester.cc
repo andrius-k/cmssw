@@ -32,14 +32,14 @@ QualityTester::QualityTester(const ParameterSet& ps) {
   qtestOnEndLumi = ps.getUntrackedParameter<bool>("qtestOnEndLumi", false);
   verboseQT = ps.getUntrackedParameter<bool>("verboseQT", true);
 
-  bei = &*edm::Service<DQMStore>();
+  bei = std::make_unique<DQMStore>();
 
   qtHandler = new QTestHandle;
 
   // if you use this module, it's non-sense not to provide the QualityTests.xml
   if (getQualityTestsFromFile) {
     edm::FileInPath qtlist = ps.getUntrackedParameter<edm::FileInPath>("qtList");
-    qtHandler->configureTests(FileInPath(qtlist).fullPath(), bei);
+    qtHandler->configureTests(FileInPath(qtlist).fullPath(), &*bei);
   }
 
   nEvents = 0;
@@ -63,7 +63,7 @@ void QualityTester::beginRun(const edm::Run& run, const edm::EventSetup& iSetup)
       xmlstr += it;
     }
 
-    qtHandler->configureTests(xmlstr, bei, true);
+    qtHandler->configureTests(xmlstr, &*bei, true);
   }
 }
 
@@ -98,14 +98,14 @@ void QualityTester::endJob() {
 
 void QualityTester::performTests() {
   // done here because new ME can appear while processing data
-  qtHandler->attachTests(bei, verboseQT);
+  qtHandler->attachTests(&*bei, verboseQT);
 
   edm::LogVerbatim("QualityTester") << "Running the Quality Test";
 
   bei->runQTests();
 
   if (!reportThreshold.empty()) {
-    std::map<std::string, std::vector<std::string> > theAlarms = qtHandler->checkDetailedQTStatus(bei);
+    std::map<std::string, std::vector<std::string> > theAlarms = qtHandler->checkDetailedQTStatus(&*bei);
 
     for (auto& theAlarm : theAlarms) {
       const std::string& alarmType = theAlarm.first;

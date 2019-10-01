@@ -55,7 +55,7 @@ void SiStripPopConPedestalsHandlerFromDQM::dqmEndJob(DQMStore::IBooker&, DQMStor
   // const std::vector<MonitorElement*>& MEs = getter.getAllContents(iConfig_.getUntrackedParameter<std::string>("ME_DIR","DQMData"));
 
   // Take a copy of the vector
-  std::vector<MonitorElement*> MEs = getter.getAllContents(MEDir_);
+  auto MEs = getter.getAllContents(MEDir_);
   // Remove all but the MEs we are using
   MEs.erase(std::remove_if(MEs.begin(),
                            MEs.end(),

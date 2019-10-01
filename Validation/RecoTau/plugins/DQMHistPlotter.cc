@@ -896,13 +896,7 @@ void TauDQMHistPlotter::endRun(const edm::Run& r, const edm::EventSetup& c) {
     return;
   }
 
-  //--- check that DQMStore service is available
-  if (!edm::Service<DQMStore>().isAvailable()) {
-    edm::LogError("endJob") << " Failed to access dqmStore --> histograms will NOT be plotted !!";
-    return;
-  }
-
-  DQMStore& dqmStore = (*edm::Service<DQMStore>());
+  auto dqmStore = std::make_unique<DQMStore>();
 
   //--- stop ROOT from keeping references to all hsitograms
   //TH1::AddDirectory(false);
@@ -950,7 +944,7 @@ void TauDQMHistPlotter::endRun(const edm::Run& r, const edm::EventSetup& c) {
           dqmDirectoryName(std::string(dqmRootDirectory)).append(plot->dqmMonitorElement_);
       if (verbosity)
         std::cout << " dqmMonitorElementName_full = " << dqmMonitorElementName_full << std::endl;
-      MonitorElement* dqmMonitorElement = dqmStore.get(dqmMonitorElementName_full);
+      MonitorElement* dqmMonitorElement = dqmStore->get(dqmMonitorElementName_full);
 
       TH1* histogram = dqmMonitorElement->getTH1F();
       if (verbosity)

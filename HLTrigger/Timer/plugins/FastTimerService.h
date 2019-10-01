@@ -312,7 +312,7 @@ private:
   class PlotsPerElement {
   public:
     PlotsPerElement() = default;
-    void book(dqm::reco::DQMStore::ConcurrentBooker&,
+    void book(dqm::reco::DQMStore::IBooker&,
               std::string const& name,
               std::string const& title,
               PlotRanges const& ranges,
@@ -324,21 +324,21 @@ private:
 
   private:
     // resources spent in the module
-    ConcurrentMonitorElement time_thread_;       // TH1F
-    ConcurrentMonitorElement time_thread_byls_;  // TProfile
-    ConcurrentMonitorElement time_real_;         // TH1F
-    ConcurrentMonitorElement time_real_byls_;    // TProfile
-    ConcurrentMonitorElement allocated_;         // TH1F
-    ConcurrentMonitorElement allocated_byls_;    // TProfile
-    ConcurrentMonitorElement deallocated_;       // TH1F
-    ConcurrentMonitorElement deallocated_byls_;  // TProfile
+    dqm::reco::MonitorElement const* time_thread_;       // TH1F
+    dqm::reco::MonitorElement const* time_thread_byls_;  // TProfile
+    dqm::reco::MonitorElement const* time_real_;         // TH1F
+    dqm::reco::MonitorElement const* time_real_byls_;    // TProfile
+    dqm::reco::MonitorElement const* allocated_;         // TH1F
+    dqm::reco::MonitorElement const* allocated_byls_;    // TProfile
+    dqm::reco::MonitorElement const* deallocated_;       // TH1F
+    dqm::reco::MonitorElement const* deallocated_byls_;  // TProfile
   };
 
   // plots associated to each path or endpath
   class PlotsPerPath {
   public:
     PlotsPerPath() = default;
-    void book(dqm::reco::DQMStore::ConcurrentBooker&,
+    void book(dqm::reco::DQMStore::IBooker&,
               std::string const&,
               ProcessCallGraph const&,
               ProcessCallGraph::PathType const&,
@@ -360,18 +360,18 @@ private:
     //   be better suited than a double, but there is no "TH1L" in ROOT.
 
     // how many times each module and their dependencies has run
-    ConcurrentMonitorElement module_counter_;  // TH1D
+    dqm::reco::MonitorElement const* module_counter_;  // TH1D
     // resources spent in each module and their dependencies
-    ConcurrentMonitorElement module_time_thread_total_;  // TH1D
-    ConcurrentMonitorElement module_time_real_total_;    // TH1D
-    ConcurrentMonitorElement module_allocated_total_;    // TH1D
-    ConcurrentMonitorElement module_deallocated_total_;  // TH1D
+    dqm::reco::MonitorElement const* module_time_thread_total_;  // TH1D
+    dqm::reco::MonitorElement const* module_time_real_total_;    // TH1D
+    dqm::reco::MonitorElement const* module_allocated_total_;    // TH1D
+    dqm::reco::MonitorElement const* module_deallocated_total_;  // TH1D
   };
 
   class PlotsPerProcess {
   public:
     PlotsPerProcess(ProcessCallGraph::ProcessType const&);
-    void book(dqm::reco::DQMStore::ConcurrentBooker&,
+    void book(dqm::reco::DQMStore::IBooker&,
               ProcessCallGraph const&,
               ProcessCallGraph::ProcessType const&,
               PlotRanges const& event_ranges,
@@ -392,7 +392,7 @@ private:
   class PlotsPerJob {
   public:
     PlotsPerJob(ProcessCallGraph const& job, std::vector<GroupOfModules> const& groups);
-    void book(dqm::reco::DQMStore::ConcurrentBooker&,
+    void book(dqm::reco::DQMStore::IBooker&,
               ProcessCallGraph const&,
               std::vector<GroupOfModules> const&,
               PlotRanges const& event_ranges,
@@ -466,7 +466,8 @@ private:
   const bool print_job_summary_;    // print the time spent in each process, path and module for the whole job
 
   // dqm configuration
-  bool enable_dqm_;  // non const, depends on the availability of the DQMStore
+  const bool enable_dqm_;
+  std::unique_ptr<dqm::reco::DQMStore> dqmstore_;
   const bool enable_dqm_bymodule_;
   const bool enable_dqm_bypath_;
   const bool enable_dqm_byls_;

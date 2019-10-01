@@ -17,7 +17,7 @@ using namespace edm;
 using namespace std;
 
 ESDcsInfoTask::ESDcsInfoTask(const ParameterSet& ps) {
-  dqmStore_ = Service<DQMStore>().operator->();
+  dqmStore_ = std::make_unique<DQMStore>();
 
   prefixME_ = ps.getUntrackedParameter<string>("prefixME", "");
 

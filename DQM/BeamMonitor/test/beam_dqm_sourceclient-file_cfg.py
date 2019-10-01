@@ -101,8 +101,8 @@ process.offlinePrimaryVertices = RecoVertex.PrimaryVertexProducer.OfflinePrimary
 # Change Beam Monitor variables
 process.dqmBeamMonitor.Debug = True
 process.dqmBeamMonitor.BeamFitter.Debug = True
-process.dqmBeamMonitor_pixelless.Debug = True
-process.dqmBeamMonitor_pixelless.BeamFitter.Debug = True
+process.dqmBeamMonitorpixelless.Debug = True
+process.dqmBeamMonitorpixelless.BeamFitter.Debug = True
 process.dqmBeamMonitor.BeamFitter.WriteAscii = True
 process.dqmBeamMonitor.BeamFitter.AsciiFileName = '/nfshome0/yumiceva/BeamMonitorDQM/BeamFitResults.txt'
 process.dqmBeamMonitor.BeamFitter.WriteDIPAscii = True
@@ -117,7 +117,7 @@ process.phystrigger = cms.Sequence(process.hltTriggerTypeFilter*process.gtDigis*
 process.tracking = cms.Sequence(process.siPixelDigis*process.siStripDigis*process.trackerlocalreco*process.offlineBeamSpot*process.recopixelvertexing*process.ckftracks)
 process.monitor = cms.Sequence(process.dqmBeamMonitor*process.dqmEnv)
 process.tracking_pixelless = cms.Sequence(process.siPixelDigis*process.siStripDigis*process.trackerlocalreco*process.offlineBeamSpot*process.ctfTracksPixelLess)
-process.monitor_pixelless = cms.Sequence(process.dqmBeamMonitor_pixelless*process.dqmEnvPixelLess)
+process.monitor_pixelless = cms.Sequence(process.dqmBeamMonitorpixelless*process.dqmEnvPixelLess)
 ## Cosmic just for testing DQM
 process.tracking_cosmic = cms.Sequence(process.siPixelDigis*process.siStripDigis*process.trackerlocalreco*process.offlineBeamSpot*process.ctftracksP5)
 

@@ -98,11 +98,11 @@ if (process.runType.getRunType() == process.runType.hi_run):
 process.load("DQM.PixelLumi.PixelLumiDQM_cfi") 
 
 if process.dqmRunConfig.type.value() is "playback":
-    process.pixel_lumi_dqm.logFileName = cms.untracked.string("pixel_lumi.txt")
+    process.pixellumidqm.logFileName = cms.untracked.string("pixel_lumi.txt")
 else:
-    process.pixel_lumi_dqm.logFileName = cms.untracked.string("/nfshome0/dqmpro/pixel_lumi.txt")
+    process.pixellumidqm.logFileName = cms.untracked.string("/nfshome0/dqmpro/pixel_lumi.txt")
 
-print(process.pixel_lumi_dqm.logFileName)
+print(process.pixellumidqm.logFileName)
     
 #--------------------------
 # Service
@@ -118,7 +118,7 @@ process.AdaptorConfig = cms.Service("AdaptorConfig")
 #--------------------------
 process.Reco = cms.Sequence(process.siPixelDigis*process.siPixelClusters)
 process.DQMmodules = cms.Sequence(process.dqmEnv*
-  process.pixel_lumi_dqm*
+  process.pixellumidqm*
   process.dqmSaver)
 
 process.p = cms.Path(process.Reco*process.DQMmodules)

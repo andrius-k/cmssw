@@ -1,7 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 from DQMServices.Core.DQMEDHarvester import DQMEDHarvester
 
-SoftMuHardJetMETEfficiency_muPt = DQMEDHarvester("DQMGenericClient",
+SoftMuHardJetMETEfficiencymuPt = DQMEDHarvester("DQMGenericClient",
     subDirs        = cms.untracked.vstring("HLT/SUSY/SoftMuHardJetMET/Muon"),
     verbose        = cms.untracked.uint32(0),
     resolution     = cms.vstring(),
@@ -11,7 +11,7 @@ SoftMuHardJetMETEfficiency_muPt = DQMEDHarvester("DQMGenericClient",
     ),
 )
 
-SoftMuHardJetMETEfficiency_jetPt = DQMEDHarvester("DQMGenericClient",
+SoftMuHardJetMETEfficiencyjetPt = DQMEDHarvester("DQMGenericClient",
     subDirs        = cms.untracked.vstring("HLT/SUSY/SoftMuHardJetMET/Jet"),
     verbose        = cms.untracked.uint32(0),
     resolution     = cms.vstring(),
@@ -21,7 +21,7 @@ SoftMuHardJetMETEfficiency_jetPt = DQMEDHarvester("DQMGenericClient",
     ),
 )
 
-SoftMuHardJetMETEfficiency_metPt = DQMEDHarvester("DQMGenericClient",
+SoftMuHardJetMETEfficiencymetPt = DQMEDHarvester("DQMGenericClient",
     subDirs        = cms.untracked.vstring("HLT/SUSY/SoftMuHardJetMET/MET"),
     verbose        = cms.untracked.uint32(0),
     resolution     = cms.vstring(),
@@ -31,7 +31,7 @@ SoftMuHardJetMETEfficiency_metPt = DQMEDHarvester("DQMGenericClient",
 )
 
 susyHLTSoftMuHardJetMETClient = cms.Sequence(
-    SoftMuHardJetMETEfficiency_muPt
-  + SoftMuHardJetMETEfficiency_jetPt
-  + SoftMuHardJetMETEfficiency_metPt 
+    SoftMuHardJetMETEfficiencymuPt
+  + SoftMuHardJetMETEfficiencyjetPt
+  + SoftMuHardJetMETEfficiencymetPt 
 )

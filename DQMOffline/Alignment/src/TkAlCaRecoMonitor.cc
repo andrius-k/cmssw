@@ -86,7 +86,7 @@ void TkAlCaRecoMonitor::bookHistograms(DQMStore::IBooker &iBooker, edm::Run cons
       histname + AlgoName, histname + AlgoName, reco::TrackBase::qualitySize, -0.5, reco::TrackBase::qualitySize - 0.5);
   TrackQuality_->setAxisTitle("quality");
   for (int i = 0; i < reco::TrackBase::qualitySize; ++i) {
-    TrackQuality_->getTH1()->GetXaxis()->SetBinLabel(
+    TrackQuality_->setBinLabel(
         i + 1, reco::TrackBase::qualityName(reco::TrackBase::TrackQuality(i)).c_str());
   }
 

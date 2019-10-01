@@ -51,8 +51,7 @@ const std::string SiStripMonitorPedestals::RunMode2 = "CalculatedPlotsOnly";
 const std::string SiStripMonitorPedestals::RunMode3 = "AllPlots";
 
 SiStripMonitorPedestals::SiStripMonitorPedestals(edm::ParameterSet const &iConfig)
-    : dqmStore_(edm::Service<DQMStore>().operator->()),
-      conf_(iConfig),
+    : conf_(iConfig),
       pedsPSet_(iConfig.getParameter<edm::ParameterSet>("PedestalsPSet")),
       analyzed(false),
       firstEvent(true),
@@ -126,7 +125,7 @@ void SiStripMonitorPedestals::createMEs(DQMStore::IBooker &ibooker, const edm::E
   // use SistripHistoId for producing histogram id (and title)
   SiStripHistoId hidmanager;
   // create SiStripFolderOrganizer
-  SiStripFolderOrganizer folder_organizer;
+  SiStripFolderOrganizer folder_organizer(&ibooker);
 
   edm::LogInfo("SiStripMonitorPedestals") << "SiStripMonitorPedestals::createMEs: "
                                           << "Number of Detector Present in cabling " << SelectedDetIds.size();
@@ -467,7 +466,7 @@ void SiStripMonitorPedestals::endRun(edm::Run const &run, edm::EventSetup const 
   if (outputMEsInRootFile) {
     std::string outPutFileName = conf_.getParameter<std::string>("OutPutFileName");
     //    dqmStore_->showDirStructure();
-    dqmStore_->save(outPutFileName);
+    dqmstore_->save(outPutFileName);
   }
 }
 //
