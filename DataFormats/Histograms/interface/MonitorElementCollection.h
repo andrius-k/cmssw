@@ -206,7 +206,7 @@ struct MonitorElementData {
       return makeKeyTuple(*this) < makeKeyTuple(other);
     }
 
-    // TODO: Find a way to extract makeKeyTuple so it's implemented only once
+    // TODO: Comparing when making a tuple is crazy slow for some reason
     bool operator==(Key const& other) const {
       // auto makeKeyTuple = [](Key const& k) {
       //   return std::make_tuple(k.path_.getDirname(),
