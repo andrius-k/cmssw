@@ -203,8 +203,28 @@ struct MonitorElementData {
                                k.coveredrange_.endRun(),
                                k.coveredrange_.endLumi());
       };
-
       return makeKeyTuple(*this) < makeKeyTuple(other);
+    }
+
+    // TODO: Find a way to extract makeKeyTuple so it's implemented only once
+    bool operator==(Key const& other) const {
+      // auto makeKeyTuple = [](Key const& k) {
+      //   return std::make_tuple(k.path_.getDirname(),
+      //                          k.path_.getObjectname(),
+      //                          k.scope_,
+      //                          k.coveredrange_.startRun(),
+      //                          k.coveredrange_.startLumi(),
+      //                          k.coveredrange_.endRun(),
+      //                          k.coveredrange_.endLumi());
+      // };
+      // return makeKeyTuple(*this) == makeKeyTuple(other);
+      return this->path_.getDirname() == other.path_.getDirname() && 
+             this->scope_ == other.scope_ &&
+             this->coveredrange_.startRun() == other.coveredrange_.startRun() &&
+             this->path_.getObjectname() == other.path_.getObjectname() &&
+             this->coveredrange_.startLumi() == other.coveredrange_.startLumi() &&
+             this->coveredrange_.endRun() == other.coveredrange_.endRun() &&
+             this->coveredrange_.endLumi() == other.coveredrange_.endLumi();
     }
   };
 
